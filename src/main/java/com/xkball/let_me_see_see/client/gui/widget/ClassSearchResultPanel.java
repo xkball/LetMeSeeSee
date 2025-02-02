@@ -1,0 +1,107 @@
+package com.xkball.let_me_see_see.client.gui.widget;
+
+import com.xkball.let_me_see_see.client.gui.frame.core.PanelConfig;
+import com.xkball.let_me_see_see.client.gui.frame.widget.Label;
+import com.xkball.let_me_see_see.client.gui.frame.widget.basic.ScrollableVerticalPanel;
+import com.xkball.let_me_see_see.utils.ClassSearcher;
+import net.minecraft.client.gui.ComponentPath;
+import net.minecraft.client.gui.navigation.FocusNavigationEvent;
+import net.minecraft.client.gui.navigation.ScreenDirection;
+import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
+
+import java.util.ArrayList;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
+public class ClassSearchResultPanel extends ScrollableVerticalPanel {
+    
+    private final Supplier<String> searchesGetter;
+    private final Consumer<String> searchBarSetter;
+    
+    public ClassSearchResultPanel(Supplier<String> searchesGetter, Consumer<String> searchBarSetter) {
+        this.searchesGetter = searchesGetter;
+        this.searchBarSetter = searchBarSetter;
+        this.setMessage(Component.literal("class_search_result"));
+    }
+    
+    @Override
+    public boolean update() {
+        var searches = searchesGetter.get();
+        if (searches.isEmpty()) {
+            if (!children.isEmpty()) {
+                clearWidget();
+                return true;
+            }
+            return false;
+        }
+        clearWidget();
+        var labelConfig = PanelConfig.of().trim().fixWidth(getBoundary().inner().width() - 6);
+        var labels = new ArrayList<Label>();
+        int id = 0;
+        for (var str : ClassSearcher.search(searches)) {
+            labels.add(labelConfig.apply(new SearchResult(str, id)));
+            id += 1;
+        }
+        addWidgets(labels, false);
+        return true;
+    }
+    
+    @Override
+    public void setFocused(boolean p_313936_) {
+        super.setFocused(p_313936_);
+        if (this.selected == null && !this.children.isEmpty()) {
+            this.setFocused(this.children.getFirst());
+        }
+    }
+    
+    public class SearchResult extends Label {
+        
+        private final String str;
+        private final int id;
+        
+        public SearchResult(String str, int id) {
+            super(Component.literal(str), 1, -1, true);
+            this.str = str;
+            this.id = id;
+        }
+        
+        @Override
+        protected boolean isValidClickButton(int button) {
+            return button == 0;
+        }
+        
+        @Override
+        protected boolean clicked(double mouseX, double mouseY) {
+            if (isFocused()) {
+                ClassSearchResultPanel.this.searchBarSetter.accept(str);
+            }
+            return isMouseOver(mouseX, mouseY);
+        }
+        
+        @Override
+        public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+            if (isFocused() && keyCode == GLFW.GLFW_KEY_TAB) {
+                ClassSearchResultPanel.this.searchBarSetter.accept(str);
+                return true;
+            }
+            return super.keyPressed(keyCode, scanCode, modifiers);
+        }
+        
+        @Nullable
+        @Override
+        public ComponentPath nextFocusPath(FocusNavigationEvent event) {
+            var dir = event.getVerticalDirectionForInitialFocus();
+            var list = ClassSearchResultPanel.this.children;
+            if (dir == ScreenDirection.UP && id > 0) {
+                return ComponentPath.leaf(list.get(id - 1));
+            }
+            if (dir == ScreenDirection.DOWN && id < list.size() - 1) {
+                return ComponentPath.leaf(list.get(id + 1));
+            }
+            return super.nextFocusPath(event);
+        }
+        
+    }
+}

@@ -16,7 +16,7 @@ public class ScannerItem extends Item {
     public InteractionResult useOn(UseOnContext context) {
         var level = context.getLevel();
         //涉及渲染器类 必须在客户端执行
-        if (level.isClientSide()){
+        if (level.isClientSide()) {
             var pos = context.getClickedPos();
             var bs = level.getBlockState(pos);
             var block = bs.getBlock();

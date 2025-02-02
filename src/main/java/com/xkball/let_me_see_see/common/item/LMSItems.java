@@ -14,7 +14,7 @@ import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
-@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD,modid = LetMeSeeSee.MODID)
+@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD, modid = LetMeSeeSee.MODID)
 public class LMSItems {
     
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Registries.ITEM, LetMeSeeSee.MODID);
@@ -27,9 +27,11 @@ public class LMSItems {
             .withTabsBefore(CreativeModeTabs.FOOD_AND_DRINKS, CreativeModeTabs.INGREDIENTS, CreativeModeTabs.SPAWN_EGGS)
             .build());
     
-    public static final DeferredHolder<Item,ScannerItem> SCANNER = ITEMS.register("scanner",() -> new ScannerItem(new Item.Properties().stacksTo(1)));
+    public static final DeferredHolder<Item, ScannerItem> SCANNER = ITEMS.register("scanner", () -> new ScannerItem(new Item.Properties().stacksTo(1)));
+    public static final DeferredHolder<Item, RetrieverItem> RETRIEVER = ITEMS.register("retriever", () -> new RetrieverItem(new Item.Properties().stacksTo(1)));
+    public static final DeferredHolder<Item, DataBaseItem> DATA_BASE = ITEMS.register("data_base", () -> new DataBaseItem(new Item.Properties().stacksTo(1)));
     
-    public static void init(IEventBus eventBus){
+    public static void init(IEventBus eventBus) {
         ITEMS.register(eventBus);
         CREATIVE_MODE_TABS.register(eventBus);
     }
@@ -38,6 +40,8 @@ public class LMSItems {
     public static void creativeTab(BuildCreativeModeTabContentsEvent event) {
         if (event.getTab() == THE_TAB.get()) {
             event.accept(SCANNER.get());
+            event.accept(RETRIEVER.get());
+            event.accept(DATA_BASE.get());
         }
     }
 }

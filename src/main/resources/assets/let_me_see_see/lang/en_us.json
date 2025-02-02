@@ -1,5 +1,21 @@
 {
   "let_me_see_see.gui.align_left": "Left",
   "let_me_see_see.gui.align_center": "Center",
-  "let_me_see_see.gui.align_right": "Right"
+  "let_me_see_see.gui.align_right": "Right",
+  "let_me_see_see.gui.align_top": "Top",
+  "let_me_see_see.gui.align_bottom": "Bottom",
+  "itemGroup.let_me_see_see": "LetMeSeeSee(YourCode)",
+  "let_me_see_see.gui.retriever": "Retriever",
+  "let_me_see_see.gui.retriever.class_not_found": "Not a existed class name.",
+  "let_me_see_see.gui.retriever.search": "Search Classes: ",
+  "let_me_see_see.gui.retriever.export": "Export Class.",
+  "let_me_see_see.gui.retriever.rebuild_cache": "Re-scan all loaded class.",
+  "let_me_see_see.gui.open_config_file" : "Open Config File",
+  "let_me_see_see.gui.data_base": "Exported Classes Data Base",
+  "let_me_see_see.gui.data_base.old": "Class exported before.",
+  "let_me_see_see.gui.data_base.out_of_date": "Some mod changed since the export and may influence class contents.Suggest to re-export.",
+  "let_me_see_see.gui.data_base.preview.wip": "[WIP] Class Preview Here",
+  "let_me_see_see.gui.data_base.open_in_idea": "OpenInIDEA",
+  "let_me_see_see.gui.data_base.no_idea": " Not configured the IDEA path.",
+  "let_me_see_see.gui.data_base.re_export": "Re-Export Class"
 }

@@ -12,17 +12,16 @@ public class LMSMain {
     public static String JAR_PATH;
     
     public static void main(String[] args) {
-        if(args.length == 2){
+        if (args.length == 2) {
             var pid = Long.parseLong(args[0]);
             JAR_PATH = args[1];
             runAgent(pid);
-        }
-        else {
+        } else {
             System.out.println("Usage: java LMSMain <pid> <agent-path>");
         }
     }
     
-    public static void runAgent(long pid){
+    public static void runAgent(long pid) {
         try {
             var virtualMachine = VirtualMachine.attach(String.valueOf(pid));
             virtualMachine.loadAgent(JAR_PATH);

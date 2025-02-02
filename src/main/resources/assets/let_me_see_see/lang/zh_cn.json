@@ -1,0 +1,21 @@
+{
+  "let_me_see_see.gui.align_left": "左对齐",
+  "let_me_see_see.gui.align_center": "居中",
+  "let_me_see_see.gui.align_right": "右对齐",
+  "let_me_see_see.gui.align_top": "顶对齐",
+  "let_me_see_see.gui.align_bottom": "底对齐",
+  "itemGroup.let_me_see_see": "LetMeSeeSee(YourCode)",
+  "let_me_see_see.gui.retriever": "检索器",
+  "let_me_see_see.gui.retriever.class_not_found": "不是一个存在的类名称.",
+  "let_me_see_see.gui.retriever.search": "搜索Class: ",
+  "let_me_see_see.gui.retriever.export": "导出",
+  "let_me_see_see.gui.retriever.rebuild_cache": "重新扫描已加载类",
+  "let_me_see_see.gui.open_config_file" : "打开设置文件",
+  "let_me_see_see.gui.data_base": "已导出类数据库",
+  "let_me_see_see.gui.data_base.old": "此前导出的数据",
+  "let_me_see_see.gui.data_base.out_of_date": "导出后检测到mod列表发生变化,类内容可能变化,建议重新导出.",
+  "let_me_see_see.gui.data_base.preview.wip": "[WIP] 类预览功能尚未做完",
+  "let_me_see_see.gui.data_base.open_in_idea": "在IDEA中打开",
+  "let_me_see_see.gui.data_base.no_idea": " 尚未配置IDEA路径",
+  "let_me_see_see.gui.data_base.re_export": "重新导出类"
+}

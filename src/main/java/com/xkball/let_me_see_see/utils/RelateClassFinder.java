@@ -17,14 +17,14 @@ public class RelateClassFinder {
         result.add(block.getClass());
         result.add(block.asItem().getClass());
         var bs = block.defaultBlockState();
-        if(bs.hasBlockEntity()){
+        if (bs.hasBlockEntity()) {
             var renderDispatcher = Minecraft.getInstance().getBlockEntityRenderDispatcher();
             var teTypeList = BuiltInRegistries.BLOCK_ENTITY_TYPE.entrySet().stream()
                     .map(Map.Entry::getValue)
                     .filter(type -> type.getValidBlocks().contains(block))
                     .toList();
             var teClassesList = teTypeList.stream()
-                    .map(type -> type.create(BlockPos.ZERO,bs))
+                    .map(type -> type.create(BlockPos.ZERO, bs))
                     .filter(Objects::nonNull)
                     .map(Object::getClass)
                     .toList();
