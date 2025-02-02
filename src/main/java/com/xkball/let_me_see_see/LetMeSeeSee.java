@@ -54,7 +54,7 @@ public class LetMeSeeSee {
         MOD_LIST_MD5 = VanillaUtils.md5(ModList.get().getMods().stream()
                 .flatMap(mif -> Stream.of(mif.getModId(), mif.getVersion().toString()))
                 .collect(Collectors.joining()));
-        ExportsDataManager.EXPORT_ENV = new ExportsDataManager.ExportEnv(GAME_INSTANCE_UUID,MOD_LIST_MD5);
+        ExportsDataManager.EXPORT_ENV = new ExportsDataManager.ExportEnv(GAME_INSTANCE_UUID, MOD_LIST_MD5);
         if (IS_DEBUG) {
             JAR_PATH = System.getProperty(JAR_PATH_KEY);
         } else {

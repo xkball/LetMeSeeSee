@@ -28,7 +28,8 @@ public class DataBaseScreen extends FrameScreen {
     private final UpdateChecker searchBarUpdateChecker = new UpdateChecker();
     private String searchBarValue = "";
     
-    @Nullable private ClassLabel lastFocused = null;
+    @Nullable
+    private ClassLabel lastFocused = null;
     
     public DataBaseScreen() {
         super(Component.empty());
@@ -39,14 +40,14 @@ public class DataBaseScreen extends FrameScreen {
     protected void init() {
         super.init();
         this.searchBarUpdateChecker.forceUpdate();
-        var classListPanel = PanelConfig.of(FrameScreen.THE_SCALE,1)
+        var classListPanel = PanelConfig.of(FrameScreen.THE_SCALE, 1)
                 .align(HorizontalAlign.LEFT, VerticalAlign.TOP)
                 .decoRenderer(GuiDecorations.RIGHT_DARK_BORDER_LINE)
                 .apply(new VerticalPanel()
-                        .addWidget(PanelConfig.of(1,1)
+                        .addWidget(PanelConfig.of(1, 1)
                                 .fixHeight(24)
                                 .apply(AutoResizeWidgetWrapper.of(
-                                        new EditBox(font,0,0,0,0,Component.empty()){{
+                                        new EditBox(font, 0, 0, 0, 0, Component.empty()) {{
                                             setupSimpleEditBox(this);
                                             setValue(searchBarValue);
                                             setResponder(str -> {
@@ -55,21 +56,21 @@ public class DataBaseScreen extends FrameScreen {
                                             });
                                         }}
                                 )))
-                        .addWidget(PanelConfig.of(1,1)
+                        .addWidget(PanelConfig.of(1, 1)
                                 .align(HorizontalAlign.LEFT, VerticalAlign.TOP)
-                                .apply(new ScrollableVerticalPanel(){
+                                .apply(new ScrollableVerticalPanel() {
                                     @Override
                                     public boolean update() {
-                                        if(!searchBarUpdateChecker.checkUpdate(searchBarValue)) return false;
+                                        if (!searchBarUpdateChecker.checkUpdate(searchBarValue)) return false;
                                         clearWidget();
                                         var labelConfig = PanelConfig.of().fixHeight(16).fixWidth(getBoundary().inner().width() - 6);
-                                        for(var str : VanillaUtils.search(searchBarValue, ExportsDataManager.recordedClasses.keySet())){
-                                            addWidget(labelConfig.apply(new ClassLabel(str,ExportsDataManager.recordedClasses.get(str)){
+                                        for (var str : VanillaUtils.search(searchBarValue, ExportsDataManager.recordedClasses.keySet())) {
+                                            addWidget(labelConfig.apply(new ClassLabel(str, ExportsDataManager.recordedClasses.get(str)) {
                                                 @Override
                                                 public void setFocused(boolean focused) {
                                                     super.setFocused(focused);
-                                                    if(focused) lastFocused = this;
-                                                    if(!focused && this.equals(lastFocused)) lastFocused = null;
+                                                    if (focused) lastFocused = this;
+                                                    if (!focused && this.equals(lastFocused)) lastFocused = null;
                                                     setNeedUpdate();
                                                 }
                                             }));
@@ -78,48 +79,49 @@ public class DataBaseScreen extends FrameScreen {
                                     }
                                 })));
         var openIDEATooltip = Component.translatable("let_me_see_see.gui.data_base.open_in_idea");
-        if(LMSConfig.IDEA_PATH.isEmpty()) openIDEATooltip.append(Component.translatable("let_me_see_see.gui.data_base.no_idea").withStyle(ChatFormatting.RED));
-        var classPreviewHeader = PanelConfig.of(1,1)
+        if (LMSConfig.IDEA_PATH.isEmpty())
+            openIDEATooltip.append(Component.translatable("let_me_see_see.gui.data_base.no_idea").withStyle(ChatFormatting.RED));
+        var classPreviewHeader = PanelConfig.of(1, 1)
                 .fixHeight(24)
-                .align(HorizontalAlign.RIGHT,VerticalAlign.CENTER)
+                .align(HorizontalAlign.RIGHT, VerticalAlign.CENTER)
                 .decoRenderer(GuiDecorations.BOTTOM_DARK_BORDER_LINE)
                 .apply(new HorizontalPanel()
                         .addWidget(PanelConfig.of()
-                                .fixSize(20,20)
+                                .fixSize(20, 20)
                                 .paddingRight(4)
                                 .tooltip(Tooltip.create(openIDEATooltip))
                                 .apply(iconButton(btn -> {
-                                    if(lastFocused != null) lastFocused.openInIDEA();
+                                    if (lastFocused != null) lastFocused.openInIDEA();
                                 }, ResourceLocation.withDefaultNamespace("statistics/item_used"))))
                         .addWidget(PanelConfig.of()
-                                .fixSize(20,20)
+                                .fixSize(20, 20)
                                 .paddingRight(4)
                                 .tooltip("let_me_see_see.gui.data_base.re_export")
                                 .apply(iconButton(btn -> {
-                                    if(lastFocused != null){
+                                    if (lastFocused != null) {
                                         lastFocused.reExport();
                                         searchBarUpdateChecker.forceUpdate();
                                         setNeedUpdate();
                                     }
-                                },ResourceLocation.withDefaultNamespace("icon/search")))));
-        var classPreviewBody = PanelConfig.of(1,1)
+                                }, ResourceLocation.withDefaultNamespace("icon/search")))));
+        var classPreviewBody = PanelConfig.of(1, 1)
                 .paddingTop(0.2f)
                 .trim()
                 .apply(Label.of(Component.translatable("let_me_see_see.gui.data_base.preview.wip")));
-        var classPreviewPanel = PanelConfig.of(1,1)
+        var classPreviewPanel = PanelConfig.of(1, 1)
                 .align(HorizontalAlign.LEFT, VerticalAlign.TOP)
-                .apply(new VerticalPanel(){
+                .apply(new VerticalPanel() {
                     @Override
                     public boolean update() {
                         clearWidget();
-                        if(lastFocused != null){
+                        if (lastFocused != null) {
                             addWidget(classPreviewHeader);
                             addWidget(classPreviewBody);
                         }
                         return true;
                     }
                 });
-                
+        
         var content = PanelConfig.of()
                 .align(HorizontalAlign.LEFT, VerticalAlign.TOP)
                 .apply(new HorizontalPanel()

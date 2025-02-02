@@ -6,7 +6,6 @@ import com.xkball.let_me_see_see.client.gui.frame.core.render.CombineRenderer;
 import com.xkball.let_me_see_see.client.gui.frame.core.render.IGUIDecoRenderer;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.network.chat.Component;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;

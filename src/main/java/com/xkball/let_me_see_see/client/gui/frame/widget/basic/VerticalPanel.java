@@ -98,7 +98,7 @@ public class VerticalPanel extends AbstractContainerWidget implements IPanel, IT
         var x = parentPos.x();
         var y = parentPos.y();
         for (var widget : childrenPanels) {
-            var width = Mth.clamp(parentPos.width() * widget.getXPercentage(), widget.getXMin(), Math.min(widget.getXMax(),parentPos.width()));
+            var width = Mth.clamp(parentPos.width() * widget.getXPercentage(), widget.getXMin(), Math.min(widget.getXMax(), parentPos.width()));
             var height = Mth.clamp(parentPos.height() * widget.getYPercentage(), widget.getYMin(), Math.min(widget.getYMax(), parentPos.maxY() - y));
             var leftPadding = IPanel.calculatePadding(widget.getLeftPadding(), parentPos.width());
             var rightPadding = IPanel.calculatePadding(widget.getRightPadding(), parentPos.width());

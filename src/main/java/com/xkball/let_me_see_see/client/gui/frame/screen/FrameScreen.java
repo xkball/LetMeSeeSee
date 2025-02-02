@@ -40,14 +40,14 @@ public class FrameScreen extends Screen {
         }
     }
     
-    public void setNeedUpdate(){
+    public void setNeedUpdate() {
         this.needUpdate = true;
     }
     
     @Override
     public void tick() {
         super.tick();
-        if(needUpdate) {
+        if (needUpdate) {
             needUpdate = false;
             updateScreen();
         }
@@ -83,7 +83,7 @@ public class FrameScreen extends Screen {
                                                 .fixWidth(20)
                                                 .tooltip("let_me_see_see.gui.open_config_file")
                                                 .apply(iconButton(btn -> Util.getPlatform().openFile(FMLPaths.CONFIGDIR.get().resolve("let_me_see_see-common.toml").toFile()),
-                                                                ResourceLocation.withDefaultNamespace("icon/search"))))))
+                                                        ResourceLocation.withDefaultNamespace("icon/search"))))))
                 .addWidget(PanelConfig.of(1, 0.92f)
                         .sizeLimitYMax(height - 40)
                         .decoRenderer(GuiDecorations.BOTTOM_DARK_BORDER_LINE)
@@ -95,13 +95,13 @@ public class FrameScreen extends Screen {
         return screen;
     }
     
-    public static void setupSimpleEditBox(EditBox editBox){
+    public static void setupSimpleEditBox(EditBox editBox) {
         editBox.setMaxLength(114514);
         editBox.setCanLoseFocus(false);
         editBox.scrollTo(0);
     }
     
-    public static AutoResizeWidgetWrapper iconButton(Button.OnPress onPress,ResourceLocation sprite){
+    public static AutoResizeWidgetWrapper iconButton(Button.OnPress onPress, ResourceLocation sprite) {
         var btn = SpriteIconButton.builder(Component.empty(), onPress, true)
                 .sprite(sprite, 16, 16)
                 .build();

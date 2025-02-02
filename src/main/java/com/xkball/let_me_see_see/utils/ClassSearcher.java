@@ -2,7 +2,6 @@ package com.xkball.let_me_see_see.utils;
 
 import com.xkball.let_me_see_see.LetMeSeeSee;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +27,7 @@ public class ClassSearcher {
     }
     
     public static List<String> search(String str) {
-        return VanillaUtils.search(str,classMap.keySet());
+        return VanillaUtils.search(str, classMap.keySet());
     }
 
 //    public static List<?> searchOld(String str) {
