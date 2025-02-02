@@ -7,31 +7,31 @@ public class ClassSearcherTest {
     public static Object obj;
     
     public static void test() {
-//        for (int i = 0; i < 20; i++) {
-//            obj = ClassSearcher.searchOld("net");
-//            System.out.println(obj);
-//        }
-//        long sum1 = 0;
-//        for (int i = 0; i < 100; i++) {
-//            var t1 = System.nanoTime();
-//            obj = ClassSearcher.searchOld("net");
-//            sum1 += System.nanoTime() - t1;
-//            System.out.println(obj);
-//            System.out.println(i);
-//        }
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 200; i++) {
             obj = ClassSearcher.search("net");
-            System.out.println(obj);
+            System.out.println(obj.toString().substring(100,120));
         }
-        long sum2 = 0;
-        for (int i = 0; i < 100; i++) {
+        long sum1 = 0;
+        for (int i = 0; i < 1000; i++) {
             var t1 = System.nanoTime();
             obj = ClassSearcher.search("net");
-            sum2 += System.nanoTime() - t1;
-            System.out.println(obj);
+            sum1 += System.nanoTime() - t1;
+            System.out.println(obj.toString().substring(100,120));
             System.out.println(i);
         }
-        //System.out.println(sum1/100);
-        System.out.println(sum2 / 100);
+        for (int i = 0; i < 200; i++) {
+            //obj = ClassSearcher.searchNew("net");
+            System.out.println(obj.toString().substring(100,120));
+        }
+        long sum2 = 0;
+        for (int i = 0; i < 1000; i++) {
+            var t1 = System.nanoTime();
+            //obj = ClassSearcher.searchNew("net");
+            sum2 += System.nanoTime() - t1;
+            System.out.println(obj.toString().substring(100,120));
+            System.out.println(i);
+        }
+        System.out.println(sum1/1000);
+        System.out.println(sum2/1000);
     }
 }
