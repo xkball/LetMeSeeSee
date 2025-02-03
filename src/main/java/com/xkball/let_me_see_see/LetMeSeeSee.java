@@ -1,6 +1,7 @@
 package com.xkball.let_me_see_see;
 
 import com.mojang.logging.LogUtils;
+import com.xkball.let_me_see_see.client.offscreen.OffScreenRenders;
 import com.xkball.let_me_see_see.common.data.ExportsDataManager;
 import com.xkball.let_me_see_see.common.item.LMSItems;
 import com.xkball.let_me_see_see.config.LMSConfig;
@@ -8,6 +9,7 @@ import com.xkball.let_me_see_see.utils.VanillaUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.Items;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -18,6 +20,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.loading.FMLPaths;
+import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -55,10 +58,14 @@ public class LetMeSeeSee {
                 .flatMap(mif -> Stream.of(mif.getModId(), mif.getVersion().toString()))
                 .collect(Collectors.joining()));
         ExportsDataManager.EXPORT_ENV = new ExportsDataManager.ExportEnv(GAME_INSTANCE_UUID, MOD_LIST_MD5);
-        if (IS_DEBUG) {
+        var jar = modContainer.getModInfo().getOwningFile().getFile().getFilePath().toFile();
+        if (jar.isDirectory()) {
             JAR_PATH = System.getProperty(JAR_PATH_KEY);
+            if(JAR_PATH.isEmpty()){
+                LOGGER.error("This mod require it's jar path to work! Missing system property: " + JAR_PATH_KEY);
+            }
         } else {
-            JAR_PATH = modContainer.getModInfo().getOwningFile().getFile().getFilePath().toString();
+            JAR_PATH = jar.getAbsolutePath();
         }
         modContainer.registerConfig(ModConfig.Type.COMMON, LMSConfig.SPEC);
     }
@@ -157,6 +164,11 @@ public class LetMeSeeSee {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
         
+        }
+        
+        @SubscribeEvent
+        public static void onRegGuiLayerDef(RegisterGuiLayersEvent event){
+       
         }
     }
     

@@ -2,6 +2,7 @@ package com.xkball.let_me_see_see.utils;
 
 import com.xkball.let_me_see_see.LetMeSeeSee;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,8 @@ import java.util.Map;
 public class ClassSearcher {
     
     public static final Map<String, Class<?>> classMap = new HashMap<>();
+    public static final List<String> lowerCaseClassName = new ArrayList<>();
+    
     
     public static String className(Class<?> clazz) {
         var classLoaderName = clazz.getClassLoader() == null ? "null" : clazz.getClassLoader().getName();
@@ -17,8 +20,12 @@ public class ClassSearcher {
     
     public static void buildClassMap() {
         var classes = LetMeSeeSee.getInst().getAllLoadedClasses();
+        classMap.clear();
+        lowerCaseClassName.clear();
         for (var clazz : classes) {
-            classMap.put(className(clazz), clazz);
+            var className = className(clazz);
+            classMap.put(className, clazz);
+            lowerCaseClassName.add(className);
         }
     }
     
@@ -27,7 +34,7 @@ public class ClassSearcher {
     }
     
     public static List<String> search(String str) {
-        return VanillaUtils.search(str, classMap.keySet());
+        return VanillaUtils.search(str.toLowerCase(),lowerCaseClassName);
     }
 
 //    public static List<?> searchOld(String str) {

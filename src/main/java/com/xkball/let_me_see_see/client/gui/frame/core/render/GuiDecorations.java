@@ -1,7 +1,10 @@
 package com.xkball.let_me_see_see.client.gui.frame.core.render;
 
 import com.xkball.let_me_see_see.utils.VanillaUtils;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
+@OnlyIn(Dist.CLIENT)
 public class GuiDecorations {
     
     public static final IGUIDecoRenderer BOTTOM_DARK_BORDER_LINE = (guiGraphics, boundary, mouseX, mouseY, partialTick) -> {

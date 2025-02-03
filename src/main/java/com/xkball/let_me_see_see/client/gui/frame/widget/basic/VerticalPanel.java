@@ -16,12 +16,15 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
+@OnlyIn(Dist.CLIENT)
 public class VerticalPanel extends AbstractContainerWidget implements IPanel, ITypeset {
     public final List<AbstractWidget> children = new ArrayList<>();
     public final List<IPanel> childrenPanels = new ArrayList<>();

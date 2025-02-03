@@ -30,6 +30,7 @@ public class LMSItems {
     public static final DeferredHolder<Item, ScannerItem> SCANNER = ITEMS.register("scanner", () -> new ScannerItem(new Item.Properties().stacksTo(1)));
     public static final DeferredHolder<Item, RetrieverItem> RETRIEVER = ITEMS.register("retriever", () -> new RetrieverItem(new Item.Properties().stacksTo(1)));
     public static final DeferredHolder<Item, DataBaseItem> DATA_BASE = ITEMS.register("data_base", () -> new DataBaseItem(new Item.Properties().stacksTo(1)));
+    public static final DeferredHolder<Item, ItemDataExporterItem> ITEM_ITEM_DATA_EXPORTER = ITEMS.register("item_data_exporter",() -> new ItemDataExporterItem(new Item.Properties().stacksTo(1)));
     
     public static void init(IEventBus eventBus) {
         ITEMS.register(eventBus);
@@ -42,6 +43,7 @@ public class LMSItems {
             event.accept(SCANNER.get());
             event.accept(RETRIEVER.get());
             event.accept(DATA_BASE.get());
+            event.accept(ITEM_ITEM_DATA_EXPORTER.get());
         }
     }
 }

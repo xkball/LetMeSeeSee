@@ -21,8 +21,11 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 
+@OnlyIn(Dist.CLIENT)
 public class DataBaseScreen extends FrameScreen {
     
     private final UpdateChecker searchBarUpdateChecker = new UpdateChecker();
@@ -64,7 +67,7 @@ public class DataBaseScreen extends FrameScreen {
                                         if (!searchBarUpdateChecker.checkUpdate(searchBarValue)) return false;
                                         clearWidget();
                                         var labelConfig = PanelConfig.of().fixHeight(16).fixWidth(getBoundary().inner().width() - 6);
-                                        for (var str : VanillaUtils.search(searchBarValue, ExportsDataManager.recordedClasses.keySet())) {
+                                        for (var str : VanillaUtils.searchInLowerCase(searchBarValue, ExportsDataManager.recordedClasses.keySet())) {
                                             addWidget(labelConfig.apply(new ClassLabel(str, ExportsDataManager.recordedClasses.get(str)) {
                                                 @Override
                                                 public void setFocused(boolean focused) {

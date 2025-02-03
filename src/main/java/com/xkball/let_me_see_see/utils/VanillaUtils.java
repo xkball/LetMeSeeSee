@@ -131,7 +131,7 @@ public class VanillaUtils {
         }
     }
     
-    public static List<String> search(String key, Collection<String> src) {
+    public static List<String> searchInLowerCase(String key, Collection<String> src) {
         key = key.toLowerCase();
         var startWithList = new ArrayList<String>();
         var containsList = new ArrayList<String>();
@@ -146,17 +146,30 @@ public class VanillaUtils {
         return startWithList;
     }
     
+    public static List<String> search(String key, Collection<String> src) {
+        var startWithList = new ArrayList<String>();
+        var containsList = new ArrayList<String>();
+        for (var str : src) {
+            if (str.startsWith(key)) startWithList.add(str);
+            else if (str.contains(key)) containsList.add(str);
+        }
+        startWithList.sort(String::compareTo);
+        containsList.sort(String::compareTo);
+        startWithList.addAll(containsList);
+        return startWithList;
+    }
+    
     public static class ClientHandler {
         
         @OnlyIn(Dist.CLIENT)
         public static void renderAxis(MultiBufferSource bufferSource, PoseStack poseStack) {
-            var buffer = bufferSource.getBuffer(RenderType.lines());
+            var buffer = bufferSource.getBuffer(RenderType.debugLineStrip(8));
             var matrix = poseStack.last();
-            buffer.addVertex(matrix, 0, 0, 0).setNormal(matrix, 1, 0, 0).setColor(0xFFFF0000);
+            buffer.addVertex(matrix, 0, 0, 0).setNormal(matrix, -1, 0, 0).setColor(0xFFFF0000);
             buffer.addVertex(matrix, 100, 0, 0).setNormal(matrix, 1, 0, 0).setColor(0xFFFF0000);
-            buffer.addVertex(matrix, 0, 0, 0).setNormal(matrix, 0, 1, 0).setColor(0xFF00FF00);
+            buffer.addVertex(matrix, 0, 0, 0).setNormal(matrix, 0, -1, 0).setColor(0xFF00FF00);
             buffer.addVertex(matrix, 0, 100, 0).setNormal(matrix, 0, 1, 0).setColor(0xFF00FF00);
-            buffer.addVertex(matrix, 0, 0, 0).setNormal(matrix, 0, 0, 1).setColor(0xFF0000FF);
+            buffer.addVertex(matrix, 0, 0, 0).setNormal(matrix, 0, 0, -1).setColor(0xFF0000FF);
             buffer.addVertex(matrix, 0, 0, 100).setNormal(matrix, 0, 0, 1).setColor(0xFF0000FF);
         }
         

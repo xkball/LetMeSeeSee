@@ -20,8 +20,11 @@ import net.minecraft.client.gui.components.SpriteIconButton;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.loading.FMLPaths;
 
+@OnlyIn(Dist.CLIENT)
 public class FrameScreen extends Screen {
     
     public static final float THE_SCALE = 0.3731f;

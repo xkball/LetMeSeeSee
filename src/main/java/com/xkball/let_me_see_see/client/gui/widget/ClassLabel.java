@@ -13,12 +13,15 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 
+@OnlyIn(Dist.CLIENT)
 public class ClassLabel extends AutoResizeWidget {
     
     public static final Logger LOGGER = LogUtils.getLogger();

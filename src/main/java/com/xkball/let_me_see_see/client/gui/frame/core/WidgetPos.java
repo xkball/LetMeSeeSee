@@ -1,5 +1,9 @@
 package com.xkball.let_me_see_see.client.gui.frame.core;
 
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+
+@OnlyIn(Dist.CLIENT)
 public record WidgetPos(int x, int y, int width, int height) {
     
     public int maxX() {

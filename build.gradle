@@ -22,7 +22,7 @@ repositories {
 base {
     archivesName = mod_id
     if(System.env.GITHUB_ACTIONS){
-        var endfix = System.env.VERSION_IDENTIFIER +"-"+  LocalDateTime.now(ZoneOffset.ofHours(8)).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME).replace(':','-')
+        var endfix = System.env.VERSION_IDENTIFIER + "-" + LocalDateTime.now(ZoneOffset.ofHours(8)).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME).replace(':','-')
         archivesName="${archivesName.get()}-${version}-${endfix}-nightly"
         version=''
     }
