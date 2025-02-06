@@ -44,6 +44,7 @@ jobs:
         id: build
         env:
           VERSION_IDENTIFIER: ${{ steps.short-sha.outputs.sha }}
+          NIGHTLY_BUILD: true
         run: ./gradlew :build --stacktrace --scan
 
       - name: GitHub Action Artifact
