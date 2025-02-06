@@ -26,10 +26,14 @@ public class OffScreenRenders {
     
     public static String exportItemStackAsPng(ItemStack itemStack,int width,int height, float scale, boolean writeToFile){
         FBO.resize(width,height);
+        return exportItemStackAsPng(FBO,itemStack,scale,writeToFile);
+    }
+    
+    public static String exportItemStackAsPng(OffScreenFBO fbo, ItemStack itemStack, float scale, boolean writeToFile){
         var itemID = BuiltInRegistries.ITEM.getKey(itemStack.getItem());
         var exportPath = Path.of(LetMeSeeSee.EXPORT_DIR_PATH,"_data",itemID.getNamespace(),itemID.getPath()+".png");
-        FBO.renderOffScreen(() -> renderItemStack(itemStack,width,height,scale));
-        var result = FBO.getRenderResult();
+        fbo.renderOffScreen(() -> renderItemStack(itemStack, fbo.getWidth(), fbo.getHeight(),scale));
+        var result = fbo.getRenderResult();
         try {
             result.flipY();
             if(writeToFile){
