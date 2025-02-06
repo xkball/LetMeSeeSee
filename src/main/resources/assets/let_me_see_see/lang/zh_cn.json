@@ -17,5 +17,13 @@
   "let_me_see_see.gui.data_base.preview.wip": "[WIP] 类预览功能尚未做完",
   "let_me_see_see.gui.data_base.open_in_idea": "在IDEA中打开",
   "let_me_see_see.gui.data_base.no_idea": " 尚未配置IDEA路径",
-  "let_me_see_see.gui.data_base.re_export": "重新导出类"
+  "let_me_see_see.gui.data_base.re_export": "重新导出类",
+  "let_me_see_see.gui.item_data_exporter": "物品数据导出器",
+  "let_me_see_see.gui.item_data_exporter.namespace": "命名空间: ",
+  "let_me_see_see.gui.item_data_exporter.namespace.hint": "需要导出的命名空间(modid).留空以导出所有命名空间.",
+  "let_me_see_see.gui.item_data_exporter.image_size": "图像大小: ",
+  "let_me_see_see.gui.item_data_exporter.item_scale": "物品缩放: ",
+  "let_me_see_see.gui.item_data_exporter.save_png": "保存物品图片为png",
+  "let_me_see_see.gui.item_data_exporter.export": "导出",
+  "let_me_see_see.gui.item_data_exporter.export_hint": "示意图"
 }

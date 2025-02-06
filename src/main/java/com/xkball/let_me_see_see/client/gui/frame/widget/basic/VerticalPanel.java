@@ -15,7 +15,6 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Mth;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
@@ -98,36 +97,15 @@ public class VerticalPanel extends AbstractContainerWidget implements IPanel, IT
     @SuppressWarnings("DuplicatedCode")
     public void resize() {
         var parentPos = widgetBoundary.inner();
-        var x = parentPos.x();
         var y = parentPos.y();
         for (var widget : childrenPanels) {
-            var width = Mth.clamp(parentPos.width() * widget.getXPercentage(), widget.getXMin(), Math.min(widget.getXMax(), parentPos.width()));
-            var height = Mth.clamp(parentPos.height() * widget.getYPercentage(), widget.getYMin(), Math.min(widget.getYMax(), parentPos.maxY() - y));
-            var leftPadding = IPanel.calculatePadding(widget.getLeftPadding(), parentPos.width());
-            var rightPadding = IPanel.calculatePadding(widget.getRightPadding(), parentPos.width());
-            var topPadding = IPanel.calculatePadding(widget.getTopPadding(), parentPos.height());
-            var bottomPadding = IPanel.calculatePadding(widget.getBottomPadding(), parentPos.height());
-            
-            var outerWidth = (int) (leftPadding + width + rightPadding);
-            var outerHeight = (int) (topPadding + height + bottomPadding);
-            var outer = new WidgetPos(x, y, outerWidth, outerHeight);
-            var inner = new WidgetPos((int) (x + leftPadding), (int) (y + topPadding), (int) width, (int) height);
-            widget.setBoundary(new WidgetBoundary(outer, inner));
-            y += outerHeight;
+            IPanel.calculateBoundary(widget,parentPos,parentPos.x(),y);
+            y += widget.getBoundary().outer().height();
         }
         var heightSum = y - parentPos.y();
-        var shiftY = switch (verticalAlign) {
-            case TOP -> 0;
-            case CENTER -> (int) (parentPos.height() / 2f - heightSum / 2f);
-            case BOTTOM -> parentPos.height() - heightSum;
-        };
-        
+        var shiftY = IPanel.calculateShift(verticalAlign,parentPos.height(),heightSum);
         for (var widget : childrenPanels) {
-            var shiftX = switch (horizontalAlign) {
-                case LEFT -> 0;
-                case CENTER -> (int) (parentPos.width() / 2f - widget.getBoundary().outer().width() / 2f);
-                case RIGHT -> parentPos.width() - widget.getBoundary().outer().width();
-            };
+            var shiftX = IPanel.calculateShift(horizontalAlign,parentPos.width(),widget.getBoundary().outer().width());
             widget.shiftWidgetBoundary(shiftX, shiftY);
             widget.resize();
         }

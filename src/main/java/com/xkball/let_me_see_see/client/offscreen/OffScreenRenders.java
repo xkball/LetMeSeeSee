@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexSorting;
 import com.xkball.let_me_see_see.LetMeSeeSee;
 import com.xkball.let_me_see_see.utils.VanillaUtils;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -23,15 +24,26 @@ public class OffScreenRenders {
     
     public static final OffScreenFBO FBO = new OffScreenFBO(128,128);
     
-    public static void exportItemStackAsPng(ItemStack itemStack,int width,int height, float scale){
+    public static String exportItemStackAsPng(ItemStack itemStack,int width,int height, float scale, boolean writeToFile){
         FBO.resize(width,height);
         var itemID = BuiltInRegistries.ITEM.getKey(itemStack.getItem());
         var exportPath = Path.of(LetMeSeeSee.EXPORT_DIR_PATH,"_data",itemID.getNamespace(),itemID.getPath()+".png");
-        try(var result = FBO.drawOffScreen(() -> renderItemStack(itemStack,width,height,scale))){
-            //noinspection ResultOfMethodCallIgnored
-            exportPath.getParent().toFile().mkdirs();
+        FBO.renderOffScreen(() -> renderItemStack(itemStack,width,height,scale));
+        var result = FBO.getRenderResult();
+        try {
             result.flipY();
-            result.writeToFile(exportPath);
+            if(writeToFile){
+                Util.ioPool().submit(() -> {
+                    try {
+                        //noinspection ResultOfMethodCallIgnored
+                        exportPath.getParent().toFile().mkdirs();
+                        result.writeToFile(exportPath);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+            }
+            return VanillaUtils.base64(result.asByteArray());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -51,25 +63,24 @@ public class OffScreenRenders {
         scale*=scaleMul;
         var oldProjMatrix = RenderSystem.getProjectionMatrix();
         var oldSorting = RenderSystem.getVertexSorting();
-        RenderSystem.setProjectionMatrix(orthoProj, VertexSorting.byDistance(v -> v.z));
+        RenderSystem.setProjectionMatrix(orthoProj, VertexSorting.ORTHOGRAPHIC_Z);
         var poseStack = new PoseStack();
         poseStack.pushPose();
         poseStack.translate(shiftX,shiftY,0);
         poseStack.translate(scale/(scaleMul*2),scale/(scaleMul*2),0);
         poseStack.scale(scale,-scale,scale);
         var flag = !model.usesBlockLight();
-//        poseStack.mulPose(Axis.YP.rotationDegrees(45));
-//        poseStack.mulPose(Axis.XP.rotationDegrees(90));
-        //poseStack.mulPose(Axis.ZP.rotationDegrees(180));
 
         if(flag){
             Lighting.setupForFlatItems();
         }
-        RenderSystem.disableDepthTest();
+        
         itemRenderer.render(itemStack, ItemDisplayContext.GUI,false,poseStack,bufferSource,15728880, OverlayTexture.NO_OVERLAY,model);
-        VanillaUtils.ClientHandler.renderAxis(bufferSource,poseStack);
+        //VanillaUtils.ClientHandler.renderAxis(bufferSource,poseStack);
+        RenderSystem.disableDepthTest();
         bufferSource.endBatch();
         RenderSystem.enableDepthTest();
+        
         if(flag){
             Lighting.setupFor3DItems();
         }

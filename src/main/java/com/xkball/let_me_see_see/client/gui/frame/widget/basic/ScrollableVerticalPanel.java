@@ -2,7 +2,6 @@ package com.xkball.let_me_see_see.client.gui.frame.widget.basic;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.xkball.let_me_see_see.client.gui.frame.core.IPanel;
-import com.xkball.let_me_see_see.client.gui.frame.core.WidgetBoundary;
 import com.xkball.let_me_see_see.client.gui.frame.core.WidgetPos;
 import com.xkball.let_me_see_see.client.gui.frame.core.render.GuiDecorations;
 import com.xkball.let_me_see_see.client.gui.frame.core.render.SimpleBackgroundRenderer;
@@ -53,39 +52,19 @@ public class ScrollableVerticalPanel extends VerticalPanel {
     public void resize() {
         this.heightList.clear();
         var parentPos = widgetBoundary.inner();
-        var x = parentPos.x();
+        var parentPos_ = new WidgetPos(parentPos.x(), parentPos.y(), parentPos.width(), Integer.MAX_VALUE/2);
         var y = parentPos.y();
         for (var widget : childrenPanels) {
-            var width = Mth.clamp(parentPos.width() * widget.getXPercentage(), widget.getXMin(), widget.getXMax());
-            var height = Mth.clamp(parentPos.height() * widget.getYPercentage(), widget.getYMin(), widget.getYMax());
-            var leftPadding = IPanel.calculatePadding(widget.getLeftPadding(), parentPos.width());
-            var rightPadding = IPanel.calculatePadding(widget.getRightPadding(), parentPos.width());
-            var topPadding = IPanel.calculatePadding(widget.getTopPadding(), parentPos.height());
-            var bottomPadding = IPanel.calculatePadding(widget.getBottomPadding(), parentPos.height());
-            
-            var outerWidth = (int) (leftPadding + width + rightPadding);
-            var outerHeight = (int) (topPadding + height + bottomPadding);
-            var outer = new WidgetPos(x, y, outerWidth, outerHeight);
-            var inner = new WidgetPos((int) (x + leftPadding), (int) (y + topPadding), (int) width, (int) height);
-            widget.setBoundary(new WidgetBoundary(outer, inner));
-            y += outerHeight;
+            IPanel.calculateBoundary(widget, parentPos_, parentPos.x(), y);
+            y += widget.getBoundary().outer().height();
             this.heightList.add(y - parentPos.y());
         }
         var heightSum = y - parentPos.y();
         this.maxPosition = heightSum;
         this.maxScroll = Math.max(0, heightSum - parentPos.height());
-        var shiftY = switch (verticalAlign) {
-            case TOP -> 0;
-            case CENTER -> (int) (parentPos.height() / 2f - heightSum / 2f);
-            case BOTTOM -> parentPos.height() - heightSum;
-        };
-        
+        var shiftY = IPanel.calculateShift(verticalAlign,parentPos.height(),heightSum);
         for (var widget : childrenPanels) {
-            var shiftX = switch (horizontalAlign) {
-                case LEFT -> 0;
-                case CENTER -> (int) (parentPos.width() / 2f - widget.getBoundary().outer().width() / 2f);
-                case RIGHT -> parentPos.width() - widget.getBoundary().outer().width();
-            };
+            var shiftX = IPanel.calculateShift(horizontalAlign,parentPos.width(),widget.getBoundary().outer().width());
             widget.shiftWidgetBoundary(shiftX, shiftY);
             widget.resize();
         }

@@ -9,7 +9,7 @@ import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.function.Supplier;
 
-public class DataBaseItem extends GUIItem implements IScreenProviderItem {
+public class DataBaseItem extends GUIItem {
     
     public DataBaseItem(Properties properties) {
         super(properties);

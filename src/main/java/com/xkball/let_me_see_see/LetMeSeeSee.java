@@ -1,7 +1,6 @@
 package com.xkball.let_me_see_see;
 
 import com.mojang.logging.LogUtils;
-import com.xkball.let_me_see_see.client.offscreen.OffScreenRenders;
 import com.xkball.let_me_see_see.common.data.ExportsDataManager;
 import com.xkball.let_me_see_see.common.item.LMSItems;
 import com.xkball.let_me_see_see.config.LMSConfig;
@@ -9,7 +8,6 @@ import com.xkball.let_me_see_see.utils.VanillaUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.Items;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -67,6 +65,9 @@ public class LetMeSeeSee {
         } else {
             JAR_PATH = jar.getAbsolutePath();
         }
+        LOGGER.info("{}: {}",JAR_PATH_KEY, JAR_PATH);
+        LOGGER.info("{}: {}", EXPORT_DIR_PATH, EXPORT_DIR_PATH);
+        LOGGER.info("{}: {}","MOD_LIST_MD5", MOD_LIST_MD5);
         modContainer.registerConfig(ModConfig.Type.COMMON, LMSConfig.SPEC);
     }
     
@@ -82,6 +83,7 @@ public class LetMeSeeSee {
     
     public static Instrumentation getInst() {
         if (INST != null) return INST;
+        LOGGER.info("start get instrumentation");
         var pid = ProcessHandle.current().pid();
         var javaHome = System.getProperty("java.home");
         var process = new ProcessBuilder("java", "-jar", JAR_PATH, String.valueOf(pid), JAR_PATH);

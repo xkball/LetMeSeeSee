@@ -34,7 +34,7 @@ public class OffScreenFBO {
         this.createFBO();
     }
     
-    public NativeImage drawOffScreen(Runnable renderer){
+    public void renderOffScreen(Runnable renderer){
         var oldFBO = GL11.glGetInteger(EXTFramebufferObject.GL_FRAMEBUFFER_BINDING_EXT);
         MemoryStack.stackPush();
         var oldViewPort = MemoryStack.stackMallocInt(4);
@@ -54,6 +54,9 @@ public class OffScreenFBO {
         EXTFramebufferObject.glBindFramebufferEXT(EXTFramebufferObject.GL_FRAMEBUFFER_EXT,oldFBO);
         GL11.glViewport(oldViewPort.get(0), oldViewPort.get(1), oldViewPort.get(2), oldViewPort.get(3));
         MemoryStack.stackPop();
+    }
+    
+    public NativeImage getRenderResult(){
         var oldTexture = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
         var result = new NativeImage(width, height, false);
@@ -63,6 +66,7 @@ public class OffScreenFBO {
     }
     
     private void createFBO(){
+        LOGGER.info("Start Create OffScreen FBO");
         fboID = EXTFramebufferObject.glGenFramebuffersEXT();
         textureID = GL11.glGenTextures();
         depthRbID = EXTFramebufferObject.glGenRenderbuffersEXT();
@@ -102,4 +106,24 @@ public class OffScreenFBO {
         EXTFramebufferObject.glDeleteFramebuffersEXT(fboID);
     }
     
+    
+    public int getWidth() {
+        return width;
+    }
+    
+    public int getHeight() {
+        return height;
+    }
+    
+    public int getFboID() {
+        return fboID;
+    }
+    
+    public int getTextureID() {
+        return textureID;
+    }
+    
+    public int getDepthRbID() {
+        return depthRbID;
+    }
 }

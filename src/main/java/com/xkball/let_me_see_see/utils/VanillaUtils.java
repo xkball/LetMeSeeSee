@@ -19,6 +19,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.Vec2;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import org.apache.commons.codec.binary.Base64;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -129,6 +130,10 @@ public class VanillaUtils {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
+    }
+    
+    public static String base64(byte[] bytes) {
+        return Base64.encodeBase64String(bytes);
     }
     
     public static List<String> searchInLowerCase(String key, Collection<String> src) {

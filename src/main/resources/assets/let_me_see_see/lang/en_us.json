@@ -17,5 +17,13 @@
   "let_me_see_see.gui.data_base.preview.wip": "[WIP] Class Preview Here",
   "let_me_see_see.gui.data_base.open_in_idea": "OpenInIDEA",
   "let_me_see_see.gui.data_base.no_idea": " Not configured the IDEA path.",
-  "let_me_see_see.gui.data_base.re_export": "Re-Export Class"
+  "let_me_see_see.gui.data_base.re_export": "Re-Export Class",
+  "let_me_see_see.gui.item_data_exporter": "Item Data Exporter",
+  "let_me_see_see.gui.item_data_exporter.namespace": "Namespace: ",
+  "let_me_see_see.gui.item_data_exporter.namespace.hint": "The namespace(modid) to export.Keep empty to export all namespaces.",
+  "let_me_see_see.gui.item_data_exporter.image_size": "Image Size: ",
+  "let_me_see_see.gui.item_data_exporter.item_scale": "Item Scale: ",
+  "let_me_see_see.gui.item_data_exporter.save_png": "Save Item Image as PNG",
+  "let_me_see_see.gui.item_data_exporter.export": "Export",
+  "let_me_see_see.gui.item_data_exporter.export_hint": "Diagram"
 }

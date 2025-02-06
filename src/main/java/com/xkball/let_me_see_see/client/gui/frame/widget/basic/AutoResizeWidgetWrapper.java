@@ -2,7 +2,6 @@ package com.xkball.let_me_see_see.client.gui.frame.widget.basic;
 
 import com.xkball.let_me_see_see.client.gui.frame.core.IPanel;
 import com.xkball.let_me_see_see.client.gui.frame.core.WidgetBoundary;
-import com.xkball.let_me_see_see.client.gui.frame.core.WidgetPos;
 import com.xkball.let_me_see_see.client.gui.frame.core.render.CombineRenderer;
 import com.xkball.let_me_see_see.client.gui.frame.core.render.IGUIDecoRenderer;
 import net.minecraft.client.gui.GuiGraphics;
@@ -11,7 +10,6 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.util.Mth;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
@@ -21,7 +19,7 @@ import java.util.List;
 @OnlyIn(Dist.CLIENT)
 public class AutoResizeWidgetWrapper extends AbstractContainerWidget implements IPanel {
     
-    private final AbstractWidget inner;
+    protected final AbstractWidget inner;
     private final List<? extends GuiEventListener> child;
     
     public float xPercentage = 0f;
@@ -71,20 +69,7 @@ public class AutoResizeWidgetWrapper extends AbstractContainerWidget implements 
     public void resize() {
         if (inner instanceof IPanel widget) {
             var parentPos = widgetBoundary.inner();
-            var x = parentPos.x();
-            var y = parentPos.y();
-            var width = Mth.clamp(parentPos.width() * widget.getXPercentage(), widget.getXMin(), widget.getXMax());
-            var height = Mth.clamp(parentPos.height() * widget.getYPercentage(), widget.getYMin(), widget.getYMax());
-            var leftPadding = IPanel.calculatePadding(widget.getLeftPadding(), parentPos.width());
-            var rightPadding = IPanel.calculatePadding(widget.getRightPadding(), parentPos.width());
-            var topPadding = IPanel.calculatePadding(widget.getTopPadding(), parentPos.height());
-            var bottomPadding = IPanel.calculatePadding(widget.getBottomPadding(), parentPos.height());
-            
-            var outerWidth = (int) (leftPadding + width + rightPadding);
-            var outerHeight = (int) (topPadding + height + bottomPadding);
-            var outer = new WidgetPos(x, y, outerWidth, outerHeight);
-            var inner = new WidgetPos((int) (x + leftPadding), (int) (y + topPadding), (int) width, (int) height);
-            widget.setBoundary(new WidgetBoundary(outer, inner));
+            IPanel.calculateBoundary(widget,parentPos, parentPos.x(), parentPos.y());
             widget.resize();
         }
     }
@@ -95,6 +80,13 @@ public class AutoResizeWidgetWrapper extends AbstractContainerWidget implements 
             return List.of(widget);
         }
         return EMPTY;
+    }
+    
+    @Override
+    public void setFocused(boolean focused) {
+        super.setFocused(focused);
+        inner.setFocused(focused);
+        
     }
     
     @Override

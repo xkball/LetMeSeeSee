@@ -12,6 +12,8 @@ import net.minecraft.util.Mth;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 
+import java.util.function.Supplier;
+
 @OnlyIn(Dist.CLIENT)
 public class Label extends AutoResizeWidget {
     
@@ -21,15 +23,24 @@ public class Label extends AutoResizeWidget {
     private int length;
     
     public static Label of(String str) {
-        return Label.of(Component.literal(str));
+        return of(Component.literal(str));
     }
     
     public static Label of(Component message) {
-        return new Label(message, 1, -1, true);
+        return of(message,1);
     }
+    
+    public static Label of(Supplier<Component> message){
+        return of(message,1);
+    }
+    
     
     public static Label of(Component message, float scale) {
         return new Label(message, scale, -1, true);
+    }
+    
+    public static Label of(Supplier<Component> message, float scale){
+        return new DynamicLabel(message,scale,-1,true);
     }
     
     public Label(Component message, float scale, int color, boolean dropShadow) {
@@ -121,5 +132,23 @@ public class Label extends AutoResizeWidget {
         this.length = font.width(getMessage());
         this.setFixWidth((int) (length * scale));
         this.setFixHeight((int) (font.lineHeight * scale));
+    }
+    
+    public static class DynamicLabel extends Label {
+        
+        private final Supplier<Component> textSupplier;
+        
+        public DynamicLabel(Supplier<Component> textSupplier, float scale, int color, boolean dropShadow) {
+            super(textSupplier.get(), scale, color, dropShadow);
+            this.textSupplier = textSupplier;
+        }
+        
+        @Override
+        public boolean update() {
+            var newText = textSupplier.get();
+            if(getMessage().equals(newText)) return false;
+            this.setMessage(newText);
+            return true;
+        }
     }
 }

@@ -52,8 +52,8 @@ public class ClassSearchResultPanel extends ScrollableVerticalPanel {
     }
     
     @Override
-    public void setFocused(boolean p_313936_) {
-        super.setFocused(p_313936_);
+    public void setFocused(boolean focused) {
+        super.setFocused(focused);
         if (this.selected == null && !this.children.isEmpty()) {
             this.setFocused(this.children.getFirst());
         }

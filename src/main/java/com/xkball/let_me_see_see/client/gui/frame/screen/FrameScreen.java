@@ -11,10 +11,14 @@ import com.xkball.let_me_see_see.client.gui.frame.widget.Label;
 import com.xkball.let_me_see_see.client.gui.frame.widget.basic.AutoResizeWidgetWrapper;
 import com.xkball.let_me_see_see.client.gui.frame.widget.basic.HorizontalPanel;
 import com.xkball.let_me_see_see.client.gui.frame.widget.basic.VerticalPanel;
+import com.xkball.let_me_see_see.client.gui.widget.ObjectInputBox;
+import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.SpriteIconButton;
 import net.minecraft.client.gui.screens.Screen;
@@ -24,6 +28,13 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.loading.FMLPaths;
 
+import javax.annotation.Nullable;
+import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+
 @OnlyIn(Dist.CLIENT)
 public class FrameScreen extends Screen {
     
@@ -31,7 +42,7 @@ public class FrameScreen extends Screen {
     
     protected boolean needUpdate = false;
     
-    protected FrameScreen(Component title) {
+    public FrameScreen(Component title) {
         super(title);
     }
     
@@ -98,9 +109,35 @@ public class FrameScreen extends Screen {
         return screen;
     }
     
+    public AutoResizeWidgetWrapper createEditBox(Supplier<String> valueGetter, Consumer<String> valueSetter) {
+        return createEditBox(() -> new EditBox(font,0,0,0,0,Component.empty()), valueGetter, valueSetter);
+    }
+    
+    public AutoResizeWidgetWrapper createEditBox(Supplier<? extends EditBox> editBoxSupplier, Supplier<String> valueGetter, Consumer<String> valueSetter) {
+        var editBox = editBoxSupplier.get();
+        setupSimpleEditBox(editBox);
+        editBox.setValue(valueGetter.get());
+        editBox.displayPos = 0;
+        editBox.setResponder(str -> {
+            valueSetter.accept(str);
+            setNeedUpdate();
+        });
+        return new AutoResizeWidgetWrapper(editBox);
+    }
+    
+    public <T> AutoResizeWidgetWrapper createObjInputBox(Predicate<String> validator, Function<String,T> responder,Consumer<T> valueSetter) {
+        var editBox = new ObjectInputBox<T>(font,0,0,0,0,Component.empty(),validator,responder);
+        setupSimpleEditBox(editBox);
+        editBox.setResponder(str -> {
+            valueSetter.accept(editBox.get());
+            setNeedUpdate();
+        });
+        return new AutoResizeWidgetWrapper(editBox);
+    }
+    
     public static void setupSimpleEditBox(EditBox editBox) {
         editBox.setMaxLength(114514);
-        editBox.setCanLoseFocus(false);
+        editBox.setCanLoseFocus(true);
         editBox.scrollTo(0);
     }
     
@@ -109,5 +146,18 @@ public class FrameScreen extends Screen {
                 .sprite(sprite, 16, 16)
                 .build();
         return AutoResizeWidgetWrapper.of(btn);
+    }
+    
+    public static AutoResizeWidgetWrapper createCheckBox(Component message, BooleanSupplier valueGetter, BooleanConsumer valueSetter){
+        var checkBox = Checkbox.builder(message, Minecraft.getInstance().font)
+                .onValueChange((c,b) -> valueSetter.accept(b))
+                .build();
+        if(valueGetter.getAsBoolean() != checkBox.selected()) checkBox.onPress();
+        return AutoResizeWidgetWrapper.of(checkBox);
+    }
+    
+    public static AutoResizeWidgetWrapper createButton(Component message, Runnable onPress){
+        var button = Button.builder(message, btn -> onPress.run()).build();
+        return AutoResizeWidgetWrapper.of(button);
     }
 }

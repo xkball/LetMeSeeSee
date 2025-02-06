@@ -9,7 +9,7 @@ import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.function.Supplier;
 
-public class RetrieverItem extends GUIItem implements IScreenProviderItem {
+public class RetrieverItem extends GUIItem {
     
     public RetrieverItem(Properties properties) {
         super(properties);

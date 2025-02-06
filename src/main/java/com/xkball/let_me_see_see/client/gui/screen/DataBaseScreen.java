@@ -7,7 +7,6 @@ import com.xkball.let_me_see_see.client.gui.frame.core.VerticalAlign;
 import com.xkball.let_me_see_see.client.gui.frame.core.render.GuiDecorations;
 import com.xkball.let_me_see_see.client.gui.frame.screen.FrameScreen;
 import com.xkball.let_me_see_see.client.gui.frame.widget.Label;
-import com.xkball.let_me_see_see.client.gui.frame.widget.basic.AutoResizeWidgetWrapper;
 import com.xkball.let_me_see_see.client.gui.frame.widget.basic.HorizontalPanel;
 import com.xkball.let_me_see_see.client.gui.frame.widget.basic.ScrollableVerticalPanel;
 import com.xkball.let_me_see_see.client.gui.frame.widget.basic.VerticalPanel;
@@ -17,7 +16,6 @@ import com.xkball.let_me_see_see.config.LMSConfig;
 import com.xkball.let_me_see_see.utils.ClassSearcher;
 import com.xkball.let_me_see_see.utils.VanillaUtils;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -49,16 +47,7 @@ public class DataBaseScreen extends FrameScreen {
                 .apply(new VerticalPanel()
                         .addWidget(PanelConfig.of(1, 1)
                                 .fixHeight(24)
-                                .apply(AutoResizeWidgetWrapper.of(
-                                        new EditBox(font, 0, 0, 0, 0, Component.empty()) {{
-                                            setupSimpleEditBox(this);
-                                            setValue(searchBarValue);
-                                            setResponder(str -> {
-                                                searchBarValue = str;
-                                                setNeedUpdate();
-                                            });
-                                        }}
-                                )))
+                                .apply(createEditBox(this::getSearchBarValue,this::setSearchBarValue)))
                         .addWidget(PanelConfig.of(1, 1)
                                 .align(HorizontalAlign.LEFT, VerticalAlign.TOP)
                                 .apply(new ScrollableVerticalPanel() {
@@ -134,5 +123,13 @@ public class DataBaseScreen extends FrameScreen {
         screen.resize();
         this.addRenderableWidget(screen);
         this.updateScreen();
+    }
+    
+    public String getSearchBarValue() {
+        return searchBarValue;
+    }
+    
+    public void setSearchBarValue(String searchBarValue) {
+        this.searchBarValue = searchBarValue;
     }
 }

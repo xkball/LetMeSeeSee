@@ -39,6 +39,10 @@ public class PanelConfig {
         return new PanelConfig();
     }
     
+    public static PanelConfig ofFixSize(int width, int height){
+        return of().fixSize(width, height);
+    }
+    
     public static PanelConfig of(float xPercentage, float yPercentage) {
         var result = new PanelConfig();
         result.xPercentage = xPercentage;
@@ -148,6 +152,26 @@ public class PanelConfig {
             this.guiDecoRenderer = new CombineRenderer(guiDecoRenderer, decoRenderer);
         }
         return this;
+    }
+    
+    public PanelConfig fork(){
+        var newConfig = new PanelConfig();
+        newConfig.horizontalAlign = this.horizontalAlign;
+        newConfig.verticalAlign = this.verticalAlign;
+        newConfig.guiDecoRenderer = this.guiDecoRenderer;
+        newConfig.tooltip = this.tooltip;
+        newConfig.trim = this.trim;
+        newConfig.xMax = this.xMax;
+        newConfig.yMax = this.yMax;
+        newConfig.xMin = this.xMin;
+        newConfig.yMin = this.yMin;
+        newConfig.leftPadding = this.leftPadding;
+        newConfig.rightPadding = this.rightPadding;
+        newConfig.topPadding = this.topPadding;
+        newConfig.bottomPadding = this.bottomPadding;
+        newConfig.xPercentage = this.xPercentage;
+        newConfig.yPercentage = this.yPercentage;
+        return newConfig;
     }
     
     public <T extends IPanel> T apply(T panel) {

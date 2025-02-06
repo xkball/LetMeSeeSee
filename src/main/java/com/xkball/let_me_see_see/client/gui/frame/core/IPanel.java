@@ -137,6 +137,37 @@ public interface IPanel {
         return padding > 1f ? padding : Mth.clamp(base * padding, 0f, base);
     }
     
+    static void calculateBoundary(IPanel widget, WidgetPos parentPos, int x, int y){
+        var width = Mth.clamp(parentPos.width() * widget.getXPercentage(), widget.getXMin(), Math.min(widget.getXMax(), parentPos.maxX() - x));
+        var height = Mth.clamp(parentPos.height() * widget.getYPercentage(), widget.getYMin(), Math.min(widget.getYMax(), parentPos.maxY() - y));
+        var leftPadding = IPanel.calculatePadding(widget.getLeftPadding(), parentPos.width());
+        var rightPadding = IPanel.calculatePadding(widget.getRightPadding(), parentPos.width());
+        var topPadding = IPanel.calculatePadding(widget.getTopPadding(), parentPos.height());
+        var bottomPadding = IPanel.calculatePadding(widget.getBottomPadding(), parentPos.height());
+        
+        var outerWidth = (int) (leftPadding + width + rightPadding);
+        var outerHeight = (int) (topPadding + height + bottomPadding);
+        var outer = new WidgetPos(x, y, outerWidth, outerHeight);
+        var inner = new WidgetPos((int) (x + leftPadding), (int) (y + topPadding), (int) width, (int) height);
+        widget.setBoundary(new WidgetBoundary(outer, inner));
+    }
+    
+    static int calculateShift(HorizontalAlign align, int sizeLimit, int size){
+        return switch (align) {
+            case LEFT -> 0;
+            case CENTER -> (int) (sizeLimit / 2f - size / 2f);
+            case RIGHT -> sizeLimit - size;
+        };
+    }
+    
+    static int calculateShift(VerticalAlign align, int sizeLimit, int size){
+        return switch (align) {
+            case TOP -> 0;
+            case CENTER -> (int) (sizeLimit / 2f - size / 2f);
+            case BOTTOM -> sizeLimit - size;
+        };
+    }
+    
     record DebugLine(int x, int y, int width, int height, int color) {
         public static final List<DebugLine> lines = new ArrayList<>();
         
