@@ -27,5 +27,9 @@
   "let_me_see_see.gui.item_data_exporter.export": "Export",
   "let_me_see_see.gui.item_data_exporter.export_hint": "Diagram",
   "let_me_see_see.gui.item_data_exporter.export_mcmod": "Export As MCMOD Format",
-  "let_me_see_see.gui.item_data_exporter.export_mcmod_hint": "Cannot export using custom image settings."
+  "let_me_see_see.gui.item_data_exporter.export_mcmod_hint": "Cannot export using custom image settings.",
+  "item.let_me_see_see.scanner": "Scanner",
+  "item.let_me_see_see.retriever": "Retriever",
+  "item.let_me_see_see.data_base": "Exported Classes Data Base",
+  "item.let_me_see_see.item_data_exporter": "Item Data Exporter"
 }

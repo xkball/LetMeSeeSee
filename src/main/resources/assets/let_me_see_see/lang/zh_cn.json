@@ -27,5 +27,9 @@
   "let_me_see_see.gui.item_data_exporter.export": "导出",
   "let_me_see_see.gui.item_data_exporter.export_hint": "示意图",
   "let_me_see_see.gui.item_data_exporter.export_mcmod": "按mcmod格式导出",
-  "let_me_see_see.gui.item_data_exporter.export_mcmod_hint": "无法使用自定义图片设置导出"
+  "let_me_see_see.gui.item_data_exporter.export_mcmod_hint": "无法使用自定义图片设置导出",
+  "item.let_me_see_see.scanner": "盒码先生",
+  "item.let_me_see_see.retriever": "检索器",
+  "item.let_me_see_see.data_base": "已导出类检索器",
+  "item.let_me_see_see.item_data_exporter": "物品数据导出器"
 }
