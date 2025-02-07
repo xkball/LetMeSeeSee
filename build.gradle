@@ -132,7 +132,7 @@ jar{
     }
 }
 
-runClient{
+tasks.withType(net.neoforged.moddevgradle.internal.RunGameTask).configureEach{
     dependsOn jar
     systemProperty("LET_ME_SEE_AGENT_JAR_PATH",tasks.jar.archiveFile.get().getAsFile())
 }

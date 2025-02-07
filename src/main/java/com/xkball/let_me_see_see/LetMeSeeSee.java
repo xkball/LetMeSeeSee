@@ -44,7 +44,7 @@ public class LetMeSeeSee {
     public static final boolean IS_DEBUG = SharedConstants.IS_RUNNING_WITH_JDWP;
     public static final UUID GAME_INSTANCE_UUID = UUID.randomUUID();
     public static String MOD_LIST_MD5;
-    public static String JAR_PATH;
+    public static String JAR_PATH = "";
     public static String EXPORT_DIR_PATH;
     private static final Logger LOGGER = LogUtils.getLogger();
     public static Instrumentation INST;
@@ -66,7 +66,7 @@ public class LetMeSeeSee {
             JAR_PATH = jar.getAbsolutePath();
         }
         LOGGER.info("{}: {}",JAR_PATH_KEY, JAR_PATH);
-        LOGGER.info("{}: {}", EXPORT_DIR_PATH, EXPORT_DIR_PATH);
+        LOGGER.info("{}: {}", EXPORT_PATH_KEY, EXPORT_DIR_PATH);
         LOGGER.info("{}: {}","MOD_LIST_MD5", MOD_LIST_MD5);
         modContainer.registerConfig(ModConfig.Type.COMMON, LMSConfig.SPEC);
     }

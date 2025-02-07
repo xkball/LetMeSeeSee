@@ -1,6 +1,7 @@
 package com.xkball.let_me_see_see.client.gui.widget;
 
 import com.xkball.let_me_see_see.client.gui.frame.core.HorizontalAlign;
+import com.xkball.let_me_see_see.client.gui.frame.core.IPanel;
 import com.xkball.let_me_see_see.client.gui.frame.core.PanelConfig;
 import com.xkball.let_me_see_see.client.gui.frame.core.VerticalAlign;
 import com.xkball.let_me_see_see.client.gui.frame.widget.Label;
@@ -28,7 +29,7 @@ public abstract class NumInputFrame<T extends Number> extends ClampHorizontalPan
                         .paddingRight(8)
                         .apply(AutoResizeWidgetWrapper.of(Button.builder(Component.literal("-"), btn -> {
                             this.onDecreaseButtonClick();
-                            this.update();
+                            this.update(IPanel.GLOBAL_UPDATE_MARKER);
                         }).build()))
         );
         this.setRight(
@@ -36,7 +37,7 @@ public abstract class NumInputFrame<T extends Number> extends ClampHorizontalPan
                         .paddingLeft(8)
                         .apply(AutoResizeWidgetWrapper.of(Button.builder(Component.literal("+"), btn -> {
                             this.onIncreaseButtonClick();
-                            this.update();
+                            this.update(IPanel.GLOBAL_UPDATE_MARKER);
                         }).build())));
         if(renderNumLabel){
             this.addWidget(PanelConfig.of().trim()

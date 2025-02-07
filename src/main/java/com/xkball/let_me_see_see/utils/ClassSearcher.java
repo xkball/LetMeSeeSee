@@ -25,7 +25,7 @@ public class ClassSearcher {
         for (var clazz : classes) {
             var className = className(clazz);
             classMap.put(className, clazz);
-            lowerCaseClassName.add(className);
+            lowerCaseClassName.add(className.toLowerCase());
         }
     }
     

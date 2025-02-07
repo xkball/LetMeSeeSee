@@ -10,6 +10,7 @@
   "let_me_see_see.gui.retriever.search": "搜索Class: ",
   "let_me_see_see.gui.retriever.export": "导出",
   "let_me_see_see.gui.retriever.rebuild_cache": "重新扫描已加载类",
+  "let_me_see_see.gui.retriever.searching": "正在搜索...",
   "let_me_see_see.gui.open_config_file" : "打开设置文件",
   "let_me_see_see.gui.data_base": "已导出类数据库",
   "let_me_see_see.gui.data_base.old": "此前导出的数据",

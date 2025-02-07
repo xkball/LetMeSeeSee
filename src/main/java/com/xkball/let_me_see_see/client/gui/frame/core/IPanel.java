@@ -2,6 +2,7 @@ package com.xkball.let_me_see_see.client.gui.frame.core;
 
 import com.xkball.let_me_see_see.LetMeSeeSee;
 import com.xkball.let_me_see_see.client.gui.frame.core.render.IGUIDecoRenderer;
+import com.xkball.let_me_see_see.client.gui.frame.screen.FrameScreen;
 import com.xkball.let_me_see_see.utils.VanillaUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -15,6 +16,26 @@ import java.util.List;
 
 @OnlyIn(Dist.CLIENT)
 public interface IPanel {
+    
+    IUpdateMarker GLOBAL_UPDATE_MARKER = new IUpdateMarker() {
+        
+        @Override
+        public boolean needUpdate() {
+            var screen = Minecraft.getInstance().screen;
+            if(screen instanceof FrameScreen frameScreen){
+                return frameScreen.needUpdate();
+            }
+            return false;
+        }
+        
+        @Override
+        public void setNeedUpdate() {
+            var screen = Minecraft.getInstance().screen;
+            if(screen instanceof FrameScreen frameScreen){
+                frameScreen.setNeedUpdate();
+            }
+        }
+    };
     
     List<IPanel> EMPTY = List.of();
     
@@ -82,10 +103,10 @@ public interface IPanel {
     }
     
     //调用此方法更新内容 如果改变子部件应该调用resize
-    default boolean update() {
+    default boolean update(IUpdateMarker updateMarker) {
         var flag = false;
         for (var child : getChildren()) {
-            flag |= child.update();
+            flag |= child.update(updateMarker);
         }
         if (flag) resize();
         return false;

@@ -1,5 +1,6 @@
 package com.xkball.let_me_see_see.client.gui.frame.widget;
 
+import com.xkball.let_me_see_see.client.gui.frame.core.IUpdateMarker;
 import com.xkball.let_me_see_see.client.gui.frame.widget.basic.AutoResizeWidget;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -144,7 +145,7 @@ public class Label extends AutoResizeWidget {
         }
         
         @Override
-        public boolean update() {
+        public boolean update(IUpdateMarker marker) {
             var newText = textSupplier.get();
             if(getMessage().equals(newText)) return false;
             this.setMessage(newText);

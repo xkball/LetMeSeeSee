@@ -3,6 +3,7 @@ package com.xkball.let_me_see_see.client.gui.frame.screen;
 import com.xkball.let_me_see_see.client.gui.frame.core.HorizontalAlign;
 import com.xkball.let_me_see_see.client.gui.frame.core.IPanel;
 import com.xkball.let_me_see_see.client.gui.frame.core.PanelConfig;
+import com.xkball.let_me_see_see.client.gui.frame.core.IUpdateMarker;
 import com.xkball.let_me_see_see.client.gui.frame.core.VerticalAlign;
 import com.xkball.let_me_see_see.client.gui.frame.core.render.GuiDecorations;
 import com.xkball.let_me_see_see.client.gui.frame.core.render.SimpleBackgroundRenderer;
@@ -28,7 +29,6 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.loading.FMLPaths;
 
-import javax.annotation.Nullable;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -36,11 +36,11 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 @OnlyIn(Dist.CLIENT)
-public class FrameScreen extends Screen {
+public class FrameScreen extends Screen implements IUpdateMarker {
     
     public static final float THE_SCALE = 0.3731f;
     
-    protected boolean needUpdate = false;
+    protected volatile boolean needUpdate = false;
     
     public FrameScreen(Component title) {
         super(title);
@@ -49,13 +49,19 @@ public class FrameScreen extends Screen {
     public void updateScreen() {
         for (var child : this.children()) {
             if (child instanceof IPanel panel) {
-                panel.update();
+                panel.update(this);
             }
         }
     }
     
+    @Override
     public void setNeedUpdate() {
         this.needUpdate = true;
+    }
+    
+    @Override
+    public boolean needUpdate() {
+        return needUpdate;
     }
     
     @Override

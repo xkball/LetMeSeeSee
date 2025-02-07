@@ -2,6 +2,7 @@ package com.xkball.let_me_see_see.client.gui.screen;
 
 import com.xkball.let_me_see_see.LetMeSeeSee;
 import com.xkball.let_me_see_see.client.gui.frame.core.HorizontalAlign;
+import com.xkball.let_me_see_see.client.gui.frame.core.IUpdateMarker;
 import com.xkball.let_me_see_see.client.gui.frame.core.PanelConfig;
 import com.xkball.let_me_see_see.client.gui.frame.core.VerticalAlign;
 import com.xkball.let_me_see_see.client.gui.frame.screen.FrameScreen;
@@ -74,7 +75,7 @@ public class RetrieverScreen extends FrameScreen {
                                                 .trim()
                                                 .apply(new Label(Component.empty(), 1, -1, true) {
                                                     @Override
-                                                    public boolean update() {
+                                                    public boolean update(IUpdateMarker marker) {
                                                         var old = getMessage();
                                                         if (ClassSearcher.containsClass(searchBarValue))
                                                             setMessage(Component.empty());

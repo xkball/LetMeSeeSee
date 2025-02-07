@@ -1,6 +1,7 @@
 package com.xkball.let_me_see_see.client.gui.screen;
 
 import com.xkball.let_me_see_see.client.gui.frame.core.HorizontalAlign;
+import com.xkball.let_me_see_see.client.gui.frame.core.IUpdateMarker;
 import com.xkball.let_me_see_see.client.gui.frame.core.PanelConfig;
 import com.xkball.let_me_see_see.client.gui.frame.core.UpdateChecker;
 import com.xkball.let_me_see_see.client.gui.frame.core.VerticalAlign;
@@ -52,7 +53,7 @@ public class DataBaseScreen extends FrameScreen {
                                 .align(HorizontalAlign.LEFT, VerticalAlign.TOP)
                                 .apply(new ScrollableVerticalPanel() {
                                     @Override
-                                    public boolean update() {
+                                    public boolean update(IUpdateMarker marker) {
                                         if (!searchBarUpdateChecker.checkUpdate(searchBarValue)) return false;
                                         clearWidget();
                                         var labelConfig = PanelConfig.of().fixHeight(16).fixWidth(getBoundary().inner().width() - 6);
@@ -104,7 +105,7 @@ public class DataBaseScreen extends FrameScreen {
                 .align(HorizontalAlign.LEFT, VerticalAlign.TOP)
                 .apply(new VerticalPanel() {
                     @Override
-                    public boolean update() {
+                    public boolean update(IUpdateMarker marker) {
                         clearWidget();
                         if (lastFocused != null) {
                             addWidget(classPreviewHeader);

@@ -10,6 +10,7 @@
   "let_me_see_see.gui.retriever.search": "Search Classes: ",
   "let_me_see_see.gui.retriever.export": "Export Class.",
   "let_me_see_see.gui.retriever.rebuild_cache": "Re-scan all loaded class.",
+  "let_me_see_see.gui.retriever.searching": "Searching...",
   "let_me_see_see.gui.open_config_file" : "Open Config File",
   "let_me_see_see.gui.data_base": "Exported Classes Data Base",
   "let_me_see_see.gui.data_base.old": "Class exported before.",
