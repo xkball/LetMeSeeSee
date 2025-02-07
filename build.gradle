@@ -194,7 +194,7 @@ tasks.register("githubActionOutput",DefaultTask){
         def outputFile = new File(System.env.GITHUB_OUTPUT)
         // Use the env-specific line separator for maximally possible compatibility
         def newLine = System.getProperty('line.separator')
-        def publishName = "${jar.archiveBaseName.get()}-${loader_name}-Miecraft${minecraft_version}-${version}.jar"
+        def publishName = "${release_name}-${loader_name}-Minecraft${minecraft_version}-${version}.jar"
         // Write out new env variable for later usage
         outputFile << newLine << "artifact_name=${theFile.getName()}"
         outputFile << newLine << "artifact_publish_name=${publishName}"
