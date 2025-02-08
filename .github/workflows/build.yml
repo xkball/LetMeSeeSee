@@ -47,6 +47,12 @@ jobs:
           NIGHTLY_BUILD: true
         run: ./gradlew :build --stacktrace --scan
 
+      - name: dlst
+        id: dlst
+        uses: Anvil-Dev/dedicated-server-launch-test@1.21.1-neoforge
+        with:
+          mod: build/libs/${{ steps.build.outputs.jar_name}}.jar
+
       - name: GitHub Action Artifact
         uses: actions/upload-artifact@v4
         with:

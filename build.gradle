@@ -1,3 +1,5 @@
+import net.neoforged.moddevgradle.internal.RunGameTask
+
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
@@ -132,7 +134,7 @@ jar{
     }
 }
 
-tasks.withType(net.neoforged.moddevgradle.internal.RunGameTask).configureEach{
+tasks.withType(RunGameTask).configureEach{
     dependsOn jar
     systemProperty("LET_ME_SEE_AGENT_JAR_PATH",tasks.jar.archiveFile.get().getAsFile())
 }
@@ -184,6 +186,13 @@ idea {
     module {
         downloadSources = true
         downloadJavadoc = true
+    }
+}
+
+build{
+    if (System.env.GITHUB_ACTIONS){
+        def outputFile = new File(System.env.GITHUB_OUTPUT)
+        outputFile << newLine << "jar_name=${base.archivesName}"
     }
 }
 
