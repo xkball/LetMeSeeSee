@@ -65,7 +65,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @OnlyIn(Dist.CLIENT)
-@EventBusSubscriber(modid = LetMeSeeSee.MODID,bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@EventBusSubscriber(modid = LetMeSeeSee.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class ItemDataExporterScreen extends FrameScreen {
     
     private static final Map<CreativeModeTab, Set<Item>> CREATIVE_MODEL_TABS_ITEM_CACHE = new HashMap<>();
@@ -74,25 +74,27 @@ public class ItemDataExporterScreen extends FrameScreen {
     private static final Codec<List<TagKey<Item>>> TAG_LIST_CODEC = TagKey.codec(Registries.ITEM).listOf();
     private String namespaceFilterValue = "";
     private boolean dumpPNG = false;
-    @Nullable private Integer imageSize = 128;
-    @Nullable private Float imageScale = 1f;
+    @Nullable
+    private Integer imageSize = 128;
+    @Nullable
+    private Float imageScale = 1f;
     
     public ItemDataExporterScreen() {
         super(Component.translatable("let_me_see_see.gui.item_data_exporter"));
     }
     
-    public static void updateLanguageMap(ResourceManager resourceManager){
+    public static void updateLanguageMap(ResourceManager resourceManager) {
         LOGGER.info("Updating language map");
         var map = new HashMap<String, ClientLanguage>();
         var list = new ArrayList<>(LMSConfig.EXPORT_LANG);
-        if(!LMSConfig.EXPORT_LANG.contains("en_us")) list.add("en_us");
-        if(!LMSConfig.EXPORT_LANG.contains("zh_cn")) list.add("zh_cn");
-        for(var key : list){
+        if (!LMSConfig.EXPORT_LANG.contains("en_us")) list.add("en_us");
+        if (!LMSConfig.EXPORT_LANG.contains("zh_cn")) list.add("zh_cn");
+        for (var key : list) {
             var langInfo = Minecraft.getInstance().getLanguageManager().getLanguage(key);
-            map.put(key,ClientLanguage.loadFrom(resourceManager,List.of(key), langInfo != null && langInfo.bidirectional()));
+            map.put(key, ClientLanguage.loadFrom(resourceManager, List.of(key), langInfo != null && langInfo.bidirectional()));
         }
         
-        synchronized (LANGUAGES){
+        synchronized (LANGUAGES) {
             LANGUAGES.clear();
             LANGUAGES.putAll(map);
         }
@@ -102,48 +104,48 @@ public class ItemDataExporterScreen extends FrameScreen {
     protected void init() {
         super.init();
         var centerWidthScale = 1 - THE_SCALE;
-        var aConfig = PanelConfig.of(0.5f,1).fixHeight(20).paddingTop(8);
-        var leftPanel = PanelConfig.of((1-THE_SCALE)*centerWidthScale,1)
-                .align(HorizontalAlign.LEFT,VerticalAlign.CENTER)
+        var aConfig = PanelConfig.of(0.5f, 1).fixHeight(20).paddingTop(8);
+        var leftPanel = PanelConfig.of((1 - THE_SCALE) * centerWidthScale, 1)
+                .align(HorizontalAlign.LEFT, VerticalAlign.CENTER)
                 .apply(new VerticalPanel()
                         .addWidget(aConfig.fork()
-                                .decoRenderer(GuiDecorations.leftCenterString(Component.translatable("let_me_see_see.gui.item_data_exporter.image_size"),-1,true,1.2f))
-                                .apply(new NumInputFrame.Pow2IntInput(0,12,7).setValueSetter(this::setImageSize)))
+                                .decoRenderer(GuiDecorations.leftCenterString(Component.translatable("let_me_see_see.gui.item_data_exporter.image_size"), -1, true, 1.2f))
+                                .apply(new NumInputFrame.Pow2IntInput(0, 12, 7).setValueSetter(this::setImageSize)))
                         .addWidget(aConfig.fork()
-                                .decoRenderer(GuiDecorations.leftCenterString(Component.translatable("let_me_see_see.gui.item_data_exporter.item_scale"),-1,true,1.2f))
-                                .apply(new NumInputFrame.FloatInput(0,8,0.1f,1,false).setValueSetter(this::setImageScale)))
-                        .addWidget(PanelConfig.of(0.6f,1)
+                                .decoRenderer(GuiDecorations.leftCenterString(Component.translatable("let_me_see_see.gui.item_data_exporter.item_scale"), -1, true, 1.2f))
+                                .apply(new NumInputFrame.FloatInput(0, 8, 0.1f, 1, false).setValueSetter(this::setImageScale)))
+                        .addWidget(PanelConfig.of(0.6f, 1)
                                 .fixHeight(20)
                                 .paddingTop(8)
                                 .paddingBottom(10)
-                                .decoRenderer(GuiDecorations.leftCenterString(Component.translatable("let_me_see_see.gui.item_data_exporter.namespace"),-1,true,1.2f))
-                                .decoRenderer(GuiDecorations.bottomLeftString(Component.translatable("let_me_see_see.gui.item_data_exporter.namespace.hint"), 11184810,true,1))
-                                .apply(createEditBox(this::getNamespaceFilterValue,this::setNamespaceFilterValue))))
+                                .decoRenderer(GuiDecorations.leftCenterString(Component.translatable("let_me_see_see.gui.item_data_exporter.namespace"), -1, true, 1.2f))
+                                .decoRenderer(GuiDecorations.bottomLeftString(Component.translatable("let_me_see_see.gui.item_data_exporter.namespace.hint"), 11184810, true, 1))
+                                .apply(createEditBox(this::getNamespaceFilterValue, this::setNamespaceFilterValue))))
                 .addWidget(aConfig
-                        .apply(createCheckBox(Component.translatable("let_me_see_see.gui.item_data_exporter.save_png"),this::isDumpPNG,this::setDumpPNG)))
-                .addWidget(PanelConfig.of(0.3f,1)
+                        .apply(createCheckBox(Component.translatable("let_me_see_see.gui.item_data_exporter.save_png"), this::isDumpPNG, this::setDumpPNG)))
+                .addWidget(PanelConfig.of(0.3f, 1)
                         .fixHeight(20)
                         .paddingTop(8)
-                        .apply(createButton(Component.translatable("let_me_see_see.gui.item_data_exporter.export"),this::runExport)))
-                .addWidget(PanelConfig.of(0.3f,1)
+                        .apply(createButton(Component.translatable("let_me_see_see.gui.item_data_exporter.export"), this::runExport)))
+                .addWidget(PanelConfig.of(0.3f, 1)
                         .fixHeight(20)
                         .paddingTop(8)
                         .paddingBottom(0.1f)
-                        .decoRenderer(GuiDecorations.bottomLeftString(Component.translatable("let_me_see_see.gui.item_data_exporter.export_mcmod_hint"),11184810,true,1))
-                        .apply(createButton(Component.translatable("let_me_see_see.gui.item_data_exporter.export_mcmod"),this::runExportMcMod)));
-        var rightPanel = PanelConfig.of(THE_SCALE*centerWidthScale,1)
-                .align(HorizontalAlign.CENTER,VerticalAlign.CENTER)
+                        .decoRenderer(GuiDecorations.bottomLeftString(Component.translatable("let_me_see_see.gui.item_data_exporter.export_mcmod_hint"), 11184810, true, 1))
+                        .apply(createButton(Component.translatable("let_me_see_see.gui.item_data_exporter.export_mcmod"), this::runExportMcMod)));
+        var rightPanel = PanelConfig.of(THE_SCALE * centerWidthScale, 1)
+                .align(HorizontalAlign.CENTER, VerticalAlign.CENTER)
                 .apply(new VerticalPanel()
-                        .addWidget(PanelConfig.of(1,1).apply(new SquareWidgetWrapper(
+                        .addWidget(PanelConfig.of(1, 1).apply(new SquareWidgetWrapper(
                                 PanelConfig.of()
                                         .decoRenderer(GuiDecorations.bottomCenterString(Component.translatable("let_me_see_see.gui.item_data_exporter.export_hint")))
                                         .apply(new RawTexturePanel(OffScreenRenders.FBO::getTextureID))))));
-        var content = PanelConfig.of(1,1)
+        var content = PanelConfig.of(1, 1)
                 .align(HorizontalAlign.CENTER, VerticalAlign.TOP)
                 .apply(new HorizontalPanel()
                         .addWidget(leftPanel)
                         .addWidget(rightPanel));
-        var screen = screenFrame("let_me_see_see.gui.item_data_exporter",content);
+        var screen = screenFrame("let_me_see_see.gui.item_data_exporter", content);
         screen.resize();
         this.addRenderableWidget(screen);
         this.updateScreen();
@@ -152,30 +154,30 @@ public class ItemDataExporterScreen extends FrameScreen {
     @Override
     public void updateScreen() {
         super.updateScreen();
-        if(imageSize != null && imageScale != null) {
-            OffScreenRenders.FBO.resize(imageSize,imageSize);
-            OffScreenRenders.FBO.renderOffScreen(() -> OffScreenRenders.renderItemStack(Items.CRAFTING_TABLE.getDefaultInstance(),imageSize,imageSize,imageScale));
+        if (imageSize != null && imageScale != null) {
+            OffScreenRenders.FBO.resize(imageSize, imageSize);
+            OffScreenRenders.FBO.renderOffScreen(() -> OffScreenRenders.renderItemStack(Items.CRAFTING_TABLE.getDefaultInstance(), imageSize, imageSize, imageScale));
             //OffScreenRenders.exportItemStackAsPng(Items.CRAFTING_TABLE.getDefaultInstance(),imageSize,imageSize,imageScale);
         }
         
     }
     
-    public void runExport(){
-        if(imageSize == null || imageScale == null) return;
+    public void runExport() {
+        if (imageSize == null || imageScale == null) return;
         var ops = RegistryOps.create(JsonOps.INSTANCE, Objects.requireNonNull(Minecraft.getInstance().level).registryAccess());
-        var map = ArrayListMultimap.<String,JsonObject>create();
-        for(var entry : BuiltInRegistries.ITEM.entrySet()){
+        var map = ArrayListMultimap.<String, JsonObject>create();
+        for (var entry : BuiltInRegistries.ITEM.entrySet()) {
             var key = entry.getKey().location();
             var value = entry.getValue();
             var namespace = key.getNamespace();
-            if(!namespaceFilterValue.isEmpty() && !namespace.equals(namespaceFilterValue)) continue;
-            map.put(namespace, itemData(key, value,ops));
+            if (!namespaceFilterValue.isEmpty() && !namespace.equals(namespaceFilterValue)) continue;
+            map.put(namespace, itemData(key, value, ops));
         }
-        for(var entry : map.asMap().entrySet()){
+        for (var entry : map.asMap().entrySet()) {
             var list = entry.getValue().stream().sorted(Comparator.comparing(j -> j.get("item_name").getAsString())).toList();
             var array = new JsonArray();
             list.forEach(array::add);
-            var path = Path.of(LetMeSeeSee.EXPORT_DIR_PATH,entry.getKey() + ".json");
+            var path = Path.of(LetMeSeeSee.EXPORT_DIR_PATH, entry.getKey() + ".json");
             try {
                 Files.createDirectories(path.getParent());
                 Files.writeString(path, GsonHelper.toStableString(array));
@@ -186,28 +188,28 @@ public class ItemDataExporterScreen extends FrameScreen {
         this.setNeedUpdate();
     }
     
-    public void runExportMcMod(){
-        if(imageSize == null || imageScale == null) return;
+    public void runExportMcMod() {
+        if (imageSize == null || imageScale == null) return;
         rebuildCreativeModeTabsItemCache();
         var ops = RegistryOps.create(JsonOps.INSTANCE, Objects.requireNonNull(Minecraft.getInstance().level).registryAccess());
-        var map = ArrayListMultimap.<String,JsonObject>create();
-        var bigFBO = new OffScreenFBO(128,128);
-        var smallFBO = new OffScreenFBO(32,32);
-        for(var entry : BuiltInRegistries.ITEM.entrySet()){
+        var map = ArrayListMultimap.<String, JsonObject>create();
+        var bigFBO = new OffScreenFBO(128, 128);
+        var smallFBO = new OffScreenFBO(32, 32);
+        for (var entry : BuiltInRegistries.ITEM.entrySet()) {
             var itemID = entry.getKey().location();
             var item = entry.getValue();
             var namespace = itemID.getNamespace();
-            if(!namespaceFilterValue.isEmpty() && !namespace.equals(namespaceFilterValue)) continue;
+            if (!namespaceFilterValue.isEmpty() && !namespace.equals(namespaceFilterValue)) continue;
             var json = itemDataMcMod(itemID, item, ops);
-            json.addProperty("smallIcon",OffScreenRenders.exportItemStackAsPng(smallFBO,item.getDefaultInstance(),1,false));
-            json.addProperty("largeIcon",OffScreenRenders.exportItemStackAsPng(bigFBO,item.getDefaultInstance(),1,false));
+            json.addProperty("smallIcon", OffScreenRenders.exportItemStackAsPng(smallFBO, item.getDefaultInstance(), 1, false));
+            json.addProperty("largeIcon", OffScreenRenders.exportItemStackAsPng(bigFBO, item.getDefaultInstance(), 1, false));
             map.put(namespace, json);
         }
-        for(var entry : map.asMap().entrySet()){
+        for (var entry : map.asMap().entrySet()) {
             var list = entry.getValue().stream().sorted(Comparator.comparing(j -> j.get("registerName").getAsString())).toList();
-            var path = Path.of(LetMeSeeSee.EXPORT_DIR_PATH,entry.getKey() + ".json");
+            var path = Path.of(LetMeSeeSee.EXPORT_DIR_PATH, entry.getKey() + ".json");
             StringBuilder str = new StringBuilder();
-            for(var json : list){
+            for (var json : list) {
                 str.append(json.toString());
                 str.append('\n');
             }
@@ -231,51 +233,51 @@ public class ItemDataExporterScreen extends FrameScreen {
         var defaultComponent = item.getDefaultInstance().getComponents();
         var tags = item.getDefaultInstance().getTags().toList();
         var result = new JsonObject();
-        result.addProperty("item_name",id.toString());
-        result.addProperty("default_max_stack_size",defaultMaxStackSize);
-        result.addProperty("can_repair",canRepair);
-        result.addProperty("craftRemainItem",craftRemainItem == null ? null : BuiltInRegistries.ITEM.getKey(craftRemainItem).toString());
-        result.addProperty("item_image",OffScreenRenders.exportItemStackAsPng(item.getDefaultInstance(),imageSize,imageSize,imageScale,dumpPNG));
-        addDataResult(result,"default_component",() -> DataComponentMap.CODEC.encodeStart(ops,defaultComponent),"ERROR WHEN ENCODING");
-        addDataResult(result,"tags",() -> TAG_LIST_CODEC.encodeStart(ops,tags),"ERROR WHEN ENCODING");
-        for(var key : LMSConfig.EXPORT_LANG){
-            result.addProperty(key+"_name",LANGUAGES.get(key).getOrDefault(item.getDescriptionId()));
+        result.addProperty("item_name", id.toString());
+        result.addProperty("default_max_stack_size", defaultMaxStackSize);
+        result.addProperty("can_repair", canRepair);
+        result.addProperty("craftRemainItem", craftRemainItem == null ? null : BuiltInRegistries.ITEM.getKey(craftRemainItem).toString());
+        result.addProperty("item_image", OffScreenRenders.exportItemStackAsPng(item.getDefaultInstance(), imageSize, imageSize, imageScale, dumpPNG));
+        addDataResult(result, "default_component", () -> DataComponentMap.CODEC.encodeStart(ops, defaultComponent), "ERROR WHEN ENCODING");
+        addDataResult(result, "tags", () -> TAG_LIST_CODEC.encodeStart(ops, tags), "ERROR WHEN ENCODING");
+        for (var key : LMSConfig.EXPORT_LANG) {
+            result.addProperty(key + "_name", LANGUAGES.get(key).getOrDefault(item.getDescriptionId()));
         }
         return result;
     }
     
-    public JsonObject itemDataMcMod(ResourceLocation id, Item item, DynamicOps<JsonElement> ops){
+    public JsonObject itemDataMcMod(ResourceLocation id, Item item, DynamicOps<JsonElement> ops) {
         var result = new JsonObject();
-        result.addProperty("name",LANGUAGES.get("zh_cn").getOrDefault(item.getDescriptionId()));
-        result.addProperty("englishName",LANGUAGES.get("en_us").getOrDefault(item.getDescriptionId()));
-        result.addProperty("registerName",id.toString());
-        result.addProperty("type",item instanceof BlockItem ? "Block" : "Item");
-        result.addProperty("maxStacksSize",item.getDefaultMaxStackSize());
-        result.addProperty("maxDurability",item.getDefaultInstance().getMaxDamage());
-        result.addProperty("CreativeTabName",getCreativeModeTab(item)
+        result.addProperty("name", LANGUAGES.get("zh_cn").getOrDefault(item.getDescriptionId()));
+        result.addProperty("englishName", LANGUAGES.get("en_us").getOrDefault(item.getDescriptionId()));
+        result.addProperty("registerName", id.toString());
+        result.addProperty("type", item instanceof BlockItem ? "Block" : "Item");
+        result.addProperty("maxStacksSize", item.getDefaultMaxStackSize());
+        result.addProperty("maxDurability", item.getDefaultInstance().getMaxDamage());
+        result.addProperty("CreativeTabName", getCreativeModeTab(item)
                 .map(CreativeModeTab::getDisplayName)
                 .map(Component::getString)
                 .orElse("未知"));
         var tags = item.getDefaultInstance().getTags().toList();
         StringBuilder oreDic = new StringBuilder("[");
         boolean flag = false;
-        for(var tag : tags){
+        for (var tag : tags) {
             flag = true;
             oreDic.append(tag.location()).append(",");
         }
-        if(flag) oreDic.deleteCharAt(oreDic.length()-1);
+        if (flag) oreDic.deleteCharAt(oreDic.length() - 1);
         oreDic.append("]");
         result.addProperty("OredictList", oreDic.toString());
         return result;
     }
     
-    public static void rebuildCreativeModeTabsItemCache(){
+    public static void rebuildCreativeModeTabsItemCache() {
         assert Minecraft.getInstance().player != null;
         assert Minecraft.getInstance().level != null;
-        CreativeModeTabs.tryRebuildTabContents(Minecraft.getInstance().player.connection.enabledFeatures(),true,Minecraft.getInstance().level.registryAccess());
-        var map = new HashMap<CreativeModeTab,Set<Item>>();
-        for(var tab : BuiltInRegistries.CREATIVE_MODE_TAB.stream().toList()){
-            map.put(tab,tab.getSearchTabDisplayItems().stream().map(ItemStack::getItem).collect(Collectors.toSet()));
+        CreativeModeTabs.tryRebuildTabContents(Minecraft.getInstance().player.connection.enabledFeatures(), true, Minecraft.getInstance().level.registryAccess());
+        var map = new HashMap<CreativeModeTab, Set<Item>>();
+        for (var tab : BuiltInRegistries.CREATIVE_MODE_TAB.stream().toList()) {
+            map.put(tab, tab.getSearchTabDisplayItems().stream().map(ItemStack::getItem).collect(Collectors.toSet()));
         }
         CREATIVE_MODEL_TABS_ITEM_CACHE.clear();
         CREATIVE_MODEL_TABS_ITEM_CACHE.putAll(map);
@@ -286,17 +288,17 @@ public class ItemDataExporterScreen extends FrameScreen {
         return CREATIVE_MODEL_TABS_ITEM_CACHE.entrySet().stream().filter(entry -> entry.getValue().contains(item)).map(Map.Entry::getKey).findFirst();
     }
     
-    public static void addDataResult(JsonObject jsonObject, String key, Supplier<DataResult<JsonElement>> resultSupplier, String errorMessage){
-        try{
+    public static void addDataResult(JsonObject jsonObject, String key, Supplier<DataResult<JsonElement>> resultSupplier, String errorMessage) {
+        try {
             var result = resultSupplier.get();
-            if(result.isSuccess()){
-                jsonObject.add(key,result.getOrThrow());
+            if (result.isSuccess()) {
+                jsonObject.add(key, result.getOrThrow());
                 return;
             }
-        }catch(Exception e){
-            LOGGER.error("Cannot Encode Object: ",e);
+        } catch (Exception e) {
+            LOGGER.error("Cannot Encode Object: ", e);
         }
-        jsonObject.addProperty(key,errorMessage);
+        jsonObject.addProperty(key, errorMessage);
     }
     
     public String getNamespaceFilterValue() {
@@ -339,7 +341,7 @@ public class ItemDataExporterScreen extends FrameScreen {
     }
     
     @SubscribeEvent
-    public static void onResourceReload(RegisterClientReloadListenersEvent event){
+    public static void onResourceReload(RegisterClientReloadListenersEvent event) {
         event.registerReloadListener((ResourceManagerReloadListener) ItemDataExporterScreen::updateLanguageMap);
     }
     

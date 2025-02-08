@@ -39,7 +39,7 @@ public class PanelConfig {
         return new PanelConfig();
     }
     
-    public static PanelConfig ofFixSize(int width, int height){
+    public static PanelConfig ofFixSize(int width, int height) {
         return of().fixSize(width, height);
     }
     
@@ -154,7 +154,7 @@ public class PanelConfig {
         return this;
     }
     
-    public PanelConfig fork(){
+    public PanelConfig fork() {
         var newConfig = new PanelConfig();
         newConfig.horizontalAlign = this.horizontalAlign;
         newConfig.verticalAlign = this.verticalAlign;

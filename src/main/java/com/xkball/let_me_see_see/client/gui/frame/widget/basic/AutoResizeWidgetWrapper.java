@@ -69,7 +69,7 @@ public class AutoResizeWidgetWrapper extends AbstractContainerWidget implements 
     public void resize() {
         if (inner instanceof IPanel widget) {
             var parentPos = widgetBoundary.inner();
-            IPanel.calculateBoundary(widget,parentPos, parentPos.x(), parentPos.y());
+            IPanel.calculateBoundary(widget, parentPos, parentPos.x(), parentPos.y());
             widget.resize();
         }
     }

@@ -79,7 +79,7 @@ public class HorizontalPanel extends AbstractContainerWidget implements IPanel, 
         childrenPanels.clear();
     }
     
-    public WidgetPos getInnerPos(){
+    public WidgetPos getInnerPos() {
         return widgetBoundary.inner();
     }
     
@@ -89,13 +89,13 @@ public class HorizontalPanel extends AbstractContainerWidget implements IPanel, 
         var parentPos = getInnerPos();
         var x = parentPos.x();
         for (var widget : childrenPanels) {
-            IPanel.calculateBoundary(widget,parentPos,x,parentPos.y());
+            IPanel.calculateBoundary(widget, parentPos, x, parentPos.y());
             x += widget.getBoundary().outer().width();
         }
         var widthSum = x - parentPos.x();
-        var shiftX = IPanel.calculateShift(horizontalAlign,parentPos.width(),widthSum);
+        var shiftX = IPanel.calculateShift(horizontalAlign, parentPos.width(), widthSum);
         for (var widget : childrenPanels) {
-            var shiftY = IPanel.calculateShift(verticalAlign,parentPos.height(),widget.getBoundary().outer().height());
+            var shiftY = IPanel.calculateShift(verticalAlign, parentPos.height(), widget.getBoundary().outer().height());
             widget.shiftWidgetBoundary(shiftX, shiftY);
             widget.resize();
         }

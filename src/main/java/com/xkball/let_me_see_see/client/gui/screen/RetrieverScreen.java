@@ -11,7 +11,6 @@ import com.xkball.let_me_see_see.client.gui.frame.widget.basic.AutoResizeWidgetW
 import com.xkball.let_me_see_see.client.gui.frame.widget.basic.HorizontalPanel;
 import com.xkball.let_me_see_see.client.gui.frame.widget.basic.VerticalPanel;
 import com.xkball.let_me_see_see.client.gui.widget.ClassSearchResultPanel;
-import com.xkball.let_me_see_see.test.ClassSearcherTest;
 import com.xkball.let_me_see_see.utils.ClassSearcher;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.ComponentPath;

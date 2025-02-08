@@ -6,7 +6,6 @@ import com.xkball.let_me_see_see.client.gui.frame.core.PanelConfig;
 import com.xkball.let_me_see_see.client.gui.frame.widget.Label;
 import com.xkball.let_me_see_see.client.gui.frame.widget.basic.ScrollableVerticalPanel;
 import com.xkball.let_me_see_see.utils.ClassSearcher;
-import net.minecraft.Util;
 import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.navigation.ScreenDirection;
@@ -17,7 +16,6 @@ import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 
-import javax.naming.directory.SearchResult;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -31,7 +29,8 @@ public class ClassSearchResultPanel extends ScrollableVerticalPanel {
     private final Supplier<String> searchesGetter;
     private final Consumer<String> searchBarSetter;
     private String lastSearches = "";
-    @Nullable private CompletableFuture<List<SearchResult>> searchTask;
+    @Nullable
+    private CompletableFuture<List<SearchResult>> searchTask;
     
     public ClassSearchResultPanel(Supplier<String> searchesGetter, Consumer<String> searchBarSetter) {
         this.searchesGetter = searchesGetter;
@@ -49,26 +48,25 @@ public class ClassSearchResultPanel extends ScrollableVerticalPanel {
             }
             return false;
         }
-        if(!lastSearches.equals(searches)) {
-            if(searchTask != null) {
+        if (!lastSearches.equals(searches)) {
+            if (searchTask != null) {
                 searchTask.cancel(true);
             }
-            searchTask = runSearch(searches,marker);
+            searchTask = runSearch(searches, marker);
             
         }
-        if(searchTask != null && searchTask.isDone()) {
+        if (searchTask != null && searchTask.isDone()) {
             clearWidget();
             addWidgets(searchTask.getNow(List.of()), true);
-        }
-        else {
+        } else {
             clearWidget();
             var labelConfig = PanelConfig.of().trim().fixWidth(getBoundary().inner().width() - 6);
-            addWidget(labelConfig.apply(Label.of(Component.translatable("let_me_see_see.gui.retriever.searching"))),true);
+            addWidget(labelConfig.apply(Label.of(Component.translatable("let_me_see_see.gui.retriever.searching"))), true);
         }
         return false;
     }
     
-    public CompletableFuture<List<SearchResult>> runSearch(String searches, IUpdateMarker updateMarker){
+    public CompletableFuture<List<SearchResult>> runSearch(String searches, IUpdateMarker updateMarker) {
         lastSearches = searches;
         var future = CompletableFuture.supplyAsync(() -> {
             var labelConfig = PanelConfig.of().trim().fixWidth(getBoundary().inner().width() - 6);
@@ -82,7 +80,7 @@ public class ClassSearchResultPanel extends ScrollableVerticalPanel {
             return labels;
         });
         future.exceptionallyAsync(e -> {
-            LOGGER.warn("Search task cancelled: {}",searches);
+            LOGGER.warn("Search task cancelled: {}", searches);
             return List.of();
         });
         return future;

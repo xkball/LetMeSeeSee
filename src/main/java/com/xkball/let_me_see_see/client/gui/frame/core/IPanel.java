@@ -22,7 +22,7 @@ public interface IPanel {
         @Override
         public boolean needUpdate() {
             var screen = Minecraft.getInstance().screen;
-            if(screen instanceof FrameScreen frameScreen){
+            if (screen instanceof FrameScreen frameScreen) {
                 return frameScreen.needUpdate();
             }
             return false;
@@ -31,7 +31,7 @@ public interface IPanel {
         @Override
         public void setNeedUpdate() {
             var screen = Minecraft.getInstance().screen;
-            if(screen instanceof FrameScreen frameScreen){
+            if (screen instanceof FrameScreen frameScreen) {
                 frameScreen.setNeedUpdate();
             }
         }
@@ -158,7 +158,7 @@ public interface IPanel {
         return padding > 1f ? padding : Mth.clamp(base * padding, 0f, base);
     }
     
-    static void calculateBoundary(IPanel widget, WidgetPos parentPos, int x, int y){
+    static void calculateBoundary(IPanel widget, WidgetPos parentPos, int x, int y) {
         var width = Mth.clamp(parentPos.width() * widget.getXPercentage(), widget.getXMin(), Math.min(widget.getXMax(), parentPos.maxX() - x));
         var height = Mth.clamp(parentPos.height() * widget.getYPercentage(), widget.getYMin(), Math.min(widget.getYMax(), parentPos.maxY() - y));
         var leftPadding = IPanel.calculatePadding(widget.getLeftPadding(), parentPos.width());
@@ -173,7 +173,7 @@ public interface IPanel {
         widget.setBoundary(new WidgetBoundary(outer, inner));
     }
     
-    static int calculateShift(HorizontalAlign align, int sizeLimit, int size){
+    static int calculateShift(HorizontalAlign align, int sizeLimit, int size) {
         return switch (align) {
             case LEFT -> 0;
             case CENTER -> (int) (sizeLimit / 2f - size / 2f);
@@ -181,7 +181,7 @@ public interface IPanel {
         };
     }
     
-    static int calculateShift(VerticalAlign align, int sizeLimit, int size){
+    static int calculateShift(VerticalAlign align, int sizeLimit, int size) {
         return switch (align) {
             case TOP -> 0;
             case CENTER -> (int) (sizeLimit / 2f - size / 2f);

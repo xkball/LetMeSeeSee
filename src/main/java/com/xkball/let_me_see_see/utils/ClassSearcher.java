@@ -34,7 +34,7 @@ public class ClassSearcher {
     }
     
     public static List<String> search(String str) {
-        return VanillaUtils.search(str.toLowerCase(),lowerCaseClassName);
+        return VanillaUtils.search(str.toLowerCase(), lowerCaseClassName);
     }
 
 //    public static List<?> searchOld(String str) {

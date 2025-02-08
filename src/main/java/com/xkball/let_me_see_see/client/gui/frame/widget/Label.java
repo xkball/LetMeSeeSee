@@ -28,11 +28,11 @@ public class Label extends AutoResizeWidget {
     }
     
     public static Label of(Component message) {
-        return of(message,1);
+        return of(message, 1);
     }
     
-    public static Label of(Supplier<Component> message){
-        return of(message,1);
+    public static Label of(Supplier<Component> message) {
+        return of(message, 1);
     }
     
     
@@ -40,8 +40,8 @@ public class Label extends AutoResizeWidget {
         return new Label(message, scale, -1, true);
     }
     
-    public static Label of(Supplier<Component> message, float scale){
-        return new DynamicLabel(message,scale,-1,true);
+    public static Label of(Supplier<Component> message, float scale) {
+        return new DynamicLabel(message, scale, -1, true);
     }
     
     public Label(Component message, float scale, int color, boolean dropShadow) {
@@ -147,7 +147,7 @@ public class Label extends AutoResizeWidget {
         @Override
         public boolean update(IUpdateMarker marker) {
             var newText = textSupplier.get();
-            if(getMessage().equals(newText)) return false;
+            if (getMessage().equals(newText)) return false;
             this.setMessage(newText);
             return true;
         }

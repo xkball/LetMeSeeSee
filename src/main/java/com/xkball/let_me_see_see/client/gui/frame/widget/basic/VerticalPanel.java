@@ -99,13 +99,13 @@ public class VerticalPanel extends AbstractContainerWidget implements IPanel, IT
         var parentPos = widgetBoundary.inner();
         var y = parentPos.y();
         for (var widget : childrenPanels) {
-            IPanel.calculateBoundary(widget,parentPos,parentPos.x(),y);
+            IPanel.calculateBoundary(widget, parentPos, parentPos.x(), y);
             y += widget.getBoundary().outer().height();
         }
         var heightSum = y - parentPos.y();
-        var shiftY = IPanel.calculateShift(verticalAlign,parentPos.height(),heightSum);
+        var shiftY = IPanel.calculateShift(verticalAlign, parentPos.height(), heightSum);
         for (var widget : childrenPanels) {
-            var shiftX = IPanel.calculateShift(horizontalAlign,parentPos.width(),widget.getBoundary().outer().width());
+            var shiftX = IPanel.calculateShift(horizontalAlign, parentPos.width(), widget.getBoundary().outer().width());
             widget.shiftWidgetBoundary(shiftX, shiftY);
             widget.resize();
         }

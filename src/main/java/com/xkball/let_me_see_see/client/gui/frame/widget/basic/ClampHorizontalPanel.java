@@ -10,14 +10,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class ClampHorizontalPanel extends HorizontalPanel{
+public class ClampHorizontalPanel extends HorizontalPanel {
     
-    @Nullable public IPanel left_;
-    @Nullable public IPanel right_;
-    public WidgetPos innerPos = new WidgetPos(0,0,0,0);
+    @Nullable
+    public IPanel left_;
+    @Nullable
+    public IPanel right_;
+    public WidgetPos innerPos = new WidgetPos(0, 0, 0, 0);
     private final List<IPanel> actuallyPanels = new ArrayList<>();
     
-    public ClampHorizontalPanel() {}
+    public ClampHorizontalPanel() {
+    }
     
     @Override
     public void resize() {
@@ -26,20 +29,20 @@ public class ClampHorizontalPanel extends HorizontalPanel{
         var parentPos = getBoundary().inner();
         var x = parentPos.x();
         var y = parentPos.y();
-        if(left_ != null){
-            IPanel.calculateBoundary(left_,parentPos,x,y);
-            var shiftY = IPanel.calculateShift(verticalAlign,parentPos.height(),left_.getBoundary().outer().height());
-            left_.shiftWidgetBoundary(0,shiftY);
+        if (left_ != null) {
+            IPanel.calculateBoundary(left_, parentPos, x, y);
+            var shiftY = IPanel.calculateShift(verticalAlign, parentPos.height(), left_.getBoundary().outer().height());
+            left_.shiftWidgetBoundary(0, shiftY);
             xl = left_.getBoundary().outer().width();
         }
-        if(right_ != null){
-            IPanel.calculateBoundary(right_,parentPos,x,y);
-            var shiftX = IPanel.calculateShift(HorizontalAlign.RIGHT,parentPos.width(),right_.getBoundary().outer().width());
-            var shiftY = IPanel.calculateShift(verticalAlign,parentPos.height(),right_.getBoundary().outer().height());
-            right_.shiftWidgetBoundary(shiftX,shiftY);
+        if (right_ != null) {
+            IPanel.calculateBoundary(right_, parentPos, x, y);
+            var shiftX = IPanel.calculateShift(HorizontalAlign.RIGHT, parentPos.width(), right_.getBoundary().outer().width());
+            var shiftY = IPanel.calculateShift(verticalAlign, parentPos.height(), right_.getBoundary().outer().height());
+            right_.shiftWidgetBoundary(shiftX, shiftY);
             xr = right_.getBoundary().outer().width();
         }
-        this.innerPos = new WidgetPos(x+xl,y,parentPos.width()-xr-xl,parentPos.height());
+        this.innerPos = new WidgetPos(x + xl, y, parentPos.width() - xr - xl, parentPos.height());
         super.resize();
     }
     

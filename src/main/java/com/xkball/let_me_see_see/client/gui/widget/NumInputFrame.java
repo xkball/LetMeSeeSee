@@ -17,15 +17,16 @@ import java.util.function.Consumer;
 
 public abstract class NumInputFrame<T extends Number> extends ClampHorizontalPanel {
     
-    @Nullable private Consumer<T> valueSetter;
+    @Nullable
+    private Consumer<T> valueSetter;
     
-    public NumInputFrame(boolean renderNumLabel){
+    public NumInputFrame(boolean renderNumLabel) {
         this.setHorizontalAlign(HorizontalAlign.CENTER);
         this.setVerticalAlign(VerticalAlign.CENTER);
         this.setXMin(50);
         this.setYMin(20);
         this.setLeft(
-                PanelConfig.ofFixSize(20,20)
+                PanelConfig.ofFixSize(20, 20)
                         .paddingRight(8)
                         .apply(AutoResizeWidgetWrapper.of(Button.builder(Component.literal("-"), btn -> {
                             this.onDecreaseButtonClick();
@@ -33,25 +34,25 @@ public abstract class NumInputFrame<T extends Number> extends ClampHorizontalPan
                         }).build()))
         );
         this.setRight(
-                PanelConfig.ofFixSize(20,20)
+                PanelConfig.ofFixSize(20, 20)
                         .paddingLeft(8)
                         .apply(AutoResizeWidgetWrapper.of(Button.builder(Component.literal("+"), btn -> {
                             this.onIncreaseButtonClick();
                             this.update(IPanel.GLOBAL_UPDATE_MARKER);
                         }).build())));
-        if(renderNumLabel){
+        if (renderNumLabel) {
             this.addWidget(PanelConfig.of().trim()
-                    .apply(Label.of(() -> Component.literal(String.valueOf(getValue())),1.2f)));
+                    .apply(Label.of(() -> Component.literal(String.valueOf(getValue())), 1.2f)));
         }
     }
     
-    public NumInputFrame<T> setValueSetter(Consumer<T> valueSetter){
+    public NumInputFrame<T> setValueSetter(Consumer<T> valueSetter) {
         this.valueSetter = valueSetter;
         return this;
     }
     
-    public void onValueChange(){
-        if(valueSetter != null){
+    public void onValueChange() {
+        if (valueSetter != null) {
             valueSetter.accept(getValue());
         }
     }
@@ -62,12 +63,12 @@ public abstract class NumInputFrame<T extends Number> extends ClampHorizontalPan
     
     public abstract @Nullable T getValue();
     
-    public static class Pow2IntInput extends NumInputFrame<Integer>{
+    public static class Pow2IntInput extends NumInputFrame<Integer> {
         private final int minN;
         private final int maxN;
         private int n;
         
-        public Pow2IntInput(int minN, int maxN, int defaultN){
+        public Pow2IntInput(int minN, int maxN, int defaultN) {
             super(true);
             this.minN = minN;
             this.maxN = maxN;
@@ -76,19 +77,19 @@ public abstract class NumInputFrame<T extends Number> extends ClampHorizontalPan
         
         @Override
         public void onDecreaseButtonClick() {
-            var nn = Math.max(minN,n - 1);
+            var nn = Math.max(minN, n - 1);
             this.setN_(nn);
         }
         
         @Override
         public void onIncreaseButtonClick() {
-            var nn = Math.min(n + 1,maxN);
+            var nn = Math.min(n + 1, maxN);
             this.setN_(nn);
         }
         
         @Override
         public @Nullable Integer getValue() {
-            return (int) Math.pow(2,n);
+            return (int) Math.pow(2, n);
         }
         
         public int getN() {
@@ -96,43 +97,45 @@ public abstract class NumInputFrame<T extends Number> extends ClampHorizontalPan
         }
         
         public void setN(int n) {
-            var nn = Mth.clamp(n,minN,maxN);
+            var nn = Mth.clamp(n, minN, maxN);
             this.setN_(nn);
         }
         
-        private void setN_(int nn){
-            if(nn == n) return;
+        private void setN_(int nn) {
+            if (nn == n) return;
             this.n = nn;
             this.onValueChange();
         }
     }
     
-    public static class FloatInput extends NumInputFrame<Float>{
+    public static class FloatInput extends NumInputFrame<Float> {
         
         private final float min;
         private final float max;
         private final float delta;
-        @Nullable private Float value;
-        @Nullable private ObjectInputBox<Float> input;
+        @Nullable
+        private Float value;
+        @Nullable
+        private ObjectInputBox<Float> input;
         
         public FloatInput(float min, float max, float delta, float default_, boolean renderNumLabel) {
             super(renderNumLabel);
             this.min = min;
             this.max = max;
             this.delta = delta;
-            if(!renderNumLabel){
+            if (!renderNumLabel) {
                 this.input = new ObjectInputBox<>(ObjectInputBox.FLOAT_VALIDATOR, ObjectInputBox.FLOAT_RESPONDER);
                 input.setOnLoseFocused(str -> this.setValue(Objects.requireNonNull(input).get()));
-                this.addWidget(PanelConfig.of(1,1)
+                this.addWidget(PanelConfig.of(1, 1)
                         .apply(AutoResizeWidgetWrapper.of(input)));
             }
             this.setValue(default_);
         }
         
         public void setValue(@Nullable Float value) {
-            if(Objects.equals(this.value,value)) return;
-            value = value == null ? null : Mth.clamp(value,min,max);
-            if(input != null && value != null){
+            if (Objects.equals(this.value, value)) return;
+            value = value == null ? null : Mth.clamp(value, min, max);
+            if (input != null && value != null) {
                 input.setValue(String.valueOf(value));
                 input.displayPos = 0;
             }
@@ -142,20 +145,18 @@ public abstract class NumInputFrame<T extends Number> extends ClampHorizontalPan
         
         @Override
         public void onDecreaseButtonClick() {
-            if(value == null){
+            if (value == null) {
                 this.setValue(min);
-            }
-            else {
+            } else {
                 this.setValue(Math.max(min, value - delta));
             }
         }
         
         @Override
         public void onIncreaseButtonClick() {
-            if(value == null){
+            if (value == null) {
                 this.setValue(max);
-            }
-            else {
+            } else {
                 this.setValue(Math.min(value + delta, max));
             }
         }

@@ -45,7 +45,7 @@ public class ObjectInputBox<T> extends EditBox implements Renderable {
                 try {
                     LocalDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(str)), ZoneOffset.UTC);
                     return true;
-                }catch (Exception e) {
+                } catch (Exception e) {
                     return false;
                 }
             }
@@ -55,17 +55,17 @@ public class ObjectInputBox<T> extends EditBox implements Renderable {
         try {
             Integer.parseInt(str);
             return true;
-        }catch (Exception e) {
+        } catch (Exception e) {
             return false;
         }
     };
     
     public static final Predicate<String> LOCAL_TIME_VALIDATOR = INT_VALIDATOR.and(
             (str) -> {
-                if(str.length() != 9) return false;
+                if (str.length() != 9) return false;
                 var time = Integer.parseInt(str);
-                if(time < 0 || time > 240000000) return false;
-                if((time %10_000_000)/100_000 > 60) return false;
+                if (time < 0 || time > 240000000) return false;
+                if ((time % 10_000_000) / 100_000 > 60) return false;
                 return (time % 100_000) / 1000 <= 60;
             }
     );
@@ -74,7 +74,7 @@ public class ObjectInputBox<T> extends EditBox implements Renderable {
         try {
             Float.parseFloat(str);
             return true;
-        }catch (Exception e) {
+        } catch (Exception e) {
             return false;
         }
     };
@@ -87,16 +87,16 @@ public class ObjectInputBox<T> extends EditBox implements Renderable {
         try {
             VanillaUtils.parseColorHEX(str);
             return true;
-        }catch (Exception e){
+        } catch (Exception e) {
             return false;
         }
     };
     
     public static final Predicate<String> COMPONENT_VALIDATOR = (str) -> {
         try {
-            ParserUtils.parseJson(Minecraft.getInstance().level.registryAccess(),new StringReader(str), ComponentSerialization.CODEC);
+            ParserUtils.parseJson(Minecraft.getInstance().level.registryAccess(), new StringReader(str), ComponentSerialization.CODEC);
             return true;
-        }catch (Exception e){
+        } catch (Exception e) {
             return false;
         }
     };
@@ -104,30 +104,31 @@ public class ObjectInputBox<T> extends EditBox implements Renderable {
     @SuppressWarnings("deprecation")
     public static final Predicate<String> TEXTURE_VALIDATOR = (str) -> {
         var rl = ResourceLocation.tryParse(str);
-        if(rl == null) return false;
+        if (rl == null) return false;
         var texture = Minecraft.getInstance().getModelManager().getAtlas(TextureAtlas.LOCATION_BLOCKS).getSprite(rl);
         return !VanillaUtils.MISSING_TEXTURE.equals(texture.atlasLocation());
     };
     
-    public static final Function<String,String> PASS_RESPONDER = str -> str;
-    public static final Function<String,Integer> INT_RESPONDER = Integer::parseInt;
-    public static final Function<String,Long> LONG_RESPONDER = Long::parseLong;
-    public static final Function<String,Float> FLOAT_RESPONDER = Float::parseFloat;
-    public static final Function<String,Integer> RGB_COLOR_RESPONDER = VanillaUtils::parseColorHEX;
-    public static final Function<String,Component> COMPONENT_RESPONDER = (str) -> ParserUtils.parseJson(Objects.requireNonNull(Minecraft.getInstance().level).registryAccess(),new StringReader(str), ComponentSerialization.CODEC);
-    public static final Function<String,ResourceLocation> TEXTURE_RESPONDER = (str) -> Objects.requireNonNullElse(ResourceLocation.tryParse(str),VanillaUtils.MISSING_TEXTURE);
+    public static final Function<String, String> PASS_RESPONDER = str -> str;
+    public static final Function<String, Integer> INT_RESPONDER = Integer::parseInt;
+    public static final Function<String, Long> LONG_RESPONDER = Long::parseLong;
+    public static final Function<String, Float> FLOAT_RESPONDER = Float::parseFloat;
+    public static final Function<String, Integer> RGB_COLOR_RESPONDER = VanillaUtils::parseColorHEX;
+    public static final Function<String, Component> COMPONENT_RESPONDER = (str) -> ParserUtils.parseJson(Objects.requireNonNull(Minecraft.getInstance().level).registryAccess(), new StringReader(str), ComponentSerialization.CODEC);
+    public static final Function<String, ResourceLocation> TEXTURE_RESPONDER = (str) -> Objects.requireNonNullElse(ResourceLocation.tryParse(str), VanillaUtils.MISSING_TEXTURE);
     
     protected final Predicate<String> validator;
     protected final Function<String, T> responder;
     protected boolean renderState = true;
-    @Nullable private Consumer<ObjectInputBox<T>> onLoseFocused;
+    @Nullable
+    private Consumer<ObjectInputBox<T>> onLoseFocused;
     
     public ObjectInputBox(Predicate<String> validator, Function<String, T> responder) {
-        this(Minecraft.getInstance().font,0,0,0,0,Component.empty(),validator,responder);
+        this(Minecraft.getInstance().font, 0, 0, 0, 0, Component.empty(), validator, responder);
     }
-
-    public ObjectInputBox(Font font, int x, int y, int width, int height, Component message, Predicate<String> validator, Function<String,T> responder) {
-        super(font,x, y, width, height, message);
+    
+    public ObjectInputBox(Font font, int x, int y, int width, int height, Component message, Predicate<String> validator, Function<String, T> responder) {
+        super(font, x, y, width, height, message);
         this.validator = validator;
         this.responder = responder;
         this.setFocused(false);
@@ -135,8 +136,8 @@ public class ObjectInputBox<T> extends EditBox implements Renderable {
     }
     
     @Nullable
-    public T get(){
-        if(validator.test(getValue())){
+    public T get() {
+        if (validator.test(getValue())) {
             return responder.apply(getValue());
         }
         return null;
@@ -145,12 +146,12 @@ public class ObjectInputBox<T> extends EditBox implements Renderable {
     @Override
     public void setFocused(boolean focused) {
         super.setFocused(focused);
-        if(onLoseFocused != null && !focused) onLoseFocused.accept(this);
+        if (onLoseFocused != null && !focused) onLoseFocused.accept(this);
     }
     
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if(isFocused() && !isMouseOver(mouseX, mouseY)) {
+        if (isFocused() && !isMouseOver(mouseX, mouseY)) {
             setFocused(false);
         }
         return super.mouseClicked(mouseX, mouseY, button);
@@ -161,27 +162,26 @@ public class ObjectInputBox<T> extends EditBox implements Renderable {
         super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
         var font = Minecraft.getInstance().font;
         var rec = guiGraphics.scissorStack.stack.isEmpty() ? null : guiGraphics.scissorStack.stack.peekLast();
-        if(rec != null){
+        if (rec != null) {
             guiGraphics.disableScissor();
-            guiGraphics.enableScissor(rec.position().x()-4, rec.position().y(), rec.position().x()+rec.width(), rec.position().y()+rec.height());
+            guiGraphics.enableScissor(rec.position().x() - 4, rec.position().y(), rec.position().x() + rec.width(), rec.position().y() + rec.height());
         }
         if (this.visible) {
-            if(renderState){
-                if(validator.test(getValue())) {
-                    guiGraphics.fill(getX()-2,getY(),getX(),getY()+getHeight(), VanillaUtils.getColor(0,255,0,255));
-                }
-                else {
-                    guiGraphics.fill(getX()-2,getY(),getX(),getY()+getHeight(), VanillaUtils.getColor(255,0,0,255));
+            if (renderState) {
+                if (validator.test(getValue())) {
+                    guiGraphics.fill(getX() - 2, getY(), getX(), getY() + getHeight(), VanillaUtils.getColor(0, 255, 0, 255));
+                } else {
+                    guiGraphics.fill(getX() - 2, getY(), getX(), getY() + getHeight(), VanillaUtils.getColor(255, 0, 0, 255));
                 }
             }
             var title = this.getMessage().getString();
-            if(!title.isEmpty()){
-                guiGraphics.drawString(font,title,getX()-font.width(title)-(renderState?12:2),getY()+2,0xFFFFFF);
+            if (!title.isEmpty()) {
+                guiGraphics.drawString(font, title, getX() - font.width(title) - (renderState ? 12 : 2), getY() + 2, 0xFFFFFF);
             }
         }
-        if(rec != null){
+        if (rec != null) {
             guiGraphics.disableScissor();
-            guiGraphics.enableScissor(rec.position().x(), rec.position().y(), rec.position().x()+rec.width(), rec.position().y()+rec.height());
+            guiGraphics.enableScissor(rec.position().x(), rec.position().y(), rec.position().x() + rec.width(), rec.position().y() + rec.height());
         }
     }
     

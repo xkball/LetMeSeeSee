@@ -2,8 +2,8 @@ package com.xkball.let_me_see_see.client.gui.frame.screen;
 
 import com.xkball.let_me_see_see.client.gui.frame.core.HorizontalAlign;
 import com.xkball.let_me_see_see.client.gui.frame.core.IPanel;
-import com.xkball.let_me_see_see.client.gui.frame.core.PanelConfig;
 import com.xkball.let_me_see_see.client.gui.frame.core.IUpdateMarker;
+import com.xkball.let_me_see_see.client.gui.frame.core.PanelConfig;
 import com.xkball.let_me_see_see.client.gui.frame.core.VerticalAlign;
 import com.xkball.let_me_see_see.client.gui.frame.core.render.GuiDecorations;
 import com.xkball.let_me_see_see.client.gui.frame.core.render.SimpleBackgroundRenderer;
@@ -116,7 +116,7 @@ public class FrameScreen extends Screen implements IUpdateMarker {
     }
     
     public AutoResizeWidgetWrapper createEditBox(Supplier<String> valueGetter, Consumer<String> valueSetter) {
-        return createEditBox(() -> new EditBox(font,0,0,0,0,Component.empty()), valueGetter, valueSetter);
+        return createEditBox(() -> new EditBox(font, 0, 0, 0, 0, Component.empty()), valueGetter, valueSetter);
     }
     
     public AutoResizeWidgetWrapper createEditBox(Supplier<? extends EditBox> editBoxSupplier, Supplier<String> valueGetter, Consumer<String> valueSetter) {
@@ -131,8 +131,8 @@ public class FrameScreen extends Screen implements IUpdateMarker {
         return new AutoResizeWidgetWrapper(editBox);
     }
     
-    public <T> AutoResizeWidgetWrapper createObjInputBox(Predicate<String> validator, Function<String,T> responder,Consumer<T> valueSetter) {
-        var editBox = new ObjectInputBox<T>(font,0,0,0,0,Component.empty(),validator,responder);
+    public <T> AutoResizeWidgetWrapper createObjInputBox(Predicate<String> validator, Function<String, T> responder, Consumer<T> valueSetter) {
+        var editBox = new ObjectInputBox<T>(font, 0, 0, 0, 0, Component.empty(), validator, responder);
         setupSimpleEditBox(editBox);
         editBox.setResponder(str -> {
             valueSetter.accept(editBox.get());
@@ -154,15 +154,15 @@ public class FrameScreen extends Screen implements IUpdateMarker {
         return AutoResizeWidgetWrapper.of(btn);
     }
     
-    public static AutoResizeWidgetWrapper createCheckBox(Component message, BooleanSupplier valueGetter, BooleanConsumer valueSetter){
+    public static AutoResizeWidgetWrapper createCheckBox(Component message, BooleanSupplier valueGetter, BooleanConsumer valueSetter) {
         var checkBox = Checkbox.builder(message, Minecraft.getInstance().font)
-                .onValueChange((c,b) -> valueSetter.accept(b))
+                .onValueChange((c, b) -> valueSetter.accept(b))
                 .build();
-        if(valueGetter.getAsBoolean() != checkBox.selected()) checkBox.onPress();
+        if (valueGetter.getAsBoolean() != checkBox.selected()) checkBox.onPress();
         return AutoResizeWidgetWrapper.of(checkBox);
     }
     
-    public static AutoResizeWidgetWrapper createButton(Component message, Runnable onPress){
+    public static AutoResizeWidgetWrapper createButton(Component message, Runnable onPress) {
         var button = Button.builder(message, btn -> onPress.run()).build();
         return AutoResizeWidgetWrapper.of(button);
     }

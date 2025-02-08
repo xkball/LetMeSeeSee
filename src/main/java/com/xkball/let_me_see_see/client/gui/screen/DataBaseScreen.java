@@ -48,7 +48,7 @@ public class DataBaseScreen extends FrameScreen {
                 .apply(new VerticalPanel()
                         .addWidget(PanelConfig.of(1, 1)
                                 .fixHeight(24)
-                                .apply(createEditBox(this::getSearchBarValue,this::setSearchBarValue)))
+                                .apply(createEditBox(this::getSearchBarValue, this::setSearchBarValue)))
                         .addWidget(PanelConfig.of(1, 1)
                                 .align(HorizontalAlign.LEFT, VerticalAlign.TOP)
                                 .apply(new ScrollableVerticalPanel() {

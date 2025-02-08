@@ -10,8 +10,6 @@ import com.xkball.let_me_see_see.client.gui.frame.widget.basic.AutoResizeWidget;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import org.joml.Matrix4f;
 
@@ -21,7 +19,7 @@ public class RawTexturePanel extends AutoResizeWidget {
     
     private final IntSupplier textureIDGetter;
     
-    public RawTexturePanel(int textureID){
+    public RawTexturePanel(int textureID) {
         this(() -> textureID);
     }
     

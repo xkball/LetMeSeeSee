@@ -59,15 +59,15 @@ public class LetMeSeeSee {
         var jar = modContainer.getModInfo().getOwningFile().getFile().getFilePath().toFile();
         if (jar.isDirectory()) {
             JAR_PATH = System.getProperty(JAR_PATH_KEY);
-            if(JAR_PATH.isEmpty()){
+            if (JAR_PATH.isEmpty()) {
                 LOGGER.error("This mod require it's jar path to work! Missing system property: " + JAR_PATH_KEY);
             }
         } else {
             JAR_PATH = jar.getAbsolutePath();
         }
-        LOGGER.info("{}: {}",JAR_PATH_KEY, JAR_PATH);
+        LOGGER.info("{}: {}", JAR_PATH_KEY, JAR_PATH);
         LOGGER.info("{}: {}", EXPORT_PATH_KEY, EXPORT_DIR_PATH);
-        LOGGER.info("{}: {}","MOD_LIST_MD5", MOD_LIST_MD5);
+        LOGGER.info("{}: {}", "MOD_LIST_MD5", MOD_LIST_MD5);
         modContainer.registerConfig(ModConfig.Type.COMMON, LMSConfig.SPEC);
     }
     
@@ -169,8 +169,8 @@ public class LetMeSeeSee {
         }
         
         @SubscribeEvent
-        public static void onRegGuiLayerDef(RegisterGuiLayersEvent event){
-       
+        public static void onRegGuiLayerDef(RegisterGuiLayersEvent event) {
+        
         }
     }
     

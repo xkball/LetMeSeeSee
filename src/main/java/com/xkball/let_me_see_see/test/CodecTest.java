@@ -7,8 +7,8 @@ public class CodecTest {
     
     public static void main(String[] args) {
         var buf = ByteBufAllocator.DEFAULT.buffer(8);
-        ByteBufCodecs.VAR_INT.encode(buf,-1);
-        for(var i = 0; i < buf.capacity(); i++) {
+        ByteBufCodecs.VAR_INT.encode(buf, -1);
+        for (var i = 0; i < buf.capacity(); i++) {
             System.out.println(buf.getByte(i));
         }
     }
