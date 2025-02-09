@@ -34,6 +34,12 @@ jobs:
         id: build
         run: ./gradlew :build --stacktrace --scan
 
+      - name: dslt
+        id: dslt
+        uses: Anvil-Dev/dedicated-server-launch-test@1.21.1-neoforge
+        with:
+          mod: build/libs/${{ steps.build.outputs.jar_name}}.jar
+
       - name: Generate Output Path
         id: generate_output_path
         run: ./gradlew githubActionOutput
