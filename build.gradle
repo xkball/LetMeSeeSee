@@ -192,10 +192,11 @@ idea {
 build{
     if (System.env.GITHUB_ACTIONS){
         def outputFile = new File(System.env.GITHUB_OUTPUT)
-        File theFile = jar.archiveFile.get().getAsFile()
         def newLine = System.getProperty('line.separator')
-        if(System.env.NIGHTLY_BUILD) outputFile << newLine << "jar_name=${base.archivesName.get()}"
-        else outputFile << newLine << "jar_name=${theFile.absolutePath}"
+        String fileName = jar.archiveFileName.get();
+        fileName = fileName.substring(0,fileName.length()-4)
+        println fileName
+        outputFile << newLine << "jar_name=${fileName}"
     }
 }
 
