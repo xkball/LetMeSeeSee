@@ -4,6 +4,8 @@ import com.mojang.logging.LogUtils;
 import com.xkball.let_me_see_see.common.data.ExportsDataManager;
 import com.xkball.let_me_see_see.common.item.LMSItems;
 import com.xkball.let_me_see_see.config.LMSConfig;
+import com.xkball.let_me_see_see.utils.ClassSearcher;
+import com.xkball.let_me_see_see.utils.ClassStaticAnalysis;
 import com.xkball.let_me_see_see.utils.VanillaUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
@@ -19,6 +21,7 @@ import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
+import org.checkerframework.checker.units.qual.C;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -38,6 +41,7 @@ import java.util.stream.Stream;
 @Mod(LetMeSeeSee.MODID)
 public class LetMeSeeSee {
     
+    private static final Logger LOGGER = LogUtils.getLogger();
     public static final String MODID = "let_me_see_see";
     public static final String JAR_PATH_KEY = "LET_ME_SEE_AGENT_JAR_PATH";
     public static final String EXPORT_PATH_KEY = "LET_ME_SEE_EXPORT_PATH";
@@ -46,11 +50,12 @@ public class LetMeSeeSee {
     public static String MOD_LIST_MD5;
     public static String JAR_PATH = "";
     public static String EXPORT_DIR_PATH;
-    private static final Logger LOGGER = LogUtils.getLogger();
+    public static String[] CLASS_PATH;
     public static Instrumentation INST;
     
     public LetMeSeeSee(IEventBus modEventBus, ModContainer modContainer) {
         LMSItems.init(modEventBus);
+        CLASS_PATH = System.getProperty("java.class.path").split(File.pathSeparator);
         EXPORT_DIR_PATH = FMLPaths.getOrCreateGameRelativePath(Path.of(MODID)).toString();
         MOD_LIST_MD5 = VanillaUtils.md5(ModList.get().getMods().stream()
                 .flatMap(mif -> Stream.of(mif.getModId(), mif.getVersion().toString()))
@@ -65,6 +70,7 @@ public class LetMeSeeSee {
         } else {
             JAR_PATH = jar.getAbsolutePath();
         }
+        ClassStaticAnalysis.scanOnlyIn(MODID);
         LOGGER.info("{}: {}", JAR_PATH_KEY, JAR_PATH);
         LOGGER.info("{}: {}", EXPORT_PATH_KEY, EXPORT_DIR_PATH);
         LOGGER.info("{}: {}", "MOD_LIST_MD5", MOD_LIST_MD5);

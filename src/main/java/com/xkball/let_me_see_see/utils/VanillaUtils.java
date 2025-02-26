@@ -37,10 +37,10 @@ public class VanillaUtils {
     public static final int GUI_GRAY = VanillaUtils.getColor(30, 30, 30, 200);
     
     public static ResourceLocation modRL(String path) {
-        return resourceLocationOf(LetMeSeeSee.MODID, path);
+        return rLOf(LetMeSeeSee.MODID, path);
     }
     
-    public static ResourceLocation resourceLocationOf(String namespace, String path) {
+    public static ResourceLocation rLOf(String namespace, String path) {
         return ResourceLocation.fromNamespaceAndPath(namespace, path);
     }
     
@@ -134,6 +134,20 @@ public class VanillaUtils {
     
     public static String base64(byte[] bytes) {
         return Base64.encodeBase64String(bytes);
+    }
+    
+    public static String removeAfterLastCharOf(String str,char c){
+        return str.substring(0,str.lastIndexOf(c));
+    }
+    
+    public static List<String> searchStartWith(String key, Collection<String> src){
+        var startWithList = new ArrayList<String>();
+        for (var str : src) {
+            var searchEntry = str.toLowerCase();
+            if (searchEntry.startsWith(key)) startWithList.add(str);
+        }
+        startWithList.sort(String::compareTo);
+        return startWithList;
     }
     
     public static List<String> searchInLowerCase(String key, Collection<String> src) {

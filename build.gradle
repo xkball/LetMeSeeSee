@@ -137,6 +137,7 @@ jar{
 tasks.withType(RunGameTask).configureEach{
     dependsOn jar
     systemProperty("LET_ME_SEE_AGENT_JAR_PATH",tasks.jar.archiveFile.get().getAsFile())
+    
 }
 
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
@@ -193,9 +194,8 @@ build{
     if (System.env.GITHUB_ACTIONS){
         def outputFile = new File(System.env.GITHUB_OUTPUT)
         def newLine = System.getProperty('line.separator')
-        String fileName = jar.archiveFileName.get();
+        String fileName = jar.archiveFileName.get()
         fileName = fileName.substring(0,fileName.length()-4)
-        println fileName
         outputFile << newLine << "jar_name=${fileName}"
     }
 }

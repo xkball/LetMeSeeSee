@@ -11,5 +11,9 @@ public class CodecTest {
         for (var i = 0; i < buf.capacity(); i++) {
             System.out.println(buf.getByte(i));
         }
+        
+        Runnable runnable = () -> {
+            System.out.println(111);
+        };
     }
 }

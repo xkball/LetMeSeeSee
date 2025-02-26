@@ -7,11 +7,17 @@ import com.xkball.let_me_see_see.client.gui.frame.core.render.GuiDecorations;
 import com.xkball.let_me_see_see.client.gui.frame.core.render.SimpleBackgroundRenderer;
 import com.xkball.let_me_see_see.utils.VanillaUtils;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.navigation.ScreenPosition;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.neoforged.api.distmarker.Dist;
@@ -101,11 +107,19 @@ public class ScrollableVerticalPanel extends VerticalPanel {
         this.enableScissor(guiGraphics);
         guiGraphics.pose().translate(0, -scrollAmount, 0);
         renderSelectedBackground(guiGraphics, mouseX, mouseY, partialTick);
+        int actualMouseY = (int) (mouseY + scrollAmount);
         for (int i = 0; i < heightList.size(); i++) {
             var pos = heightList.getInt(i);
             if (pos < scrollAmount - 10) continue;
             if (pos > scrollAmount + getBoundaryHeight() + 10) break;
-            children.get(i).render(guiGraphics, mouseX, mouseY, partialTick);
+            var widget = children.get(i);
+            var widgetRec = widget.getRectangle();
+            widget.render(guiGraphics, mouseX, actualMouseY, partialTick);
+            widget.isHovered =  mouseX >= widget.getX()
+                    && actualMouseY >= widget.getY()
+                    && mouseX < widget.getRight()
+                    && actualMouseY < widget.getBottom();
+            this.refreshScrollWidgetTooltip(widget.tooltip.get(), widget.isHovered(), widget.isFocused(), new ScreenRectangle(new ScreenPosition(widgetRec.left(), (int) (widgetRec.top()-scrollAmount)),widgetRec.width(),widgetRec.height()));
         }
         renderDecoration(guiGraphics, mouseX, mouseY, partialTick);
         guiGraphics.disableScissor();
@@ -126,6 +140,18 @@ public class ScrollableVerticalPanel extends VerticalPanel {
             guiGraphics.blitSprite(SCROLLER_BACKGROUND_SPRITE, l, y, 6, h);
             guiGraphics.blitSprite(SCROLLER_SPRITE, l, k, 6, i1);
             RenderSystem.disableBlend();
+        }
+        
+    }
+    
+    private void refreshScrollWidgetTooltip(@Nullable Tooltip tooltip, boolean isHovered, boolean isFocused, ScreenRectangle rect){
+        if (tooltip == null) return;
+        boolean flag = isHovered|| isFocused && Minecraft.getInstance().getLastInputType().isKeyboard();
+        if (flag) {
+            Screen screen = Minecraft.getInstance().screen;
+            if (screen != null) {
+                screen.setTooltipForNextRenderPass(tooltip, DefaultTooltipPositioner.INSTANCE, isFocused);
+            }
         }
         
     }

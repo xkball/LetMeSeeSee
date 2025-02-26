@@ -23,6 +23,7 @@ import com.xkball.let_me_see_see.client.gui.widget.NumInputFrame;
 import com.xkball.let_me_see_see.client.offscreen.OffScreenFBO;
 import com.xkball.let_me_see_see.client.offscreen.OffScreenRenders;
 import com.xkball.let_me_see_see.config.LMSConfig;
+import com.xkball.let_me_see_see.utils.GoogleTranslate;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.ClientLanguage;
 import net.minecraft.core.component.DataComponentMap;
@@ -61,6 +62,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -160,6 +162,13 @@ public class ItemDataExporterScreen extends FrameScreen {
             //OffScreenRenders.exportItemStackAsPng(Items.CRAFTING_TABLE.getDefaultInstance(),imageSize,imageSize,imageScale);
         }
         
+    }
+    
+    public void runTranslateTest(){
+        var map = LANGUAGES.get("en_us").getLanguageData();
+        for(var value : map.values().stream().filter(str -> str.contains("\n")).limit(1).toList()) {
+            GoogleTranslate.translate(value,GoogleTranslate.ZN_CH).whenComplete((str,t) -> Minecraft.getInstance().player.sendSystemMessage(Component.literal(value + " : " + str)));
+        }
     }
     
     public void runExport() {
