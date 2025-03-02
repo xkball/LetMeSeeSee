@@ -7,7 +7,6 @@ import com.xkball.let_me_see_see.client.gui.frame.core.render.GuiDecorations;
 import com.xkball.let_me_see_see.client.gui.frame.core.render.SimpleBackgroundRenderer;
 import com.xkball.let_me_see_see.utils.VanillaUtils;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;

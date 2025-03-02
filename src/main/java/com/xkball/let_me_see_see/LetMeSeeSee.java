@@ -4,7 +4,6 @@ import com.mojang.logging.LogUtils;
 import com.xkball.let_me_see_see.common.data.ExportsDataManager;
 import com.xkball.let_me_see_see.common.item.LMSItems;
 import com.xkball.let_me_see_see.config.LMSConfig;
-import com.xkball.let_me_see_see.utils.ClassSearcher;
 import com.xkball.let_me_see_see.utils.ClassStaticAnalysis;
 import com.xkball.let_me_see_see.utils.VanillaUtils;
 import net.minecraft.ChatFormatting;
@@ -21,7 +20,6 @@ import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
-import org.checkerframework.checker.units.qual.C;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -54,6 +52,7 @@ public class LetMeSeeSee {
     public static Instrumentation INST;
     
     public LetMeSeeSee(IEventBus modEventBus, ModContainer modContainer) {
+        System.out.println("好好好");
         LMSItems.init(modEventBus);
         CLASS_PATH = System.getProperty("java.class.path").split(File.pathSeparator);
         EXPORT_DIR_PATH = FMLPaths.getOrCreateGameRelativePath(Path.of(MODID)).toString();
@@ -115,7 +114,7 @@ public class LetMeSeeSee {
         }
         INST.addTransformer(new ClassFileTransformer() {
             @Override
-            public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
+            public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) {
                 return recordTransformer(classBeingRedefined, classfileBuffer);
             }
         }, true);
