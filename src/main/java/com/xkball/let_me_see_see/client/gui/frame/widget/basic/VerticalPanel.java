@@ -59,6 +59,16 @@ public class VerticalPanel extends AbstractContainerWidget implements IPanel, IT
         this.widgetBoundary = new WidgetBoundary(new WidgetPos(0, 0, width, height), new WidgetPos(0, 0, width, height));
     }
     
+    @Override
+    protected int contentHeight() {
+        return getHeight();
+    }
+    
+    @Override
+    protected double scrollRate() {
+        return 0;
+    }
+    
     public <T extends AbstractWidget & IPanel> VerticalPanel addWidget(T widget) {
         return addWidget(widget, false);
     }

@@ -46,7 +46,7 @@ public class ExportsDataManager {
     public static void finishClassExport(Class<?> clazz) {
         allowsExportsClasses.remove(clazz);
         recordedClasses.put(ClassSearcher.className(clazz), EXPORT_ENV);
-        Util.ioPool().submit(ExportsDataManager::saveRecordedClasses);
+        Util.ioPool().execute(ExportsDataManager::saveRecordedClasses);
     }
     
     public static void saveRecordedClasses() {
@@ -80,7 +80,7 @@ public class ExportsDataManager {
         if (player == null) return;
         Component message;
         while ((message = resultQueue.poll()) != null) {
-            player.sendSystemMessage(message);
+            player.displayClientMessage(message,false);
         }
     }
     

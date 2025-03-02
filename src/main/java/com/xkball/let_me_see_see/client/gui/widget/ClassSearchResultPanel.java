@@ -111,11 +111,11 @@ public class ClassSearchResultPanel extends ScrollableVerticalPanel {
         }
         
         @Override
-        protected boolean clicked(double mouseX, double mouseY) {
+        public boolean isMouseOver(double mouseX, double mouseY) {
             if (isFocused()) {
                 ClassSearchResultPanel.this.searchBarSetter.accept(str);
             }
-            return isMouseOver(mouseX, mouseY);
+            return super.isMouseOver(mouseX, mouseY);
         }
         
         @Override

@@ -1,0 +1,19 @@
+package com.xkball.let_me_see_see.datagen;
+
+import com.xkball.let_me_see_see.LetMeSeeSee;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
+
+@EventBusSubscriber(modid = LetMeSeeSee.MODID, bus = EventBusSubscriber.Bus.MOD)
+public class LMSDataGen {
+    
+    @SubscribeEvent
+    public static void gatherData(GatherDataEvent.Client event) {
+        var dataGenerator = event.getGenerator();
+        var packOutput = dataGenerator.getPackOutput();
+        var registries = event.getLookupProvider();
+        
+        event.addProvider(new ModItemModelProvider(packOutput));
+    }
+}

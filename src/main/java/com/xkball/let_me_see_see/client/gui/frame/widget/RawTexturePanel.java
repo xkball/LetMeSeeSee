@@ -9,6 +9,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import com.xkball.let_me_see_see.client.gui.frame.widget.basic.AutoResizeWidget;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.renderer.CoreShaders;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import org.joml.Matrix4f;
@@ -35,7 +36,7 @@ public class RawTexturePanel extends AutoResizeWidget {
         //texture = 18;
         
         RenderSystem.setShaderTexture(0, texture);
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShader(CoreShaders.POSITION_TEX);
         
         Matrix4f matrix4f = guiGraphics.pose().last().pose();
         var x1 = getBoundary().inner().x();

@@ -252,4 +252,14 @@ public class AutoResizeWidgetWrapper extends AbstractContainerWidget implements 
             this.guiDecoRenderer = new CombineRenderer(guiDecoRenderer, decoRenderer);
         }
     }
+    
+    @Override
+    protected int contentHeight() {
+        return getHeight();
+    }
+    
+    @Override
+    protected double scrollRate() {
+        return 0;
+    }
 }

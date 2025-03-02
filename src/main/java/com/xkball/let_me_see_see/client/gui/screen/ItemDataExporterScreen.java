@@ -24,6 +24,7 @@ import com.xkball.let_me_see_see.client.offscreen.OffScreenFBO;
 import com.xkball.let_me_see_see.client.offscreen.OffScreenRenders;
 import com.xkball.let_me_see_see.config.LMSConfig;
 import com.xkball.let_me_see_see.utils.GoogleTranslate;
+import com.xkball.let_me_see_see.utils.VanillaUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.ClientLanguage;
 import net.minecraft.core.component.DataComponentMap;
@@ -47,7 +48,7 @@ import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.config.ModConfigEvent;
-import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
+import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -166,7 +167,7 @@ public class ItemDataExporterScreen extends FrameScreen {
     public void runTranslateTest(){
         var map = LANGUAGES.get("en_us").getLanguageData();
         for(var value : map.values().stream().filter(str -> str.contains("\n")).limit(1).toList()) {
-            GoogleTranslate.translate(value,GoogleTranslate.ZN_CH).whenComplete((str,t) -> Minecraft.getInstance().player.sendSystemMessage(Component.literal(value + " : " + str)));
+            GoogleTranslate.translate(value,GoogleTranslate.ZN_CH).whenComplete((str,t) -> Minecraft.getInstance().player.displayClientMessage(Component.literal(value + " : " + str),false));
         }
     }
     
@@ -235,16 +236,16 @@ public class ItemDataExporterScreen extends FrameScreen {
         LOGGER.debug("Exporting {} ", id);
         assert imageSize != null && imageScale != null;
         var defaultMaxStackSize = item.getDefaultMaxStackSize();
-        var canRepair = item.canRepair;
+        var canRepair = item.canCombineRepair;
         @SuppressWarnings("deprecation")
-        var craftRemainItem = item.getCraftingRemainingItem();
+        var craftRemainItem = item.getCraftingRemainder();
         var defaultComponent = item.getDefaultInstance().getComponents();
         var tags = item.getDefaultInstance().getTags().toList();
         var result = new JsonObject();
         result.addProperty("item_name", id.toString());
         result.addProperty("default_max_stack_size", defaultMaxStackSize);
         result.addProperty("can_repair", canRepair);
-        result.addProperty("craftRemainItem", craftRemainItem == null ? null : BuiltInRegistries.ITEM.getKey(craftRemainItem).toString());
+        result.addProperty("craftRemainItem", BuiltInRegistries.ITEM.getKey(craftRemainItem.getItem()).toString());
         result.addProperty("item_image", OffScreenRenders.exportItemStackAsPng(item.getDefaultInstance(), imageSize, imageSize, imageScale, dumpPNG));
         addDataResult(result, "default_component", () -> DataComponentMap.CODEC.encodeStart(ops, defaultComponent), "ERROR WHEN ENCODING");
         addDataResult(result, "tags", () -> TAG_LIST_CODEC.encodeStart(ops, tags), "ERROR WHEN ENCODING");
@@ -349,8 +350,8 @@ public class ItemDataExporterScreen extends FrameScreen {
     }
     
     @SubscribeEvent
-    public static void onResourceReload(RegisterClientReloadListenersEvent event) {
-        event.registerReloadListener((ResourceManagerReloadListener) ItemDataExporterScreen::updateLanguageMap);
+    public static void onResourceReload(AddClientReloadListenersEvent event) {
+        event.addListener(VanillaUtils.modRL("update_language_map"),(ResourceManagerReloadListener) ItemDataExporterScreen::updateLanguageMap);
     }
     
 }

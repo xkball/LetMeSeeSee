@@ -17,6 +17,7 @@ import net.minecraft.client.gui.navigation.ScreenPosition;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.neoforged.api.distmarker.Dist;
@@ -136,8 +137,8 @@ public class ScrollableVerticalPanel extends VerticalPanel {
             }
             
             RenderSystem.enableBlend();
-            guiGraphics.blitSprite(SCROLLER_BACKGROUND_SPRITE, l, y, 6, h);
-            guiGraphics.blitSprite(SCROLLER_SPRITE, l, k, 6, i1);
+            guiGraphics.blitSprite(RenderType::guiTextured,SCROLLER_BACKGROUND_SPRITE, l, y, 6, h);
+            guiGraphics.blitSprite(RenderType::guiTextured,SCROLLER_SPRITE, l, k, 6, i1);
             RenderSystem.disableBlend();
         }
         

@@ -45,11 +45,6 @@ public abstract class AutoResizeWidget extends AbstractWidget implements IPanel 
     }
     
     @Override
-    protected boolean clicked(double mouseX, double mouseY) {
-        return this.active && this.visible && this.getBoundary().inner().inside(mouseX, mouseY);
-    }
-    
-    @Override
     public int getX() {
         return getBoundary().inner().x();
     }

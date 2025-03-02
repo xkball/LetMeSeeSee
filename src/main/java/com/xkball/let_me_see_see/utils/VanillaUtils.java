@@ -1,5 +1,6 @@
 package com.xkball.let_me_see_see.utils;
 
+import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.xkball.let_me_see_see.LetMeSeeSee;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -10,9 +11,8 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.Block;
@@ -20,7 +20,12 @@ import net.minecraft.world.phys.Vec2;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import org.apache.commons.codec.binary.Base64;
+import org.lwjgl.stb.STBImage;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.channels.Channels;
+import java.nio.channels.WritableByteChannel;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -48,21 +53,12 @@ public class VanillaUtils {
         return hand == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND;
     }
     
-    public static ItemInteractionResult itemInteractionFrom(InteractionResult result) {
-        return switch (result) {
-            case SUCCESS, SUCCESS_NO_ITEM_USED -> ItemInteractionResult.SUCCESS;
-            case CONSUME -> ItemInteractionResult.CONSUME;
-            case CONSUME_PARTIAL -> ItemInteractionResult.CONSUME_PARTIAL;
-            case PASS -> ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
-            case FAIL -> ItemInteractionResult.FAIL;
-        };
-    }
-    
     public static void runCommand(String command, LivingEntity livingEntity) {
         // Raise permission level to 2, akin to what vanilla sign does
-        CommandSourceStack cmdSrc = livingEntity.createCommandSourceStack().withPermission(2);
+        var level = livingEntity.level();
         var server = livingEntity.level().getServer();
-        if (server != null) {
+        if (server != null && level instanceof ServerLevel serverLevel) {
+            CommandSourceStack cmdSrc = livingEntity.createCommandSourceStackForNameResolution(serverLevel).withPermission(2);
             server.getCommands().performPrefixedCommand(cmdSrc, command);
         }
     }
@@ -192,5 +188,21 @@ public class VanillaUtils {
             buffer.addVertex(matrix, 0, 0, 100).setNormal(matrix, 0, 0, 1).setColor(0xFF0000FF);
         }
         
+        @OnlyIn(Dist.CLIENT)
+        public static byte[] asByteArray(NativeImage image) throws IOException {
+            byte[] abyte;
+            try (
+                    ByteArrayOutputStream bytearrayoutputstream = new ByteArrayOutputStream();
+                    WritableByteChannel writablebytechannel = Channels.newChannel(bytearrayoutputstream);
+            ) {
+                if (!image.writeToChannel(writablebytechannel)) {
+                    throw new IOException("Could not write image to byte array: " + STBImage.stbi_failure_reason());
+                }
+                
+                abyte = bytearrayoutputstream.toByteArray();
+            }
+            
+            return abyte;
+        }
     }
 }

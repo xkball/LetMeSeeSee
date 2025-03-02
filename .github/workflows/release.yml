@@ -36,7 +36,7 @@ jobs:
 
       - name: dslt
         id: dslt
-        uses: Anvil-Dev/dedicated-server-launch-test@1.21.1-neoforge
+        uses: Anvil-Dev/dedicated-server-launch-test@1.21.4-neoforge
         with:
           mod: build/libs/${{ steps.build.outputs.jar_name}}.jar
 

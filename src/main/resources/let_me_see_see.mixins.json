@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.xkball.let_me_see_see.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+  ],
+  "client": [
+    "MixinItemInfoCollector"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
