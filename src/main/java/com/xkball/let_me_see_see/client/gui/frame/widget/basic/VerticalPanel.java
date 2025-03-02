@@ -9,7 +9,6 @@ import com.xkball.let_me_see_see.client.gui.frame.core.WidgetPos;
 import com.xkball.let_me_see_see.client.gui.frame.core.render.CombineRenderer;
 import com.xkball.let_me_see_see.client.gui.frame.core.render.IGUIDecoRenderer;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.AbstractContainerWidget;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -24,49 +23,26 @@ import java.util.List;
 import java.util.function.Supplier;
 
 @OnlyIn(Dist.CLIENT)
-public class VerticalPanel extends AbstractContainerWidget implements IPanel, ITypeset {
+public class VerticalPanel extends BaseContainerWidget implements ITypeset {
     public final List<AbstractWidget> children = new ArrayList<>();
     public final List<IPanel> childrenPanels = new ArrayList<>();
     
-    public float xPercentage = 1f;
-    public float yPercentage = 1f;
-    public float leftPadding = 0f;
-    public float rightPadding = 0f;
-    public float topPadding = 0f;
-    public float bottomPadding = 0f;
-    
-    public int xMax = Integer.MAX_VALUE;
-    public int yMax = Integer.MAX_VALUE;
-    public int xMin = 0;
-    public int yMin = 0;
-    
-    public WidgetBoundary widgetBoundary;
     public HorizontalAlign horizontalAlign = HorizontalAlign.CENTER;
     public VerticalAlign verticalAlign = VerticalAlign.CENTER;
-    @Nullable
-    public IGUIDecoRenderer guiDecoRenderer = null;
     
     public static VerticalPanel of(Screen screen) {
-        return new VerticalPanel(0, 0, screen.width, screen.height, screen.getTitle());
+        return new VerticalPanel(screen.width, screen.height, screen.getTitle());
     }
     
     public VerticalPanel() {
-        this(0, 0, 0, 0, Component.empty());
+        this(0, 0, Component.empty());
     }
     
-    public VerticalPanel(int x, int y, int width, int height, Component message) {
-        super(x, y, width, height, message);
+    public VerticalPanel(int width, int height, Component message) {
+        super( message);
+        this.xPercentage = 1f;
+        this.yPercentage = 1f;
         this.widgetBoundary = new WidgetBoundary(new WidgetPos(0, 0, width, height), new WidgetPos(0, 0, width, height));
-    }
-    
-    @Override
-    protected int contentHeight() {
-        return getHeight();
-    }
-    
-    @Override
-    protected double scrollRate() {
-        return 0;
     }
     
     public <T extends AbstractWidget & IPanel> VerticalPanel addWidget(T widget) {
@@ -149,158 +125,6 @@ public class VerticalPanel extends AbstractContainerWidget implements IPanel, IT
     @Override
     public List<? extends GuiEventListener> children() {
         return children;
-    }
-    
-    @Override
-    public int getX() {
-        return getBoundary().inner().x();
-    }
-    
-    @Override
-    public int getY() {
-        return getBoundary().inner().y();
-    }
-    
-    @Override
-    public int getRight() {
-        return getBoundary().inner().maxX();
-    }
-    
-    @Override
-    public int getBottom() {
-        return getBoundary().inner().maxY();
-    }
-    
-    @Override
-    public float getXPercentage() {
-        return xPercentage;
-    }
-    
-    @Override
-    public float getYPercentage() {
-        return yPercentage;
-    }
-    
-    @Override
-    public float getLeftPadding() {
-        return leftPadding;
-    }
-    
-    @Override
-    public float getRightPadding() {
-        return rightPadding;
-    }
-    
-    @Override
-    public float getTopPadding() {
-        return topPadding;
-    }
-    
-    @Override
-    public float getBottomPadding() {
-        return bottomPadding;
-    }
-    
-    @Override
-    public int getXMax() {
-        return xMax;
-    }
-    
-    @Override
-    public int getYMax() {
-        return yMax;
-    }
-    
-    @Override
-    public int getXMin() {
-        return xMin;
-    }
-    
-    @Override
-    public int getYMin() {
-        return yMin;
-    }
-    
-    @Override
-    public WidgetBoundary getBoundary() {
-        return widgetBoundary;
-    }
-    
-    @Nullable
-    @Override
-    public IGUIDecoRenderer getDecoRenderer() {
-        return guiDecoRenderer;
-    }
-    
-    @Override
-    public boolean getIsFocused() {
-        return isFocused();
-    }
-    
-    @Override
-    public void setXPercentage(float percentage) {
-        this.xPercentage = percentage;
-    }
-    
-    @Override
-    public void setYPercentage(float percentage) {
-        this.yPercentage = percentage;
-    }
-    
-    @Override
-    public void setLeftPadding(float percentage) {
-        this.leftPadding = percentage;
-    }
-    
-    @Override
-    public void setRightPadding(float percentage) {
-        this.rightPadding = percentage;
-    }
-    
-    @Override
-    public void setTopPadding(float percentage) {
-        this.topPadding = percentage;
-    }
-    
-    @Override
-    public void setBottomPadding(float percentage) {
-        this.bottomPadding = percentage;
-    }
-    
-    @Override
-    public void setXMax(int max) {
-        this.xMax = max;
-    }
-    
-    @Override
-    public void setYMax(int max) {
-        this.yMax = max;
-    }
-    
-    @Override
-    public void setXMin(int min) {
-        this.xMin = min;
-    }
-    
-    @Override
-    public void setYMin(int min) {
-        this.yMin = min;
-    }
-    
-    @Override
-    public void setBoundary(WidgetBoundary boundary) {
-        this.widgetBoundary = boundary;
-        this.width = boundary.inner().width();
-        this.height = boundary.inner().height();
-    }
-    
-    @Override
-    public void setDecoRenderer(IGUIDecoRenderer decoRenderer) {
-        if (this.guiDecoRenderer == null) {
-            this.guiDecoRenderer = decoRenderer;
-        } else {
-            this.guiDecoRenderer = new CombineRenderer(guiDecoRenderer, decoRenderer);
-        }
     }
     
     @Override

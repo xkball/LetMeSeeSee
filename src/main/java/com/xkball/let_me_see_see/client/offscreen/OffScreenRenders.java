@@ -4,15 +4,12 @@ import com.mojang.blaze3d.ProjectionType;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexSorting;
 import com.xkball.let_me_see_see.LetMeSeeSee;
 import com.xkball.let_me_see_see.utils.VanillaUtils;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -22,7 +19,6 @@ import org.joml.Matrix4f;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Objects;
 
 @OnlyIn(Dist.CLIENT)
 public class OffScreenRenders {

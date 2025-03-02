@@ -257,6 +257,7 @@ public class ScrollableVerticalPanel extends VerticalPanel {
     
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        //todo[xkball] 支持滚动组件内的滚动组件
         this.setScrollAmount(this.scrollAmount - scrollY * 10);
         return true;
     }
