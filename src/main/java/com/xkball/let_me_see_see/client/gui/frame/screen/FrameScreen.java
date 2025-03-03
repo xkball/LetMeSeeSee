@@ -29,6 +29,8 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.loading.FMLPaths;
 
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -41,6 +43,7 @@ public class FrameScreen extends Screen implements IUpdateMarker {
     public static final float THE_SCALE = 0.3731f;
     
     protected volatile boolean needUpdate = false;
+    protected final Queue<Runnable> renderTasks = new ConcurrentLinkedQueue<>();
     
     public FrameScreen(Component title) {
         super(title);
@@ -77,6 +80,13 @@ public class FrameScreen extends Screen implements IUpdateMarker {
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.render(guiGraphics, mouseX, mouseY, partialTick);
         IPanel.DebugLine.drawAllDebugLines(guiGraphics);
+        while (!renderTasks.isEmpty()) {
+            renderTasks.poll().run();
+        }
+    }
+    
+    public void submitRenderTask(Runnable runnable) {
+        renderTasks.add(runnable);
     }
     
     @Override

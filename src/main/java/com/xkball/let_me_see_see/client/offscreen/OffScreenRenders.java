@@ -65,13 +65,12 @@ public class OffScreenRenders {
         var orthoProj = new Matrix4f();
         orthoProj.setOrtho(0, scale, scale, 0, -1000, 1000);
         scale *= scaleMul;
-        var oldProjMatrix = RenderSystem.getProjectionMatrix();
-        var oldProjType = RenderSystem.getProjectionType();
-        
+        RenderSystem.backupProjectionMatrix();
         RenderSystem.setProjectionMatrix(orthoProj, ProjectionType.ORTHOGRAPHIC);
         var modelView = RenderSystem.getModelViewStack();
         modelView.pushMatrix();
         modelView.set(new Matrix4f());
+        
         var poseStack = new PoseStack();
         poseStack.pushPose();
         poseStack.translate(shiftX, shiftY, 0);
@@ -97,6 +96,6 @@ public class OffScreenRenders {
         
         poseStack.popPose();
         modelView.popMatrix();
-        RenderSystem.setProjectionMatrix(oldProjMatrix, oldProjType);
+        RenderSystem.restoreProjectionMatrix();
     }
 }

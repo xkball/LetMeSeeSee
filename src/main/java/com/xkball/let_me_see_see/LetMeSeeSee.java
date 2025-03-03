@@ -61,7 +61,7 @@ public class LetMeSeeSee {
         var jar = modContainer.getModInfo().getOwningFile().getFile().getFilePath().toFile();
         if (jar.isDirectory()) {
             JAR_PATH = System.getProperty(JAR_PATH_KEY);
-            if (JAR_PATH.isEmpty()) {
+            if (JAR_PATH == null || JAR_PATH.isEmpty()) {
                 LOGGER.error("This mod require it's jar path to work! Missing system property: " + JAR_PATH_KEY);
             }
         } else {

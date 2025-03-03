@@ -129,13 +129,13 @@ public class ItemDataExporterScreen extends FrameScreen {
                 .addWidget(PanelConfig.of(0.3f, 1)
                         .fixHeight(20)
                         .paddingTop(8)
-                        .apply(createButton(Component.translatable("let_me_see_see.gui.item_data_exporter.export"), this::runExport)))
+                        .apply(createButton(Component.translatable("let_me_see_see.gui.item_data_exporter.export"), () -> submitRenderTask(this::runExport))))
                 .addWidget(PanelConfig.of(0.3f, 1)
                         .fixHeight(20)
                         .paddingTop(8)
                         .paddingBottom(0.1f)
                         .decoRenderer(GuiDecorations.bottomLeftString(Component.translatable("let_me_see_see.gui.item_data_exporter.export_mcmod_hint"), 11184810, true, 1))
-                        .apply(createButton(Component.translatable("let_me_see_see.gui.item_data_exporter.export_mcmod"), this::runExportMcMod)));
+                        .apply(createButton(Component.translatable("let_me_see_see.gui.item_data_exporter.export_mcmod"), () -> submitRenderTask(this::runExportMcMod))));
         var rightPanel = PanelConfig.of(THE_SCALE * centerWidthScale, 1)
                 .align(HorizontalAlign.CENTER, VerticalAlign.CENTER)
                 .apply(new VerticalPanel()
@@ -157,19 +157,23 @@ public class ItemDataExporterScreen extends FrameScreen {
     @Override
     public void updateScreen() {
         super.updateScreen();
-//        if (imageSize != null && imageScale != null) {
-//            OffScreenRenders.FBO.resize(imageSize, imageSize);
-//            OffScreenRenders.FBO.renderOffScreen(() -> OffScreenRenders.renderItemStack(Items.CRAFTING_TABLE.getDefaultInstance(), imageSize, imageSize, imageScale));
-//        }
+        this.submitRenderTask(
+                () ->{
+                    if (imageSize != null && imageScale != null) {
+                        OffScreenRenders.FBO.resize(imageSize, imageSize);
+                        OffScreenRenders.FBO.renderOffScreen(() -> OffScreenRenders.renderItemStack(Items.CRAFTING_TABLE.getDefaultInstance(), imageSize, imageSize, imageScale));
+                    }
+                }
+        );
     }
     
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.render(guiGraphics, mouseX, mouseY, partialTick);
-        if (imageSize != null && imageScale != null) {
-            OffScreenRenders.FBO.resize(imageSize, imageSize);
-            OffScreenRenders.FBO.renderOffScreen(() -> OffScreenRenders.renderItemStack(Items.CRAFTING_TABLE.getDefaultInstance(), imageSize, imageSize, imageScale));
-        }
+//        if (imageSize != null && imageScale != null) {
+//            OffScreenRenders.FBO.resize(imageSize, imageSize);
+//            OffScreenRenders.FBO.renderOffScreen(() -> OffScreenRenders.renderItemStack(Items.CRAFTING_TABLE.getDefaultInstance(), imageSize, imageSize, imageScale));
+//        }
     }
     
     public void runTranslateTest(){
