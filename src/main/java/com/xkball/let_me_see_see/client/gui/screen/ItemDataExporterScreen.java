@@ -26,6 +26,7 @@ import com.xkball.let_me_see_see.config.LMSConfig;
 import com.xkball.let_me_see_see.utils.GoogleTranslate;
 import com.xkball.let_me_see_see.utils.VanillaUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.language.ClientLanguage;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -156,12 +157,19 @@ public class ItemDataExporterScreen extends FrameScreen {
     @Override
     public void updateScreen() {
         super.updateScreen();
+//        if (imageSize != null && imageScale != null) {
+//            OffScreenRenders.FBO.resize(imageSize, imageSize);
+//            OffScreenRenders.FBO.renderOffScreen(() -> OffScreenRenders.renderItemStack(Items.CRAFTING_TABLE.getDefaultInstance(), imageSize, imageSize, imageScale));
+//        }
+    }
+    
+    @Override
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
         if (imageSize != null && imageScale != null) {
             OffScreenRenders.FBO.resize(imageSize, imageSize);
             OffScreenRenders.FBO.renderOffScreen(() -> OffScreenRenders.renderItemStack(Items.CRAFTING_TABLE.getDefaultInstance(), imageSize, imageSize, imageScale));
-            //OffScreenRenders.exportItemStackAsPng(Items.CRAFTING_TABLE.getDefaultInstance(),imageSize,imageSize,imageScale);
         }
-        
     }
     
     public void runTranslateTest(){

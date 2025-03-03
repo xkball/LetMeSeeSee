@@ -32,11 +32,11 @@ public class RawTexturePanel extends AutoResizeWidget {
     protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
         var texture = textureIDGetter.getAsInt();
-        //texture = 18;
+//        texture = 28;
         
+        guiGraphics.pose().pushPose();
         RenderSystem.setShaderTexture(0, texture);
         RenderSystem.setShader(CoreShaders.POSITION_TEX);
-        
         Matrix4f matrix4f = guiGraphics.pose().last().pose();
         var x1 = getBoundary().inner().x();
         var y1 = getBoundary().inner().y();
@@ -48,7 +48,7 @@ public class RawTexturePanel extends AutoResizeWidget {
         bufferbuilder.addVertex(matrix4f, x2, y2, 0).setUv(1, 0);
         bufferbuilder.addVertex(matrix4f, x2, y1, 0).setUv(1, 1);
         BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
-        
+        guiGraphics.pose().popPose();
     }
     
     @Override

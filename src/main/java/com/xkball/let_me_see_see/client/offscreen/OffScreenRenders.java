@@ -67,7 +67,11 @@ public class OffScreenRenders {
         scale *= scaleMul;
         var oldProjMatrix = RenderSystem.getProjectionMatrix();
         var oldProjType = RenderSystem.getProjectionType();
+        
         RenderSystem.setProjectionMatrix(orthoProj, ProjectionType.ORTHOGRAPHIC);
+        var modelView = RenderSystem.getModelViewStack();
+        modelView.pushMatrix();
+        modelView.set(new Matrix4f());
         var poseStack = new PoseStack();
         poseStack.pushPose();
         poseStack.translate(shiftX, shiftY, 0);
@@ -77,24 +81,22 @@ public class OffScreenRenders {
         Minecraft.getInstance()
                 .getItemModelResolver()
                 .updateForTopItem(itemStackRenderState, itemStack, ItemDisplayContext.GUI, false, null, null, 42);
-        
         var flag = !itemStackRenderState.usesBlockLight();
-        
         if (flag) {
+            bufferSource.endBatch();
             Lighting.setupForFlatItems();
         }
         
         itemStackRenderState.render(poseStack, bufferSource, 15728880, OverlayTexture.NO_OVERLAY);
-        //VanillaUtils.ClientHandler.renderAxis(bufferSource,poseStack);
-        RenderSystem.disableDepthTest();
+//        VanillaUtils.ClientHandler.renderAxis(bufferSource,poseStack);
         bufferSource.endBatch();
-        RenderSystem.enableDepthTest();
         
         if (flag) {
             Lighting.setupFor3DItems();
         }
         
         poseStack.popPose();
+        modelView.popMatrix();
         RenderSystem.setProjectionMatrix(oldProjMatrix, oldProjType);
     }
 }
