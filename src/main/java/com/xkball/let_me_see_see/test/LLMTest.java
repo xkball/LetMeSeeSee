@@ -11,7 +11,7 @@ import java.nio.file.Path;
 
 public class LLMTest {
     
-    private static final String API_KEY = "sk-393f058ddc1c481ea978d31f37ef22c1";
+    private static final String API_KEY = "";
     private static final String CONTENT_BASE = """
 {
     "model": "qwen-plus",

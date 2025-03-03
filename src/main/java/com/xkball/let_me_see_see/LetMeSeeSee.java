@@ -52,7 +52,6 @@ public class LetMeSeeSee {
     public static Instrumentation INST;
     
     public LetMeSeeSee(IEventBus modEventBus, ModContainer modContainer) {
-        System.out.println("好好好");
         LMSItems.init(modEventBus);
         CLASS_PATH = System.getProperty("java.class.path").split(File.pathSeparator);
         EXPORT_DIR_PATH = FMLPaths.getOrCreateGameRelativePath(Path.of(MODID)).toString();
