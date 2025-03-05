@@ -1,6 +1,8 @@
 package com.xkball.let_me_see_see.client.gui.screen;
 
+import com.mojang.logging.LogUtils;
 import com.xkball.let_me_see_see.client.gui.frame.core.HorizontalAlign;
+import com.xkball.let_me_see_see.client.gui.frame.core.IPanel;
 import com.xkball.let_me_see_see.client.gui.frame.core.IUpdateMarker;
 import com.xkball.let_me_see_see.client.gui.frame.core.PanelConfig;
 import com.xkball.let_me_see_see.client.gui.frame.core.UpdateChecker;
@@ -8,25 +10,36 @@ import com.xkball.let_me_see_see.client.gui.frame.core.VerticalAlign;
 import com.xkball.let_me_see_see.client.gui.frame.core.render.GuiDecorations;
 import com.xkball.let_me_see_see.client.gui.frame.screen.FrameScreen;
 import com.xkball.let_me_see_see.client.gui.frame.widget.Label;
+import com.xkball.let_me_see_see.client.gui.frame.widget.basic.AutoResizeWidget;
+import com.xkball.let_me_see_see.client.gui.frame.widget.basic.AutoResizeWidgetWrapper;
 import com.xkball.let_me_see_see.client.gui.frame.widget.basic.HorizontalPanel;
 import com.xkball.let_me_see_see.client.gui.frame.widget.basic.ScrollableVerticalPanel;
 import com.xkball.let_me_see_see.client.gui.frame.widget.basic.VerticalPanel;
 import com.xkball.let_me_see_see.client.gui.widget.ClassLabel;
 import com.xkball.let_me_see_see.common.data.ExportsDataManager;
 import com.xkball.let_me_see_see.config.LMSConfig;
+import com.xkball.let_me_see_see.utils.ClassDecompiler;
 import com.xkball.let_me_see_see.utils.ClassSearcher;
 import com.xkball.let_me_see_see.utils.VanillaUtils;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
 
 @OnlyIn(Dist.CLIENT)
 public class DataBaseScreen extends FrameScreen {
     
+    private static final Logger LOGGER = LogUtils.getLogger();
     private final UpdateChecker searchBarUpdateChecker = new UpdateChecker();
     private String searchBarValue = "";
     
@@ -97,10 +110,6 @@ public class DataBaseScreen extends FrameScreen {
                                         setNeedUpdate();
                                     }
                                 }, ResourceLocation.withDefaultNamespace("icon/search")))));
-        var classPreviewBody = PanelConfig.of(1, 1)
-                .paddingTop(0.2f)
-                .trim()
-                .apply(Label.of(Component.translatable("let_me_see_see.gui.data_base.preview.wip")));
         var classPreviewPanel = PanelConfig.of(1, 1)
                 .align(HorizontalAlign.LEFT, VerticalAlign.TOP)
                 .apply(new VerticalPanel() {
@@ -109,7 +118,7 @@ public class DataBaseScreen extends FrameScreen {
                         clearWidget();
                         if (lastFocused != null) {
                             addWidget(classPreviewHeader);
-                            addWidget(classPreviewBody);
+                            addWidget(buildClassPreviewPanelBody());
                         }
                         return true;
                     }
@@ -124,6 +133,61 @@ public class DataBaseScreen extends FrameScreen {
         screen.resize();
         this.addRenderableWidget(screen);
         this.updateScreen();
+    }
+    
+    @SuppressWarnings("unchecked")
+    public <T extends AbstractWidget & IPanel> T buildClassPreviewPanelBody(){
+        var config = PanelConfig.of(1, 1)
+                .paddingTop(0.4f)
+                .trim();
+        if(LMSConfig.FERN_FLOWER_PATH.isEmpty()){
+            return (T) config.apply(Label.ofKey("let_me_see_see.gui.data_base.preview.no_fernflower"));
+        }
+        else if(this.lastFocused == null){
+            return (T) config.apply(Label.ofKey("let_me_see_see.gui.data_base.preview.no_focused"));
+        }
+        else {
+            var classPath = this.lastFocused.getClassPath();
+            if(!classPath.toFile().exists()){
+                return (T) config.apply(Label.ofKey("let_me_see_see.gui.data_base.preview.no_file"));
+            }
+            var state = ClassDecompiler.getState(classPath);
+            if(state == null || state == ClassDecompiler.DecompilerState.DECOMPILING){
+                if(state == null){
+                    ClassDecompiler.decompile(classPath).whenCompleteAsync((v,t) -> {
+                        if(t == null){
+                            this.setNeedUpdate();
+                        }
+                        else {
+                            LOGGER.error("can not decompile file: {}",classPath,t);
+                        }
+                    });
+                }
+                return (T) config.apply(Label.ofKey("let_me_see_see.gui.data_base.preview.decompiling"));
+            }
+            else if(state == ClassDecompiler.DecompilerState.SUCCESS){
+                List<String> lines = new ArrayList<>();
+                var dstPath = ClassDecompiler.toResultPath(classPath);
+                if(dstPath.toFile().exists()){
+                    try {
+                        lines = Files.readAllLines(dstPath);
+                    } catch (IOException e) {
+                        LOGGER.error("can not read file: {}",dstPath,e);
+                    }
+                }
+                var config_ = PanelConfig.of().trim().paddingLeft(2);
+                return (T) PanelConfig.of(1,1)
+                        .apply(AutoResizeWidgetWrapper.of(
+                                PanelConfig.of(1,1)
+                                        .align(HorizontalAlign.LEFT, VerticalAlign.TOP)
+                                        .apply(new ScrollableVerticalPanel()
+                                                .addWidgets(lines.stream().map(str -> config_.apply(Label.of(str))).toList(),false))));
+            }
+            else {
+                assert state == ClassDecompiler.DecompilerState.ERROR;
+                return (T) config.apply(Label.ofKey("let_me_see_see.gui.data_base.preview.decompile_error"));
+            }
+        }
     }
     
     public String getSearchBarValue() {
