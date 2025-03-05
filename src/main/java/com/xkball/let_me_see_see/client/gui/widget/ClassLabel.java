@@ -54,10 +54,14 @@ public class ClassLabel extends AutoResizeWidget {
     
     }
     
+    public Path getClassPath(){
+        return Path.of(LetMeSeeSee.EXPORT_DIR_PATH, className.substring(0, className.lastIndexOf('[')).replace('.', File.separatorChar) + ".class");
+    }
+    
     public void openInIDEA() {
         var ideaPath = LMSConfig.IDEA_PATH;
         if (ideaPath.isEmpty()) return;
-        var classPath = Path.of(LetMeSeeSee.EXPORT_DIR_PATH, className.substring(0, className.lastIndexOf('[')).replace('.', File.separatorChar) + ".class").toString();
+        var classPath = getClassPath().toString();
         var pb = new ProcessBuilder('\"' + ideaPath + '\"', classPath);
         pb.redirectErrorStream(true);
         pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);

@@ -27,6 +27,10 @@ public class Label extends AutoResizeWidget {
         return of(Component.literal(str));
     }
     
+    public static Label ofKey(String str) {
+        return of(Component.translatable(str));
+    }
+    
     public static Label of(Component message) {
         return of(message, 1);
     }

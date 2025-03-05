@@ -167,15 +167,6 @@ public class ItemDataExporterScreen extends FrameScreen {
         );
     }
     
-    @Override
-    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
-//        if (imageSize != null && imageScale != null) {
-//            OffScreenRenders.FBO.resize(imageSize, imageSize);
-//            OffScreenRenders.FBO.renderOffScreen(() -> OffScreenRenders.renderItemStack(Items.CRAFTING_TABLE.getDefaultInstance(), imageSize, imageSize, imageScale));
-//        }
-    }
-    
     public void runTranslateTest(){
         var map = LANGUAGES.get("en_us").getLanguageData();
         for(var value : map.values().stream().filter(str -> str.contains("\n")).limit(1).toList()) {
