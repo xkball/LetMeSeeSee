@@ -1,8 +1,6 @@
 package com.xkball.let_me_see_see.datagen;
 
 import com.xkball.let_me_see_see.LetMeSeeSee;
-import com.xkball.xorlib.api.annotation.DataGenProvider;
-import com.xkball.xorlib.api.annotation.SubscribeEventEnhanced;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.data.event.GatherDataEvent;

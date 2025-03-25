@@ -10,7 +10,6 @@ import com.xkball.let_me_see_see.client.gui.frame.core.VerticalAlign;
 import com.xkball.let_me_see_see.client.gui.frame.core.render.GuiDecorations;
 import com.xkball.let_me_see_see.client.gui.frame.screen.FrameScreen;
 import com.xkball.let_me_see_see.client.gui.frame.widget.Label;
-import com.xkball.let_me_see_see.client.gui.frame.widget.basic.AutoResizeWidget;
 import com.xkball.let_me_see_see.client.gui.frame.widget.basic.AutoResizeWidgetWrapper;
 import com.xkball.let_me_see_see.client.gui.frame.widget.basic.HorizontalPanel;
 import com.xkball.let_me_see_see.client.gui.frame.widget.basic.ScrollableVerticalPanel;
