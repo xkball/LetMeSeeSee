@@ -2,7 +2,6 @@ package com.xkball.let_me_see_see.network.server2client;
 
 import com.xkball.let_me_see_see.common.item.IScreenProviderItem;
 import com.xkball.let_me_see_see.utils.VanillaUtils;
-import com.xkball.xorlib.api.annotation.NetworkPacket;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.RegistryFriendlyByteBuf;
