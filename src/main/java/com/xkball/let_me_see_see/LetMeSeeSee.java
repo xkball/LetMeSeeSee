@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Mod(LetMeSeeSee.MODID)
+//@ModMeta(useLanguages = {"en_us","zh_cn"})
 public class LetMeSeeSee {
     
     private static final Logger LOGGER = LogUtils.getLogger();

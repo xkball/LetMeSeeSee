@@ -5,11 +5,14 @@ import com.xkball.let_me_see_see.common.item.LMSItems;
 import net.minecraft.client.data.models.BlockModelGenerators;
 import net.minecraft.client.data.models.ItemModelGenerators;
 import net.minecraft.client.data.models.ModelProvider;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.concurrent.CompletableFuture;
 
 @ParametersAreNonnullByDefault
+//@DataGenProvider
 public class ModItemModelProvider extends ModelProvider {
     
     public ModItemModelProvider(PackOutput output) {

@@ -16,7 +16,7 @@ public class LMSConfig {
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
     public static final ModConfigSpec.ConfigValue<String> IDEA_PATH_CONFIG = BUILDER.comment("The path of your Intellij IDEA (idea64.exe) (Or other program can open .class file)").define("idea_path", "");
     public static final ModConfigSpec.BooleanValue USE_IDEA_DECOMPILER_AS_DEFAULT_CONFIG = BUILDER.comment("Intellij IDEA use fernflower as it java decompiler.Enable this allows this mod use it as default decompiler if \"fernflower_path\" is empty.").define("use_idea_decompiler_as_default", true);
-    public static final ModConfigSpec.ConfigValue<String> FERN_FLOWER_PATH_CONFIG = BUILDER.comment("The path of fernflower.jar(Or other program can decomplie .class file)").comment("See: https://github.com/JetBrains/intellij-community/tree/master/plugins/java-decompiler/engine").define("fernflower_path", "");
+    public static final ModConfigSpec.ConfigValue<String> FERN_FLOWER_PATH_CONFIG = BUILDER.comment("The path of fernflower.jar(Or other program can decomplie .class file). Can keep empty if idea_path has been set.").comment("See: https://github.com/JetBrains/intellij-community/tree/master/plugins/java-decompiler/engine").define("fernflower_path", "");
     public static final ModConfigSpec.ConfigValue<String> FERN_FLOWER_OPTION_CONFIG = BUILDER.comment("The option give to fernflower.").define("fernflower_option", "-mpm=60");
     public static final ModConfigSpec.ConfigValue<List<? extends String>> EXPORT_LANG_CONFIG = BUILDER.comment("Languages use on item name when item data export.").defineList("languages", List.of("en_us", "zh_cn"), null, (o) -> o instanceof String);
     public static final ModConfigSpec SPEC = BUILDER.build();

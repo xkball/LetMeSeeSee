@@ -80,7 +80,8 @@ configurations {
 }
 
 dependencies {
-
+    //this is a in making compile time lib.
+    //compileOnly(annotationProcessor("com.xkball:XorLib:1.0-SNAPSHOT:all"))
 }
 
 jar{

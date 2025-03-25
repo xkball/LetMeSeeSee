@@ -155,12 +155,10 @@ public class DataBaseScreen extends FrameScreen {
             if(state == null || state == ClassDecompiler.DecompilerState.DECOMPILING){
                 if(state == null){
                     ClassDecompiler.decompile(classPath).whenCompleteAsync((v,t) -> {
-                        if(t == null){
-                            this.setNeedUpdate();
-                        }
-                        else {
+                        if(t != null){
                             LOGGER.error("can not decompile file: {}",classPath,t);
                         }
+                        this.setNeedUpdate();
                     });
                 }
                 return (T) config.apply(Label.ofKey("let_me_see_see.gui.data_base.preview.decompiling"));
