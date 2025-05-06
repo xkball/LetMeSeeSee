@@ -46,7 +46,7 @@ public class ClassStaticAnalysis {
         @Override
         public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
             if(ONLY_IN.equals(descriptor)){
-                System.out.println("Only In Class: " + name);
+                System.out.println("Only In Client Class: " + name);
             }
             return super.visitAnnotation(descriptor, visible);
         }

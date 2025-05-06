@@ -10,4 +10,8 @@ public class LMSAgent {
         INST = inst;
     }
     
+    public static void premain(String args, Instrumentation inst) {
+        INST = inst;
+    }
+    
 }

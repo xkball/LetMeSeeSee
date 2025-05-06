@@ -142,7 +142,7 @@ public class ItemDataExporterScreen extends FrameScreen {
                         .addWidget(PanelConfig.of(1, 1).apply(new SquareWidgetWrapper(
                                 PanelConfig.of()
                                         .decoRenderer(GuiDecorations.bottomCenterString(Component.translatable("let_me_see_see.gui.item_data_exporter.export_hint")))
-                                        .apply(new RawTexturePanel(OffScreenRenders.FBO::getTextureID))))));
+                                        .apply(new RawTexturePanel(OffScreenRenders.FBO.get()::getTextureID))))));
         var content = PanelConfig.of(1, 1)
                 .align(HorizontalAlign.CENTER, VerticalAlign.TOP)
                 .apply(new HorizontalPanel()
@@ -160,8 +160,8 @@ public class ItemDataExporterScreen extends FrameScreen {
         this.submitRenderTask(
                 () ->{
                     if (imageSize != null && imageScale != null) {
-                        OffScreenRenders.FBO.resize(imageSize, imageSize);
-                        OffScreenRenders.FBO.renderOffScreen(() -> OffScreenRenders.renderItemStack(Items.CRAFTING_TABLE.getDefaultInstance(), imageSize, imageSize, imageScale));
+                        OffScreenRenders.FBO.get().resize(imageSize, imageSize);
+                        OffScreenRenders.FBO.get().renderOffScreen(() -> OffScreenRenders.renderItemStack(Items.CRAFTING_TABLE.getDefaultInstance(), imageSize, imageSize, imageScale));
                     }
                 }
         );
@@ -174,6 +174,15 @@ public class ItemDataExporterScreen extends FrameScreen {
         }
     }
     
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    public boolean filterItem(ResourceLocation item) {
+        if (namespaceFilterValue.isEmpty()) return true;
+        if (namespaceFilterValue.contains(":")){
+            return item.toString().equals(namespaceFilterValue);
+        }
+        return item.getNamespace().equals(namespaceFilterValue);
+    }
+    
     public void runExport() {
         if (imageSize == null || imageScale == null) return;
         var ops = RegistryOps.create(JsonOps.INSTANCE, Objects.requireNonNull(Minecraft.getInstance().level).registryAccess());
@@ -182,7 +191,7 @@ public class ItemDataExporterScreen extends FrameScreen {
             var key = entry.getKey().location();
             var value = entry.getValue();
             var namespace = key.getNamespace();
-            if (!namespaceFilterValue.isEmpty() && !namespace.equals(namespaceFilterValue)) continue;
+            if(!filterItem(key)) continue;
             map.put(namespace, itemData(key, value, ops));
         }
         for (var entry : map.asMap().entrySet()) {
@@ -211,7 +220,7 @@ public class ItemDataExporterScreen extends FrameScreen {
             var itemID = entry.getKey().location();
             var item = entry.getValue();
             var namespace = itemID.getNamespace();
-            if (!namespaceFilterValue.isEmpty() && !namespace.equals(namespaceFilterValue)) continue;
+            if(!filterItem(itemID)) continue;
             var json = itemDataMcMod(itemID, item, ops);
             json.addProperty("smallIcon", OffScreenRenders.exportItemStackAsPng(smallFBO, item.getDefaultInstance(), 1, false));
             json.addProperty("largeIcon", OffScreenRenders.exportItemStackAsPng(bigFBO, item.getDefaultInstance(), 1, false));
