@@ -5,6 +5,8 @@ import com.xkball.let_me_see_see.common.data.ExportsDataManager;
 import com.xkball.let_me_see_see.common.item.LMSItems;
 import com.xkball.let_me_see_see.config.LMSConfig;
 import com.xkball.let_me_see_see.utils.ClassStaticAnalysis;
+import com.xkball.let_me_see_see.utils.JavaWorkaround;
+import com.xkball.let_me_see_see.utils.ThrowableSupplier;
 import com.xkball.let_me_see_see.utils.VanillaUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
@@ -20,6 +22,7 @@ import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -28,10 +31,12 @@ import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
+import java.lang.invoke.MethodHandle;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.ProtectionDomain;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -41,6 +46,11 @@ import java.util.stream.Stream;
 public class LetMeSeeSee {
     
     private static final Logger LOGGER = LogUtils.getLogger();
+    @Nullable
+    private static final MethodHandle LOAD_AGENT = ThrowableSupplier.getOrNull(() -> Objects.requireNonNull(JavaWorkaround.TRUSTED_LOOKUP)
+            .unreflect(Class.forName("sun.instrument.InstrumentationImpl").getMethod("loadAgent", String.class)),
+            (e) -> LOGGER.error("Can not get MethodHandle: sun.instrument.InstrumentationImpl.loadAgent",e));
+    
     public static final String MODID = "let_me_see_see";
     public static final String JAR_PATH_KEY = "LET_ME_SEE_AGENT_JAR_PATH";
     public static final String EXPORT_PATH_KEY = "LET_ME_SEE_EXPORT_PATH";
@@ -86,27 +96,40 @@ public class LetMeSeeSee {
         ExportsDataManager.sentMessages();
     }
     
-    public static Instrumentation getInst() {
-        if (INST != null) return INST;
-        LOGGER.info("start get instrumentation");
-        var pid = ProcessHandle.current().pid();
-        var javaHome = System.getProperty("java.home");
-        var process = new ProcessBuilder("java", "-jar", JAR_PATH, String.valueOf(pid), JAR_PATH);
-        process.directory(new File(javaHome, "bin"));
-        process.redirectErrorStream(true);
-        process.redirectOutput(ProcessBuilder.Redirect.INHERIT);
-        try {
-            process.start().waitFor();
-        } catch (IOException | InterruptedException e) {
-            LOGGER.error("Failed to load java agent", e);
-            throw new RuntimeException(e);
-        }
+    private static void tryGetInst(){
         try {
             INST = (Instrumentation) Class.forName("com.xkball.let_me_see_see.LMSAgent", true, ClassLoader.getSystemClassLoader())
                     .getField("INST").get(null);
         } catch (NoSuchFieldException | ClassNotFoundException | IllegalAccessException e) {
             LOGGER.error("Failed to get instrumentation", e);
-            throw new RuntimeException(e);
+        }
+    }
+    
+    public static Instrumentation getInst() {
+        if (INST != null) return INST;
+        LOGGER.info("Start get instrumentation via MethodHandle.");
+        if(LOAD_AGENT != null) {
+            try {
+                LOAD_AGENT.invokeExact(JAR_PATH);
+            } catch (Throwable e) {
+                LOGGER.error("Failed invoke loadAgent", e);
+            }
+            tryGetInst();
+        }
+        if(INST == null){
+            LOGGER.info("Start get instrumentation via Attach JVM.");
+            var pid = ProcessHandle.current().pid();
+            var javaHome = System.getProperty("java.home");
+            var process = new ProcessBuilder("java", "-jar", JAR_PATH, String.valueOf(pid), JAR_PATH);
+            process.directory(new File(javaHome, "bin"));
+            process.redirectErrorStream(true);
+            process.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+            try {
+                process.start().waitFor();
+            } catch (IOException | InterruptedException e) {
+                LOGGER.error("Failed to load java agent", e);
+            }
+            tryGetInst();
         }
         if (INST == null) {
             LOGGER.error("Failed to get instrumentation after all.");

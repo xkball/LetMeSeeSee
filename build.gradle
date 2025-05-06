@@ -94,6 +94,7 @@ jar{
         attributes(
                 "Main-Class":"com.xkball.let_me_see_see.LMSMain",
                 "Agent-Class":"com.xkball.let_me_see_see.LMSAgent",
+                "Launcher-Agent-Class":"com.xkball.let_me_see_see.LMSAgent",
                 "Can-Retransform-Classes": "true"
         )
     }

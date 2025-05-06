@@ -14,6 +14,7 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.common.util.Lazy;
 import org.joml.Matrix4f;
 
 import java.io.IOException;
@@ -22,11 +23,11 @@ import java.nio.file.Path;
 @OnlyIn(Dist.CLIENT)
 public class OffScreenRenders {
     
-    public static final OffScreenFBO FBO = new OffScreenFBO(128, 128);
+    public static Lazy<OffScreenFBO> FBO = Lazy.of(() -> new OffScreenFBO(128,128));
     
     public static String exportItemStackAsPng(ItemStack itemStack, int width, int height, float scale, boolean writeToFile) {
-        FBO.resize(width, height);
-        return exportItemStackAsPng(FBO, itemStack, scale, writeToFile);
+        FBO.get().resize(width, height);
+        return exportItemStackAsPng(FBO.get(), itemStack, scale, writeToFile);
     }
     
     public static String exportItemStackAsPng(OffScreenFBO fbo, ItemStack itemStack, float scale, boolean writeToFile) {
