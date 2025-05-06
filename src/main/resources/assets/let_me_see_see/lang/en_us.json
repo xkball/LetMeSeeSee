@@ -25,7 +25,7 @@
   "let_me_see_see.gui.data_base.re_export": "Re-Export Class",
   "let_me_see_see.gui.item_data_exporter": "Item Data Exporter",
   "let_me_see_see.gui.item_data_exporter.namespace": "Namespace: ",
-  "let_me_see_see.gui.item_data_exporter.namespace.hint": "The namespace(modid) to export.Keep empty to export all namespaces.",
+  "let_me_see_see.gui.item_data_exporter.namespace.hint": "The namespace(modid) or item id to export.Keep empty to export all namespaces.",
   "let_me_see_see.gui.item_data_exporter.image_size": "Image Size: ",
   "let_me_see_see.gui.item_data_exporter.item_scale": "Item Scale: ",
   "let_me_see_see.gui.item_data_exporter.save_png": "Save Item Image as PNG",

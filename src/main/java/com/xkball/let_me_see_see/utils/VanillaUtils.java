@@ -21,12 +21,9 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import org.apache.commons.codec.binary.Base64;
 import org.lwjgl.stb.STBImage;
-import sun.misc.Unsafe;
-import sun.reflect.ReflectionFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.lang.invoke.MethodHandles;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
 import java.security.MessageDigest;

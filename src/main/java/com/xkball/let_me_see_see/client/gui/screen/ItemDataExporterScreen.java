@@ -26,7 +26,6 @@ import com.xkball.let_me_see_see.config.LMSConfig;
 import com.xkball.let_me_see_see.utils.GoogleTranslate;
 import com.xkball.let_me_see_see.utils.VanillaUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.language.ClientLanguage;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.registries.BuiltInRegistries;
