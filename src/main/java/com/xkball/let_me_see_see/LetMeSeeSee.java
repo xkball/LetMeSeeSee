@@ -33,6 +33,7 @@ import java.lang.instrument.UnmodifiableClassException;
 import java.lang.invoke.MethodHandle;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.security.ProtectionDomain;
 import java.util.List;
 import java.util.Objects;
@@ -78,10 +79,10 @@ public class LetMeSeeSee {
         } else {
             JAR_PATH = jar.getAbsolutePath();
         }
-        ClassStaticAnalysis.scanOnlyIn(MODID);
         LOGGER.info("{}: {}", JAR_PATH_KEY, JAR_PATH);
         LOGGER.info("{}: {}", EXPORT_PATH_KEY, EXPORT_DIR_PATH);
         LOGGER.info("{}: {}", "MOD_LIST_MD5", MOD_LIST_MD5);
+        ClassStaticAnalysis.scanOnlyIn(MODID);
         modContainer.registerConfig(ModConfig.Type.COMMON, LMSConfig.SPEC);
     }
     
@@ -104,12 +105,30 @@ public class LetMeSeeSee {
         }
     }
     
+    private static Path createTempJar(){
+        try {
+            var self = Path.of(JAR_PATH);
+            var tempDir = Files.createTempDirectory("com.xkball.");
+            var target = tempDir.resolve("let_me_see_see_temp.jar");
+            Files.copy(self, target, StandardCopyOption.REPLACE_EXISTING);
+            LOGGER.info("Created temporary jar: {}", target);
+            target.toFile().deleteOnExit();
+            tempDir.toFile().deleteOnExit();
+            return target;
+        }catch (IOException e){
+            LOGGER.error("Failed to create temp jar", e);
+            throw new RuntimeException("Failed to create temp jar", e);
+        }
+
+    }
+    
     public static Instrumentation getInst() {
         if (INST != null) return INST;
+        var jar = createTempJar().toFile().getAbsolutePath();
         LOGGER.info("Start get instrumentation via MethodHandle.");
         if(LOAD_AGENT != null) {
             try {
-                LOAD_AGENT.invokeExact(JAR_PATH);
+                LOAD_AGENT.invokeExact(jar);
             } catch (Throwable e) {
                 LOGGER.error("Failed invoke loadAgent", e);
             }
@@ -119,7 +138,7 @@ public class LetMeSeeSee {
             LOGGER.info("Start get instrumentation via Attach JVM.");
             var pid = ProcessHandle.current().pid();
             var javaHome = System.getProperty("java.home");
-            var process = new ProcessBuilder("java", "-jar", JAR_PATH, String.valueOf(pid), JAR_PATH);
+            var process = new ProcessBuilder("java", "-jar", jar, String.valueOf(pid), jar);
             process.directory(new File(javaHome, "bin"));
             process.redirectErrorStream(true);
             process.redirectOutput(ProcessBuilder.Redirect.INHERIT);
