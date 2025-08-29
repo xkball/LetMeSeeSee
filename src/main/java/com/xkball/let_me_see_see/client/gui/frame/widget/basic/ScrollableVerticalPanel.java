@@ -1,6 +1,5 @@
 package com.xkball.let_me_see_see.client.gui.frame.widget.basic;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.xkball.let_me_see_see.client.gui.frame.core.IPanel;
 import com.xkball.let_me_see_see.client.gui.frame.core.WidgetPos;
 import com.xkball.let_me_see_see.client.gui.frame.core.render.GuiDecorations;
@@ -10,26 +9,21 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.navigation.ScreenPosition;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import org.joml.Vector2f;
 
 import javax.annotation.Nullable;
 
-@OnlyIn(Dist.CLIENT)
 public class ScrollableVerticalPanel extends VerticalPanel {
     
-    private static final ResourceLocation SCROLLER_SPRITE = ResourceLocation.withDefaultNamespace("widget/scroller");
-    private static final ResourceLocation SCROLLER_BACKGROUND_SPRITE = ResourceLocation.withDefaultNamespace("widget/scroller_background");
+    protected static final ResourceLocation SCROLLER_SPRITE = ResourceLocation.withDefaultNamespace("widget/scroller");
+    protected static final ResourceLocation SCROLLER_BACKGROUND_SPRITE = ResourceLocation.withDefaultNamespace("widget/scroller_background");
     
     public IntArrayList heightList = new IntArrayList();
     public int maxScroll = 0;
@@ -67,7 +61,7 @@ public class ScrollableVerticalPanel extends VerticalPanel {
         }
         var heightSum = y - parentPos.y();
         this.maxPosition = heightSum;
-        this.maxScroll = Math.max(0, heightSum - parentPos.height());
+        this.maxScroll = Math.max(0, heightSum - parentPos.height() + 6);
         var shiftY = IPanel.calculateShift(verticalAlign, parentPos.height(), heightSum);
         for (var widget : childrenPanels) {
             var shiftX = IPanel.calculateShift(horizontalAlign, parentPos.width(), widget.getBoundary().outer().width());
@@ -99,31 +93,40 @@ public class ScrollableVerticalPanel extends VerticalPanel {
         return getBoundary().inner().y();
     }
     
+    public void translateGUIMatrix(GuiGraphics guiGraphics){
+        guiGraphics.pose().translate(0f,(float) -scrollAmount);
+    }
+    
+    public Vector2f getActualMousePos(float mouseX, float mouseY) {
+        return new Vector2f(mouseX, (float) (mouseY + scrollAmount));
+    }
+    
     @Override
     protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         renderDecoration(guiGraphics, mouseX, mouseY, partialTick);
         this.hovered = this.getEntryAtPosition(mouseX, mouseY);
-        guiGraphics.pose().pushPose();
+        guiGraphics.pose().pushMatrix();
         this.enableScissor(guiGraphics);
-        guiGraphics.pose().translate(0, -scrollAmount, 0);
+        this.translateGUIMatrix(guiGraphics);
         renderSelectedBackground(guiGraphics, mouseX, mouseY, partialTick);
-        int actualMouseY = (int) (mouseY + scrollAmount);
+        var actualMouse = getActualMousePos(mouseX, mouseY);
         for (int i = 0; i < heightList.size(); i++) {
             var pos = heightList.getInt(i);
             if (pos < scrollAmount - 10) continue;
             if (pos > scrollAmount + getBoundaryHeight() + 10) break;
             var widget = children.get(i);
             var widgetRec = widget.getRectangle();
-            widget.render(guiGraphics, mouseX, actualMouseY, partialTick);
-            widget.isHovered =  mouseX >= widget.getX()
-                    && actualMouseY >= widget.getY()
-                    && mouseX < widget.getRight()
-                    && actualMouseY < widget.getBottom();
-            this.refreshScrollWidgetTooltip(widget.tooltip.get(), widget.isHovered(), widget.isFocused(), new ScreenRectangle(new ScreenPosition(widgetRec.left(), (int) (widgetRec.top()-scrollAmount)),widgetRec.width(),widgetRec.height()));
+            widget.render(guiGraphics, (int) actualMouse.x, (int) actualMouse.y, partialTick);
+            widget.isHovered =  actualMouse.x >= widget.getX()
+                    && actualMouse.y >= widget.getY()
+                    && actualMouse.x < widget.getRight()
+                    && actualMouse.y < widget.getBottom();
+            widget.tooltip.refreshTooltipForNextRenderPass(guiGraphics,mouseX,mouseY,widget.isHovered(), widget.isFocused(),
+                    new ScreenRectangle(new ScreenPosition(widgetRec.left(), (int) (widgetRec.top()-scrollAmount)),widgetRec.width(),widgetRec.height()));
         }
         renderDecoration(guiGraphics, mouseX, mouseY, partialTick);
         guiGraphics.disableScissor();
-        guiGraphics.pose().popPose();
+        guiGraphics.pose().popMatrix();
         
         if (this.scrollbarVisible()) {
             int l = this.getScrollbarPosition();
@@ -136,22 +139,9 @@ public class ScrollableVerticalPanel extends VerticalPanel {
                 k = this.getY();
             }
             
-            RenderSystem.enableBlend();
-            guiGraphics.blitSprite(RenderType::guiTextured,SCROLLER_BACKGROUND_SPRITE, l, y, 6, h);
-            guiGraphics.blitSprite(RenderType::guiTextured,SCROLLER_SPRITE, l, k, 6, i1);
-            RenderSystem.disableBlend();
-        }
-        
-    }
-    
-    private void refreshScrollWidgetTooltip(@Nullable Tooltip tooltip, boolean isHovered, boolean isFocused, ScreenRectangle rect){
-        if (tooltip == null) return;
-        boolean flag = isHovered|| isFocused && Minecraft.getInstance().getLastInputType().isKeyboard();
-        if (flag) {
-            Screen screen = Minecraft.getInstance().screen;
-            if (screen != null) {
-                screen.setTooltipForNextRenderPass(tooltip, DefaultTooltipPositioner.INSTANCE, isFocused);
-            }
+            guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED,SCROLLER_BACKGROUND_SPRITE, l, y, 6, h);
+            guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED,SCROLLER_SPRITE, l, k, 6, i1);
+           
         }
         
     }
@@ -165,7 +155,7 @@ public class ScrollableVerticalPanel extends VerticalPanel {
         guiGraphics.enableScissor(bound.x(), bound.y(), bound.maxX() - 6, bound.maxY());
     }
     
-    private void scroll(int scroll) {
+    protected void scroll(int scroll) {
         this.setScrollAmount(this.scrollAmount + (double) scroll);
     }
     
@@ -205,6 +195,10 @@ public class ScrollableVerticalPanel extends VerticalPanel {
         return null;
     }
     
+    protected boolean anyScrolling(){
+        return this.scrolling;
+    }
+    
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (!this.isValidMouseClick(button)) {
@@ -217,7 +211,8 @@ public class ScrollableVerticalPanel extends VerticalPanel {
                 var widget = this.getEntryAtPosition(mouseX, mouseY);
                 //this.setSelected(widget);
                 if (widget != null) {
-                    if (widget.mouseClicked(mouseX, mouseY + scrollAmount, button)) {
+                    var actualMouse = this.getActualMousePos((float) mouseX, (float) mouseY);
+                    if (widget.mouseClicked(actualMouse.x, actualMouse.y, button)) {
                         var oldFocused = this.getFocused();
                         if (oldFocused != widget && oldFocused instanceof ContainerEventHandler containereventhandler) {
                             containereventhandler.setFocused(null);
@@ -227,7 +222,7 @@ public class ScrollableVerticalPanel extends VerticalPanel {
                         return true;
                     }
                 }
-                return this.scrolling;
+                return this.anyScrolling();
             }
         }
     }

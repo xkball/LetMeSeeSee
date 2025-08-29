@@ -4,6 +4,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
@@ -20,10 +21,8 @@ import com.xkball.let_me_see_see.client.gui.frame.widget.SquareWidgetWrapper;
 import com.xkball.let_me_see_see.client.gui.frame.widget.basic.HorizontalPanel;
 import com.xkball.let_me_see_see.client.gui.frame.widget.basic.VerticalPanel;
 import com.xkball.let_me_see_see.client.gui.widget.NumInputFrame;
-import com.xkball.let_me_see_see.client.offscreen.OffScreenFBO;
 import com.xkball.let_me_see_see.client.offscreen.OffScreenRenders;
 import com.xkball.let_me_see_see.config.LMSConfig;
-import com.xkball.let_me_see_see.utils.GoogleTranslate;
 import com.xkball.let_me_see_see.utils.VanillaUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.ClientLanguage;
@@ -44,7 +43,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.config.ModConfigEvent;
@@ -66,8 +64,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-@OnlyIn(Dist.CLIENT)
-@EventBusSubscriber(modid = LetMeSeeSee.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@EventBusSubscriber(modid = LetMeSeeSee.MODID, value = Dist.CLIENT)
 public class ItemDataExporterScreen extends FrameScreen {
     
     private static final Map<CreativeModeTab, Set<Item>> CREATIVE_MODEL_TABS_ITEM_CACHE = new HashMap<>();
@@ -141,7 +138,7 @@ public class ItemDataExporterScreen extends FrameScreen {
                         .addWidget(PanelConfig.of(1, 1).apply(new SquareWidgetWrapper(
                                 PanelConfig.of()
                                         .decoRenderer(GuiDecorations.bottomCenterString(Component.translatable("let_me_see_see.gui.item_data_exporter.export_hint")))
-                                        .apply(new RawTexturePanel(OffScreenRenders.FBO.get()::getTextureID))))));
+                                        .apply(new RawTexturePanel(OffScreenRenders.renderTarget))))));
         var content = PanelConfig.of(1, 1)
                 .align(HorizontalAlign.CENTER, VerticalAlign.TOP)
                 .apply(new HorizontalPanel()
@@ -159,18 +156,11 @@ public class ItemDataExporterScreen extends FrameScreen {
         this.submitRenderTask(
                 () ->{
                     if (imageSize != null && imageScale != null) {
-                        OffScreenRenders.FBO.get().resize(imageSize, imageSize);
-                        OffScreenRenders.FBO.get().renderOffScreen(() -> OffScreenRenders.renderItemStack(Items.CRAFTING_TABLE.getDefaultInstance(), imageSize, imageSize, imageScale));
+                        OffScreenRenders.renderTarget.resize(imageSize, imageSize);
+                        OffScreenRenders.renderItemStack(Items.CRAFTING_TABLE.getDefaultInstance(), imageSize, imageSize, imageScale);
                     }
                 }
         );
-    }
-    
-    public void runTranslateTest(){
-        var map = LANGUAGES.get("en_us").getLanguageData();
-        for(var value : map.values().stream().filter(str -> str.contains("\n")).limit(1).toList()) {
-            GoogleTranslate.translate(value,GoogleTranslate.ZN_CH).whenComplete((str,t) -> Minecraft.getInstance().player.displayClientMessage(Component.literal(value + " : " + str),false));
-        }
     }
     
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
@@ -213,8 +203,8 @@ public class ItemDataExporterScreen extends FrameScreen {
         rebuildCreativeModeTabsItemCache();
         var ops = RegistryOps.create(JsonOps.INSTANCE, Objects.requireNonNull(Minecraft.getInstance().level).registryAccess());
         var map = ArrayListMultimap.<String, JsonObject>create();
-        var bigFBO = new OffScreenFBO(128, 128);
-        var smallFBO = new OffScreenFBO(32, 32);
+        var bigFBO = new TextureTarget(null,128,128,true);
+        var smallFBO = new TextureTarget(null,32, 32,true);
         for (var entry : BuiltInRegistries.ITEM.entrySet()) {
             var itemID = entry.getKey().location();
             var item = entry.getValue();

@@ -1,54 +1,66 @@
 package com.xkball.let_me_see_see.client.gui.frame.widget;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferUploader;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.textures.FilterMode;
+import com.mojang.blaze3d.textures.GpuTexture;
+import com.mojang.blaze3d.textures.GpuTextureView;
+import com.mojang.blaze3d.textures.TextureFormat;
 import com.xkball.let_me_see_see.client.gui.frame.widget.basic.AutoResizeWidget;
+import com.xkball.let_me_see_see.utils.ClientUtils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.client.renderer.CoreShaders;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import org.joml.Matrix4f;
 
-import java.util.function.IntSupplier;
+import javax.annotation.Nullable;
+import java.util.function.Supplier;
 
 public class RawTexturePanel extends AutoResizeWidget {
     
-    private final IntSupplier textureIDGetter;
+    private final Supplier<RenderTarget> targetSupplier;
+    @Nullable
+    private GpuTexture gpuTexture;
+    @Nullable
+    private GpuTextureView gpuTextureView;
     
-    public RawTexturePanel(int textureID) {
-        this(() -> textureID);
+    public RawTexturePanel(RenderTarget target) {
+        this(() -> target);
     }
     
-    public RawTexturePanel(IntSupplier textureIDGetter) {
+    public RawTexturePanel(Supplier<RenderTarget> targetSupplier) {
         super(Component.empty());
-        this.textureIDGetter = textureIDGetter;
+        this.targetSupplier = targetSupplier;
     }
     
     @Override
     protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
-        var texture = textureIDGetter.getAsInt();
-//        texture = 28;
-        
-        guiGraphics.pose().pushPose();
-        RenderSystem.setShaderTexture(0, texture);
-        RenderSystem.setShader(CoreShaders.POSITION_TEX);
-        Matrix4f matrix4f = guiGraphics.pose().last().pose();
-        var x1 = getBoundary().inner().x();
-        var y1 = getBoundary().inner().y();
-        var x2 = getBoundary().inner().maxX();
-        var y2 = getBoundary().inner().maxY();
-        BufferBuilder bufferbuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        bufferbuilder.addVertex(matrix4f, x1, y1, 0).setUv(0, 1);
-        bufferbuilder.addVertex(matrix4f, x1, y2, 0).setUv(0, 0);
-        bufferbuilder.addVertex(matrix4f, x2, y2, 0).setUv(1, 0);
-        bufferbuilder.addVertex(matrix4f, x2, y1, 0).setUv(1, 1);
-        BufferUploader.drawWithShader(bufferbuilder.buildOrThrow());
-        guiGraphics.pose().popPose();
+        updateGpuTexture(targetSupplier.get());
+        assert this.gpuTextureView != null;
+        guiGraphics.submitBlit(RenderPipelines.GUI_TEXTURED, this.gpuTextureView,
+                getBoundary().inner().x(),getBoundary().inner().y(),
+                getBoundary().inner().maxX(), getBoundary().inner().maxY(),
+                0,1,0,1,-1
+                );
+
+    }
+    
+    public void updateGpuTexture(RenderTarget target) {
+        var w = target.width;
+        var h = target.height;
+        if(gpuTexture == null || gpuTextureView == null || gpuTexture.getWidth(0) != w || gpuTexture.getHeight(0) != h) {
+            if (gpuTexture != null) {
+                gpuTexture.close();
+            }
+            if(gpuTextureView != null) {
+                gpuTextureView.close();
+            }
+            gpuTexture = ClientUtils.getGpuDevice().createTexture(() -> "lms texture panel",GpuTexture.USAGE_TEXTURE_BINDING | GpuTexture.USAGE_COPY_DST, TextureFormat.RGBA8, w, h, 1, 1);
+            gpuTexture.setTextureFilter(FilterMode.NEAREST, false);
+            gpuTextureView = ClientUtils.getGpuDevice().createTextureView(gpuTexture);
+        }
+        assert target.getColorTexture() != null;
+        ClientUtils.copyFrameBufferColorTo(target.getColorTexture(), gpuTexture);
     }
     
     @Override

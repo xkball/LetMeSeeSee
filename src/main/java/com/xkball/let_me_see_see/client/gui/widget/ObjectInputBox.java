@@ -1,6 +1,5 @@
 package com.xkball.let_me_see_see.client.gui.widget;
 
-import com.mojang.brigadier.StringReader;
 import com.xkball.let_me_see_see.utils.VanillaUtils;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
@@ -9,9 +8,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.commands.ParserUtils;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nullable;
@@ -92,15 +89,6 @@ public class ObjectInputBox<T> extends EditBox implements Renderable {
         }
     };
     
-    public static final Predicate<String> COMPONENT_VALIDATOR = (str) -> {
-        try {
-            ParserUtils.parseJson(Minecraft.getInstance().level.registryAccess(), new StringReader(str), ComponentSerialization.CODEC);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    };
-    
     @SuppressWarnings("deprecation")
     public static final Predicate<String> TEXTURE_VALIDATOR = (str) -> {
         var rl = ResourceLocation.tryParse(str);
@@ -114,7 +102,6 @@ public class ObjectInputBox<T> extends EditBox implements Renderable {
     public static final Function<String, Long> LONG_RESPONDER = Long::parseLong;
     public static final Function<String, Float> FLOAT_RESPONDER = Float::parseFloat;
     public static final Function<String, Integer> RGB_COLOR_RESPONDER = VanillaUtils::parseColorHEX;
-    public static final Function<String, Component> COMPONENT_RESPONDER = (str) -> ParserUtils.parseJson(Objects.requireNonNull(Minecraft.getInstance().level).registryAccess(), new StringReader(str), ComponentSerialization.CODEC);
     public static final Function<String, ResourceLocation> TEXTURE_RESPONDER = (str) -> Objects.requireNonNullElse(ResourceLocation.tryParse(str), VanillaUtils.MISSING_TEXTURE);
     
     protected final Predicate<String> validator;

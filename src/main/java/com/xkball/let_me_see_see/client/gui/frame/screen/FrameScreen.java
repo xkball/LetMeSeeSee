@@ -25,8 +25,6 @@ import net.minecraft.client.gui.components.SpriteIconButton;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.fml.loading.FMLPaths;
 
 import java.util.Queue;
@@ -37,7 +35,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-@OnlyIn(Dist.CLIENT)
 public class FrameScreen extends Screen implements IUpdateMarker {
     
     public static final float THE_SCALE = 0.3731f;

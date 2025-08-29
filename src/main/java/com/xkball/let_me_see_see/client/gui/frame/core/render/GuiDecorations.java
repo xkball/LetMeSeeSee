@@ -5,10 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
-@OnlyIn(Dist.CLIENT)
 public class GuiDecorations {
     
     public static final IGUIDecoRenderer BOTTOM_DARK_BORDER_LINE = (guiGraphics, boundary, mouseX, mouseY, partialTick) -> {
@@ -29,10 +26,10 @@ public class GuiDecorations {
     
     private static void drawString(GuiGraphics guiGraphics, Font font, Component text, int x, int y, int color, boolean dropShadow, float scale) {
         if (scale != 1) {
-            guiGraphics.pose().pushPose();
-            guiGraphics.pose().scale(scale, scale, 1);
-            guiGraphics.drawString(font, text.getVisualOrderText(), x / scale, y / scale, color, dropShadow);
-            guiGraphics.pose().popPose();
+            guiGraphics.pose().pushMatrix();
+            guiGraphics.pose().scale(scale, scale);
+            guiGraphics.drawString(font, text.getVisualOrderText(), (int)(x / scale), (int)(y / scale), color, dropShadow);
+            guiGraphics.pose().popMatrix();
         } else {
             guiGraphics.drawString(font, text, x, y, color, dropShadow);
         }

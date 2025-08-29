@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 
 import java.nio.ByteBuffer;
 
-@OnlyIn(Dist.CLIENT)
+@Deprecated
 public class OffScreenFBO {
     private static final Logger LOGGER = LogUtils.getLogger();
     private int width;
@@ -56,7 +56,7 @@ public class OffScreenFBO {
         var oldTexture = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
         var result = new NativeImage(width, height, false);
-        result.downloadTexture(0, false);
+//        result.downloadTexture(0, false);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, oldTexture);
         return result;
     }

@@ -6,23 +6,17 @@ import com.xkball.let_me_see_see.client.gui.frame.core.ITypeset;
 import com.xkball.let_me_see_see.client.gui.frame.core.VerticalAlign;
 import com.xkball.let_me_see_see.client.gui.frame.core.WidgetBoundary;
 import com.xkball.let_me_see_see.client.gui.frame.core.WidgetPos;
-import com.xkball.let_me_see_see.client.gui.frame.core.render.CombineRenderer;
-import com.xkball.let_me_see_see.client.gui.frame.core.render.IGUIDecoRenderer;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-@OnlyIn(Dist.CLIENT)
 public class VerticalPanel extends BaseContainerWidget implements ITypeset {
     public final List<AbstractWidget> children = new ArrayList<>();
     public final List<IPanel> childrenPanels = new ArrayList<>();

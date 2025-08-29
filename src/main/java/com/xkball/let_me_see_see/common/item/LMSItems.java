@@ -16,7 +16,7 @@ import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
-@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD, modid = LetMeSeeSee.MODID)
+@EventBusSubscriber(modid = LetMeSeeSee.MODID)
 public class LMSItems {
     
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Registries.ITEM, LetMeSeeSee.MODID);

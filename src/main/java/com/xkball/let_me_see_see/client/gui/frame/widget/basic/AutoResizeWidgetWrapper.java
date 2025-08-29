@@ -2,21 +2,15 @@ package com.xkball.let_me_see_see.client.gui.frame.widget.basic;
 
 import com.xkball.let_me_see_see.client.gui.frame.core.IPanel;
 import com.xkball.let_me_see_see.client.gui.frame.core.WidgetBoundary;
-import com.xkball.let_me_see_see.client.gui.frame.core.render.CombineRenderer;
-import com.xkball.let_me_see_see.client.gui.frame.core.render.IGUIDecoRenderer;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.AbstractContainerWidget;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-@OnlyIn(Dist.CLIENT)
 public class AutoResizeWidgetWrapper extends BaseContainerWidget {
     
     protected final AbstractWidget inner;

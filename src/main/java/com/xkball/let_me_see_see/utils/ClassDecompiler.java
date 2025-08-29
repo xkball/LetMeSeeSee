@@ -17,6 +17,10 @@ public class ClassDecompiler {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final Map<Path,DecompilerState> decompiledClasses = new ConcurrentHashMap<>();
     
+    public static void clear(Path path) {
+        decompiledClasses.remove(path);
+    }
+    
     public static CompletableFuture<Void> decompile(Path file) {
         if (decompiledClasses.containsKey(file)) {
             return CompletableFuture.completedFuture(null);
@@ -26,7 +30,7 @@ public class ClassDecompiler {
             var srcPath = file.toAbsolutePath().toString();
             var dstPath = toResultPath(file).toString();
             var javaHome = System.getProperty("java.home");
-            var process = new ProcessBuilder("java", "-jar", LMSConfig.FERN_FLOWER_PATH, LMSConfig.FERN_FLOWER_OPTION, srcPath,file.getParent().toAbsolutePath().toString());
+            var process = new ProcessBuilder("java", "-cp", LMSConfig.FERN_FLOWER_PATH, "org.jetbrains.java.decompiler.main.decompiler.ConsoleDecompiler", LMSConfig.FERN_FLOWER_OPTION, srcPath,file.getParent().toAbsolutePath().toString());
             process.directory(new File(javaHome, "bin"));
             process.redirectErrorStream(true);
             process.redirectOutput(ProcessBuilder.Redirect.INHERIT);

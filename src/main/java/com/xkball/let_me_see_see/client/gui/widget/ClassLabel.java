@@ -5,6 +5,7 @@ import com.xkball.let_me_see_see.LetMeSeeSee;
 import com.xkball.let_me_see_see.client.gui.frame.widget.basic.AutoResizeWidget;
 import com.xkball.let_me_see_see.common.data.ExportsDataManager;
 import com.xkball.let_me_see_see.config.LMSConfig;
+import com.xkball.let_me_see_see.utils.ClassDecompiler;
 import com.xkball.let_me_see_see.utils.ClassSearcher;
 import com.xkball.let_me_see_see.utils.VanillaUtils;
 import net.minecraft.ChatFormatting;
@@ -13,15 +14,12 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 
-@OnlyIn(Dist.CLIENT)
 public class ClassLabel extends AutoResizeWidget {
     
     public static final Logger LOGGER = LogUtils.getLogger();
@@ -40,13 +38,13 @@ public class ClassLabel extends AutoResizeWidget {
     @Override
     protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
-        guiGraphics.pose().pushPose();
+        guiGraphics.pose().pushMatrix();
         var scale = 1.2f;
-        guiGraphics.pose().scale(scale, scale, 1);
+        guiGraphics.pose().scale(scale, scale);
         var boundary = getBoundary().inner();
         var font = Minecraft.getInstance().font;
-        guiGraphics.drawString(font, classSimpleName, (boundary.x() + 4) / scale, (boundary.y() + 4) / scale, state.color, true);
-        guiGraphics.pose().popPose();
+        guiGraphics.drawString(font, classSimpleName, (int)((boundary.x() + 4) / scale), (int)((boundary.y() + 4) / scale), state.color, true);
+        guiGraphics.pose().popMatrix();
     }
     
     @Override
@@ -75,6 +73,7 @@ public class ClassLabel extends AutoResizeWidget {
     public void reExport() {
         var clazz = ClassSearcher.classMap.get(className);
         if (clazz == null) return;
+        ClassDecompiler.clear(getClassPath());
         LetMeSeeSee.scanClasses(clazz);
     }
     

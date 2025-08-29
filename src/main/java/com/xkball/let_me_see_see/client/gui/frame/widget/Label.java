@@ -10,12 +10,9 @@ import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.function.Supplier;
 
-@OnlyIn(Dist.CLIENT)
 public class Label extends AutoResizeWidget {
     
     private float scale;
@@ -63,16 +60,16 @@ public class Label extends AutoResizeWidget {
     @Override
     protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
-        guiGraphics.pose().pushPose();
-        guiGraphics.pose().scale(scale, scale, 1);
+        guiGraphics.pose().pushMatrix();
+        guiGraphics.pose().scale(scale, scale);
         var boundary = getBoundary().inner();
         var font = Minecraft.getInstance().font;
         if (boundary.width() < length) {
             renderScrollingString(guiGraphics, font, getMessage(), boundary.x(), boundary.y(), boundary.maxX(), boundary.maxY(), color, dropShadow);
         } else {
-            guiGraphics.drawString(font, getMessage().getVisualOrderText(), boundary.x() / scale, boundary.y() / scale, color, dropShadow);
+            guiGraphics.drawString(font, getMessage().getVisualOrderText(),(int)(boundary.x() / scale), (int)(boundary.y() / scale), color, dropShadow);
         }
-        guiGraphics.pose().popPose();
+        guiGraphics.pose().popMatrix();
     }
     
     public static void renderScrollingString(

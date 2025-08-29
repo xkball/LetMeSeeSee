@@ -7,8 +7,9 @@ import java.time.format.DateTimeFormatter
 plugins {
     id 'java-library'
     id 'maven-publish'
-    id 'net.neoforged.moddev' version '2.0.78'
+    id 'net.neoforged.moddev' version '2.0.103'
     id 'idea'
+    id 'antlr'
 }
 
 tasks.named('wrapper', Wrapper).configure {
@@ -77,13 +78,43 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 configurations {
     runtimeClasspath.extendsFrom localRuntime
+
+    mcLib
+    implementation {
+        extendsFrom mcLib
+    }
+    additionalRuntimeClasspath {
+        extendsFrom mcLib
+    }
 }
+
 
 dependencies {
     //this is a in making compile time lib.
     //compileOnly(annotationProcessor("com.xkball:XorLib:1.0-SNAPSHOT:all"))
+    mcLib 'org.antlr:antlr4-runtime:4.13.2'
+    antlr "org.antlr:antlr4:4.13.2"
 }
 
+// https://github.com/antlr/antlr4/blob/master/doc/tool-options.md
+generateGrammarSource {
+    arguments += ['-package', 'com.xkball.let_me_see_see.antlr.java']
+    arguments += ["-no-visitor", "-listener"]
+    outputDirectory = outputDirectory.toPath().resolve("com/xkball/let_me_see_see/antlr/java").toFile()
+}
+
+//tasks.register('copyGrammarSource', Copy) {
+//    dependsOn generateGrammarSource
+//    from "${buildDir}/generated-src/antlr/main/com/xkball/let_me_see_see/antlr/java"
+//    into "${buildDir}/generated-src/antlr/main"
+//    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+//}
+compileJava.dependsOn generateGrammarSource
+sourceSets.main.java.srcDir("${buildDir}/generated-src/antlr/main/com/xkball/let_me_see_see/antlr/java")
+
+clean {
+    delete 'generated-src'
+}
 jar{
     manifest {
         attributes(

@@ -2,6 +2,7 @@ package com.xkball.let_me_see_see.config;
 
 import com.xkball.let_me_see_see.LetMeSeeSee;
 import com.xkball.let_me_see_see.common.data.ExportsDataManager;
+import com.xkball.let_me_see_see.utils.VanillaUtils;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.config.ModConfigEvent;
@@ -11,7 +12,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-@EventBusSubscriber(modid = LetMeSeeSee.MODID, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = LetMeSeeSee.MODID)
 public class LMSConfig {
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
     public static final ModConfigSpec.ConfigValue<String> IDEA_PATH_CONFIG = BUILDER.comment("The path of your Intellij IDEA (idea64.exe) (Or other program can open .class file)").define("idea_path", "");
@@ -40,6 +41,15 @@ public class LMSConfig {
                 FERN_FLOWER_PATH = fernflowerPath.toString();
             }
         }
+        if(!FERN_FLOWER_PATH.isEmpty()){
+            var newPath = VanillaUtils.copyToTempDir(FERN_FLOWER_PATH, "java_decompiler.jar");
+            FERN_FLOWER_PATH = newPath.toString();
+        }
+    }
+    
+    public static void createTempFernFlower() {
+        if(FERN_FLOWER_PATH.isEmpty()) return;
+        
     }
     
     @SubscribeEvent

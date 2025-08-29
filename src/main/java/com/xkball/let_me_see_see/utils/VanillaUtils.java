@@ -1,10 +1,8 @@
 package com.xkball.let_me_see_see.utils;
 
 import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.logging.LogUtils;
 import com.xkball.let_me_see_see.LetMeSeeSee;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -17,15 +15,17 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.Vec2;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import org.apache.commons.codec.binary.Base64;
 import org.lwjgl.stb.STBImage;
+import org.slf4j.Logger;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -35,6 +35,8 @@ import java.util.List;
 import java.util.UUID;
 
 public class VanillaUtils {
+    
+    private static final Logger LOGGER = LogUtils.getLogger();
     
     public static final Direction[] DIRECTIONS = Direction.values();
     public static final ResourceLocation MISSING_TEXTURE = ResourceLocation.withDefaultNamespace("missingno");
@@ -128,6 +130,23 @@ public class VanillaUtils {
         }
     }
     
+    public static Path copyToTempDir(String path,String name){
+        try {
+            var self = Path.of(path);
+            var tempDir = Files.createTempDirectory("com.xkball.");
+            var target = tempDir.resolve(name);
+            Files.copy(self, target, StandardCopyOption.REPLACE_EXISTING);
+            LOGGER.info("Created temporary file: {}", target);
+            target.toFile().deleteOnExit();
+            tempDir.toFile().deleteOnExit();
+            return target;
+        }catch (IOException e){
+            LOGGER.error("Failed to create temp file", e);
+            throw new RuntimeException("Failed to create temp file", e);
+        }
+        
+    }
+    
     public static String base64(byte[] bytes) {
         return Base64.encodeBase64String(bytes);
     }
@@ -176,19 +195,6 @@ public class VanillaUtils {
     
     public static class ClientHandler {
         
-        @OnlyIn(Dist.CLIENT)
-        public static void renderAxis(MultiBufferSource bufferSource, PoseStack poseStack) {
-            var buffer = bufferSource.getBuffer(RenderType.debugLineStrip(8));
-            var matrix = poseStack.last();
-            buffer.addVertex(matrix, 0, 0, 0).setNormal(matrix, -1, 0, 0).setColor(0xFFFF0000);
-            buffer.addVertex(matrix, 100, 0, 0).setNormal(matrix, 1, 0, 0).setColor(0xFFFF0000);
-            buffer.addVertex(matrix, 0, 0, 0).setNormal(matrix, 0, -1, 0).setColor(0xFF00FF00);
-            buffer.addVertex(matrix, 0, 100, 0).setNormal(matrix, 0, 1, 0).setColor(0xFF00FF00);
-            buffer.addVertex(matrix, 0, 0, 0).setNormal(matrix, 0, 0, -1).setColor(0xFF0000FF);
-            buffer.addVertex(matrix, 0, 0, 100).setNormal(matrix, 0, 0, 1).setColor(0xFF0000FF);
-        }
-        
-        @OnlyIn(Dist.CLIENT)
         public static byte[] asByteArray(NativeImage image) throws IOException {
             byte[] abyte;
             try (

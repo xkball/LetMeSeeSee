@@ -106,20 +106,7 @@ public class LetMeSeeSee {
     }
     
     private static Path createTempJar(){
-        try {
-            var self = Path.of(JAR_PATH);
-            var tempDir = Files.createTempDirectory("com.xkball.");
-            var target = tempDir.resolve("let_me_see_see_temp.jar");
-            Files.copy(self, target, StandardCopyOption.REPLACE_EXISTING);
-            LOGGER.info("Created temporary jar: {}", target);
-            target.toFile().deleteOnExit();
-            tempDir.toFile().deleteOnExit();
-            return target;
-        }catch (IOException e){
-            LOGGER.error("Failed to create temp jar", e);
-            throw new RuntimeException("Failed to create temp jar", e);
-        }
-
+        return VanillaUtils.copyToTempDir(JAR_PATH, "let_me_see_see_temp.jar");
     }
     
     public static Instrumentation getInst() {
@@ -207,7 +194,7 @@ public class LetMeSeeSee {
         return true;
     }
     
-    @EventBusSubscriber(modid = MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    @EventBusSubscriber(modid = MODID, value = Dist.CLIENT)
     public static class ClientModEvents {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {

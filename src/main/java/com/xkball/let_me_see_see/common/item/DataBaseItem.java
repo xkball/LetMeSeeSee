@@ -16,7 +16,6 @@ public class DataBaseItem extends GUIItem {
     }
     
     @Override
-    @OnlyIn(Dist.CLIENT)
     public Supplier<Screen> getScreenSupplier(ItemStack stack, EquipmentSlot slot) {
         return DataBaseScreen::new;
     }

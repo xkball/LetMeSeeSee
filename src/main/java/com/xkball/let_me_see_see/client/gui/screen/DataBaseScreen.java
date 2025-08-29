@@ -1,6 +1,9 @@
 package com.xkball.let_me_see_see.client.gui.screen;
 
 import com.mojang.logging.LogUtils;
+import com.xkball.let_me_see_see.antlr.java.ColoringListener;
+import com.xkball.let_me_see_see.antlr.java.JavaLexer;
+import com.xkball.let_me_see_see.antlr.java.JavaParser;
 import com.xkball.let_me_see_see.client.gui.frame.core.HorizontalAlign;
 import com.xkball.let_me_see_see.client.gui.frame.core.IPanel;
 import com.xkball.let_me_see_see.client.gui.frame.core.IUpdateMarker;
@@ -8,25 +11,32 @@ import com.xkball.let_me_see_see.client.gui.frame.core.PanelConfig;
 import com.xkball.let_me_see_see.client.gui.frame.core.UpdateChecker;
 import com.xkball.let_me_see_see.client.gui.frame.core.VerticalAlign;
 import com.xkball.let_me_see_see.client.gui.frame.core.render.GuiDecorations;
+import com.xkball.let_me_see_see.client.gui.frame.core.render.SimpleBackgroundRenderer;
 import com.xkball.let_me_see_see.client.gui.frame.screen.FrameScreen;
 import com.xkball.let_me_see_see.client.gui.frame.widget.Label;
 import com.xkball.let_me_see_see.client.gui.frame.widget.basic.AutoResizeWidgetWrapper;
 import com.xkball.let_me_see_see.client.gui.frame.widget.basic.HorizontalPanel;
+import com.xkball.let_me_see_see.client.gui.frame.widget.basic.ScrollableVHPanel;
 import com.xkball.let_me_see_see.client.gui.frame.widget.basic.ScrollableVerticalPanel;
 import com.xkball.let_me_see_see.client.gui.frame.widget.basic.VerticalPanel;
 import com.xkball.let_me_see_see.client.gui.widget.ClassLabel;
 import com.xkball.let_me_see_see.common.data.ExportsDataManager;
+import com.xkball.let_me_see_see.config.ColorMapping;
 import com.xkball.let_me_see_see.config.LMSConfig;
 import com.xkball.let_me_see_see.utils.ClassDecompiler;
 import com.xkball.let_me_see_see.utils.ClassSearcher;
 import com.xkball.let_me_see_see.utils.VanillaUtils;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -35,10 +45,10 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
-@OnlyIn(Dist.CLIENT)
 public class DataBaseScreen extends FrameScreen {
     
     private static final Logger LOGGER = LogUtils.getLogger();
+    private static final Style CODE_BASE_STYLE = Style.EMPTY;
     private final UpdateChecker searchBarUpdateChecker = new UpdateChecker();
     private String searchBarValue = "";
     
@@ -129,6 +139,7 @@ public class DataBaseScreen extends FrameScreen {
                         .addWidget(classListPanel)
                         .addWidget(classPreviewPanel));
         var screen = this.screenFrame("let_me_see_see.gui.data_base", content);
+        screen.setDecoRenderer(new SimpleBackgroundRenderer(0x60000000));
         screen.resize();
         this.addRenderableWidget(screen);
         this.updateScreen();
@@ -172,19 +183,61 @@ public class DataBaseScreen extends FrameScreen {
                         LOGGER.error("can not read file: {}",dstPath,e);
                     }
                 }
+                var all = String.join(" \n", lines);
+                LOGGER.debug("parsing class: {}",classPath);
+                var formatedLines = parseJavaSrc(all);
                 var config_ = PanelConfig.of().trim().paddingLeft(2);
                 return (T) PanelConfig.of(1,1)
                         .apply(AutoResizeWidgetWrapper.of(
                                 PanelConfig.of(1,1)
                                         .align(HorizontalAlign.LEFT, VerticalAlign.TOP)
-                                        .apply(new ScrollableVerticalPanel()
-                                                .addWidgets(lines.stream().map(str -> config_.apply(Label.of(str))).toList(),false))));
+                                        .apply(new ScrollableVHPanel()
+                                                .addWidgets(formatedLines.stream().map(c -> config_.apply(Label.of(c))).toList(),false))));
             }
             else {
                 assert state == ClassDecompiler.DecompilerState.ERROR;
                 return (T) config.apply(Label.ofKey("let_me_see_see.gui.data_base.preview.decompile_error"));
             }
         }
+    }
+    
+    public static List<Component> parseJavaSrc(String src){
+        var lexer = new JavaLexer(CharStreams.fromString(src));
+        var tokens = new CommonTokenStream(lexer);
+        var parser = new JavaParser(tokens);
+        var tree = parser.compilationUnit();
+        var walker = new ParseTreeWalker();
+        Int2ObjectMap<ColorMapping> map = new Int2ObjectOpenHashMap<>();
+        var listener = new ColoringListener(map);
+        walker.walk(listener,tree);
+        var result = new ArrayList<Component>();
+        var ctx = Component.empty();
+        for(var token : tokens.getTokens()){
+            if(token.getType() == JavaLexer.EOF) continue;
+            var index = token.getTokenIndex();
+            var text = token.getText();
+            if(text.contains("\n")){
+                var lt = text.lines().toList();
+                for(var i = 0; i < lt.size(); i++){
+                    ctx.append(Component.literal(lt.get(i)).withStyle(CODE_BASE_STYLE));
+                    if(i != lt.size() - 1 || text.endsWith("\n")){
+                        result.add(ctx);
+                        ctx = Component.empty();
+                    }
+                }
+            }
+            else{
+                if(map.containsKey(index)){
+                    ctx.append(Component.literal(text).withStyle(CODE_BASE_STYLE.withColor(map.get(index).color)));
+                }
+                else {
+                    ctx.append(Component.literal(text).withStyle(CODE_BASE_STYLE));
+                }
+            }
+            
+        }
+        result.add(ctx);
+        return result;
     }
     
     public String getSearchBarValue() {

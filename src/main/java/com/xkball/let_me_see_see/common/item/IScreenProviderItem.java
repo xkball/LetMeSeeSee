@@ -10,6 +10,5 @@ import java.util.function.Supplier;
 
 public interface IScreenProviderItem {
     
-    @OnlyIn(Dist.CLIENT)
     Supplier<Screen> getScreenSupplier(ItemStack stack, EquipmentSlot slot);
 }
