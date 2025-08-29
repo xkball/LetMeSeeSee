@@ -199,7 +199,7 @@ public class VanillaUtils {
             byte[] abyte;
             try (
                     ByteArrayOutputStream bytearrayoutputstream = new ByteArrayOutputStream();
-                    WritableByteChannel writablebytechannel = Channels.newChannel(bytearrayoutputstream);
+                    WritableByteChannel writablebytechannel = Channels.newChannel(bytearrayoutputstream)
             ) {
                 if (!image.writeToChannel(writablebytechannel)) {
                     throw new IOException("Could not write image to byte array: " + STBImage.stbi_failure_reason());

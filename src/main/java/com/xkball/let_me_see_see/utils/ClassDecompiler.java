@@ -68,6 +68,6 @@ public class ClassDecompiler {
     public enum DecompilerState {
         SUCCESS,
         DECOMPILING,
-        ERROR;
+        ERROR
     }
 }

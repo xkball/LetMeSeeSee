@@ -139,7 +139,7 @@ public class FrameScreen extends Screen implements IUpdateMarker {
     }
     
     public <T> AutoResizeWidgetWrapper createObjInputBox(Predicate<String> validator, Function<String, T> responder, Consumer<T> valueSetter) {
-        var editBox = new ObjectInputBox<T>(font, 0, 0, 0, 0, Component.empty(), validator, responder);
+        var editBox = new ObjectInputBox<>(font, 0, 0, 0, 0, Component.empty(), validator, responder);
         setupSimpleEditBox(editBox);
         editBox.setResponder(str -> {
             valueSetter.accept(editBox.get());
