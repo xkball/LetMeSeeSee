@@ -26,6 +26,7 @@ public class LMSItems {
     public static final DeferredHolder<Item, RetrieverItem> RETRIEVER = ITEMS.register("retriever", (id) -> new RetrieverItem(new Item.Properties().setId(itemKey(id)).stacksTo(1)));
     public static final DeferredHolder<Item, DataBaseItem> DATA_BASE = ITEMS.register("data_base", (id) -> new DataBaseItem(new Item.Properties().setId(itemKey(id)).stacksTo(1)));
     public static final DeferredHolder<Item, ItemDataExporterItem> ITEM_ITEM_DATA_EXPORTER = ITEMS.register("item_data_exporter", (id) -> new ItemDataExporterItem(new Item.Properties().setId(itemKey(id)).stacksTo(1)));
+    public static final DeferredHolder<Item, ExplorerItem> EXPLORER = ITEMS.register("explorer", (id) -> new ExplorerItem(new Item.Properties().setId(itemKey(id)).stacksTo(1)));
     
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> THE_TAB = CREATIVE_MODE_TABS.register("tab", () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup.let_me_see_see"))
@@ -49,6 +50,7 @@ public class LMSItems {
             event.accept(RETRIEVER.get());
             event.accept(DATA_BASE.get());
             event.accept(ITEM_ITEM_DATA_EXPORTER.get());
+            event.accept(EXPLORER.get());
         }
     }
 }

@@ -4,6 +4,7 @@ import com.xkball.let_me_see_see.client.gui.frame.core.IPanel;
 import com.xkball.let_me_see_see.client.gui.frame.core.WidgetPos;
 import com.xkball.let_me_see_see.client.gui.frame.core.render.GuiDecorations;
 import com.xkball.let_me_see_see.client.gui.frame.core.render.SimpleBackgroundRenderer;
+import com.xkball.let_me_see_see.mixin.MixinAbstractWidgetAccess;
 import com.xkball.let_me_see_see.utils.VanillaUtils;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.minecraft.client.Minecraft;
@@ -116,11 +117,11 @@ public class ScrollableVerticalPanel extends VerticalPanel {
             if (pos > scrollAmount + getBoundaryHeight() + 10) break;
             var widget = children.get(i);
             var widgetRec = widget.getRectangle();
-            widget.render(guiGraphics, (int) actualMouse.x, (int) actualMouse.y, partialTick);
             widget.isHovered =  actualMouse.x >= widget.getX()
                     && actualMouse.y >= widget.getY()
                     && actualMouse.x < widget.getRight()
                     && actualMouse.y < widget.getBottom();
+            ((MixinAbstractWidgetAccess)widget).invokeRenderWidget(guiGraphics, (int) actualMouse.x, (int) actualMouse.y, partialTick);
             widget.tooltip.refreshTooltipForNextRenderPass(guiGraphics,mouseX,mouseY,widget.isHovered(), widget.isFocused(),
                     new ScreenRectangle(new ScreenPosition(widgetRec.left(), (int) (widgetRec.top()-scrollAmount)),widgetRec.width(),widgetRec.height()));
         }

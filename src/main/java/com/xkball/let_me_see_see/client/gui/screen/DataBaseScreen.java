@@ -15,6 +15,7 @@ import com.xkball.let_me_see_see.client.gui.frame.core.render.SimpleBackgroundRe
 import com.xkball.let_me_see_see.client.gui.frame.screen.FrameScreen;
 import com.xkball.let_me_see_see.client.gui.frame.widget.Label;
 import com.xkball.let_me_see_see.client.gui.frame.widget.basic.AutoResizeWidgetWrapper;
+import com.xkball.let_me_see_see.client.gui.frame.widget.basic.BaseContainerWidget;
 import com.xkball.let_me_see_see.client.gui.frame.widget.basic.HorizontalPanel;
 import com.xkball.let_me_see_see.client.gui.frame.widget.basic.ScrollableVHPanel;
 import com.xkball.let_me_see_see.client.gui.frame.widget.basic.ScrollableVerticalPanel;
@@ -49,22 +50,19 @@ public class DataBaseScreen extends FrameScreen {
     
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final Style CODE_BASE_STYLE = Style.EMPTY;
-    private final UpdateChecker searchBarUpdateChecker = new UpdateChecker();
-    private String searchBarValue = "";
+    public final UpdateChecker searchBarUpdateChecker = new UpdateChecker();
+    protected String searchBarValue = "";
     
     @Nullable
-    private ClassLabel lastFocused = null;
+    public ClassLabel lastFocused = null;
     
     public DataBaseScreen() {
         super(Component.empty());
         ClassSearcher.buildClassMap();
     }
     
-    @Override
-    protected void init() {
-        super.init();
-        this.searchBarUpdateChecker.forceUpdate();
-        var classListPanel = PanelConfig.of(FrameScreen.THE_SCALE, 1)
+    protected BaseContainerWidget createClassListView(){
+        return PanelConfig.of(FrameScreen.THE_SCALE, 1)
                 .align(HorizontalAlign.LEFT, VerticalAlign.TOP)
                 .decoRenderer(GuiDecorations.RIGHT_DARK_BORDER_LINE)
                 .apply(new VerticalPanel()
@@ -80,19 +78,21 @@ public class DataBaseScreen extends FrameScreen {
                                         clearWidget();
                                         var labelConfig = PanelConfig.of().fixHeight(16).fixWidth(getBoundary().inner().width() - 6);
                                         for (var str : VanillaUtils.searchInLowerCase(searchBarValue, ExportsDataManager.recordedClasses.keySet())) {
-                                            addWidget(labelConfig.apply(new ClassLabel(str, ExportsDataManager.recordedClasses.get(str)) {
-                                                @Override
-                                                public void setFocused(boolean focused) {
-                                                    super.setFocused(focused);
-                                                    if (focused) lastFocused = this;
-                                                    if (!focused && this.equals(lastFocused)) lastFocused = null;
-                                                    setNeedUpdate();
-                                                }
-                                            }));
+                                            var clazz = ClassSearcher.classMap.get(str);
+                                            if (clazz == null) continue;
+                                            addWidget(labelConfig.apply(
+                                                    new ClassLabel.ClassLabelInDBS(clazz,DataBaseScreen.this)));
                                         }
                                         return true;
                                     }
                                 })));
+    }
+    
+    @Override
+    protected void init() {
+        super.init();
+        this.searchBarUpdateChecker.forceUpdate();
+        var classListPanel = this.createClassListView();
         var openIDEATooltip = Component.translatable("let_me_see_see.gui.data_base.open_in_idea");
         if (LMSConfig.IDEA_PATH.isEmpty())
             openIDEATooltip.append(Component.translatable("let_me_see_see.gui.data_base.no_idea").withStyle(ChatFormatting.RED));
@@ -101,6 +101,11 @@ public class DataBaseScreen extends FrameScreen {
                 .align(HorizontalAlign.RIGHT, VerticalAlign.CENTER)
                 .decoRenderer(GuiDecorations.BOTTOM_DARK_BORDER_LINE)
                 .apply(new HorizontalPanel()
+                        .addWidget(PanelConfig.of()
+                                .fixSize(20, 20)
+                                .paddingRight(4)
+                                .tooltip(Tooltip.create(Component.translatable("let_me_see_see.gui.retriever.rebuild_cache")))
+                                .apply(iconButton((btn) -> ClassSearcher.buildClassMap(), ResourceLocation.withDefaultNamespace("icon/search"))))
                         .addWidget(PanelConfig.of()
                                 .fixSize(20, 20)
                                 .paddingRight(4)
@@ -138,11 +143,15 @@ public class DataBaseScreen extends FrameScreen {
                 .apply(new HorizontalPanel()
                         .addWidget(classListPanel)
                         .addWidget(classPreviewPanel));
-        var screen = this.screenFrame("let_me_see_see.gui.data_base", content);
+        var screen = this.screenFrame(this.getTitleKey(), content);
         screen.setDecoRenderer(new SimpleBackgroundRenderer(0x60000000));
         screen.resize();
         this.addRenderableWidget(screen);
         this.updateScreen();
+    }
+    
+    public String getTitleKey(){
+        return "let_me_see_see.gui.data_base";
     }
     
     @SuppressWarnings("unchecked")
@@ -159,9 +168,11 @@ public class DataBaseScreen extends FrameScreen {
         else {
             var classPath = this.lastFocused.getClassPath();
             if(!classPath.toFile().exists()){
+                lastFocused.reExport();
                 return (T) config.apply(Label.ofKey("let_me_see_see.gui.data_base.preview.no_file"));
             }
             var state = ClassDecompiler.getState(classPath);
+            lastFocused.updateState();
             if(state == null || state == ClassDecompiler.DecompilerState.DECOMPILING){
                 if(state == null){
                     ClassDecompiler.decompile(classPath).whenCompleteAsync((v,t) -> {

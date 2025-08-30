@@ -1,8 +1,10 @@
 package com.xkball.let_me_see_see.utils;
 
 import com.xkball.let_me_see_see.LetMeSeeSee;
+import com.xkball.let_me_see_see.common.event.RebuildClassMapEvent;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.moddiscovery.ModFile;
+import net.neoforged.neoforge.common.NeoForge;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -37,6 +39,7 @@ public class ClassSearcher {
             var className = className(clazz);
             classMap.put(className, clazz);
         }
+        NeoForge.EVENT_BUS.post(new RebuildClassMapEvent());
     }
     
     public static boolean containsClass(String className) {
