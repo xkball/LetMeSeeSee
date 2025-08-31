@@ -25,7 +25,6 @@ import com.xkball.let_me_see_see.client.offscreen.OffScreenRenders;
 import com.xkball.let_me_see_see.config.LMSConfig;
 import com.xkball.let_me_see_see.utils.VanillaUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.language.ClientLanguage;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -158,7 +157,7 @@ public class ItemDataExporterScreen extends FrameScreen {
                 () ->{
                     if (imageSize != null && imageScale != null) {
                         OffScreenRenders.renderTarget.resize(imageSize, imageSize);
-                        OffScreenRenders.renderItemStack(Items.CRAFTING_TABLE.getDefaultInstance(), imageSize, imageSize, imageScale);
+                        OffScreenRenders.renderItemStack(Items.CRAFTING_TABLE.getDefaultInstance(), OffScreenRenders.renderTarget, imageScale);
                     }
                 }
         );

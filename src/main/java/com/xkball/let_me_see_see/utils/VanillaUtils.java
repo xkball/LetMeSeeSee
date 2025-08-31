@@ -1,6 +1,5 @@
 package com.xkball.let_me_see_see.utils;
 
-import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.logging.LogUtils;
 import com.xkball.let_me_see_see.LetMeSeeSee;
 import net.minecraft.commands.CommandSourceStack;
@@ -16,13 +15,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.Vec2;
 import org.apache.commons.codec.binary.Base64;
-import org.lwjgl.stb.STBImage;
 import org.slf4j.Logger;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.channels.Channels;
-import java.nio.channels.WritableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;

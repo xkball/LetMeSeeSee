@@ -1,5 +1,6 @@
 package com.xkball.let_me_see_see.utils;
 
+import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.NativeImage;
@@ -15,7 +16,9 @@ import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.util.ARGB;
 import org.joml.Vector3f;
+import org.lwjgl.opengl.GL43;
 import org.lwjgl.stb.STBImage;
 import org.slf4j.Logger;
 
@@ -137,6 +140,35 @@ public class ClientUtils {
     }
     
     public static void takeScreenshotWithAlpha(RenderTarget renderTarget, Consumer<NativeImage> writer){
-    
+        int width = renderTarget.width;
+        int height = renderTarget.height;
+        GpuTexture gputexture = renderTarget.getColorTexture();
+        if (gputexture == null) {
+            throw new IllegalStateException("Tried to capture screenshot of an incomplete framebuffer");
+        } else {
+            GpuBuffer gpubuffer = RenderSystem.getDevice().createBuffer(() -> "Screenshot buffer", 9, width * height * gputexture.getFormat().pixelSize());
+            CommandEncoder commandencoder = RenderSystem.getDevice().createCommandEncoder();
+            RenderSystem.getDevice()
+                    .createCommandEncoder()
+                    .copyTextureToBuffer(
+                            gputexture,
+                            gpubuffer,
+                            0,
+                            () -> {},
+                            0
+                    );
+            GL43.glFinish();
+            try (GpuBuffer.MappedView gpubuffer$mappedview = commandencoder.mapBuffer(gpubuffer, true, false)) {
+                NativeImage nativeimage = new NativeImage(width, height, false);
+                for (int i1 = 0; i1 < height; i1++) {
+                    for (int j1 = 0; j1 < width; j1++) {
+                        int i3 = gpubuffer$mappedview.data().getInt((j1 + i1 * width) * gputexture.getFormat().pixelSize());
+                        nativeimage.setPixelABGR(j1, height - i1 - 1, i3);
+                    }
+                }
+                writer.accept(nativeimage);
+            }
+            gpubuffer.close();
+        }
     }
 }

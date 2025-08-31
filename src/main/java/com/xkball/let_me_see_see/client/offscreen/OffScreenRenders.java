@@ -11,7 +11,6 @@ import com.xkball.let_me_see_see.utils.ClientUtils;
 import com.xkball.let_me_see_see.utils.VanillaUtils;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.Screenshot;
 import net.minecraft.client.renderer.CachedOrthoProjectionMatrixBuffer;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -25,6 +24,7 @@ import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class OffScreenRenders {
+    
     
     private static final CachedOrthoProjectionMatrixBuffer projBuffer = new CachedOrthoProjectionMatrixBuffer(
             "LMS Off Screen Proj", -4000.0F, 4000.0F, true
@@ -41,9 +41,9 @@ public class OffScreenRenders {
     public static String exportItemStackAsPng(RenderTarget fbo, ItemStack itemStack, float scale, boolean writeToFile) {
         var itemID = BuiltInRegistries.ITEM.getKey(itemStack.getItem());
         var exportPath = Path.of(LetMeSeeSee.EXPORT_DIR_PATH, "_data", itemID.getNamespace(), itemID.getPath() + ".png");
-        renderItemStack(itemStack, fbo.width, fbo.height, scale);
+        renderItemStack(itemStack, fbo, scale);
         AtomicReference<String> result = new AtomicReference<>("");
-        Screenshot.takeScreenshot(fbo,(nativeImage -> {
+        ClientUtils.takeScreenshotWithAlpha(fbo,(nativeImage -> {
             try {
                 if (writeToFile) {
                     Util.ioPool().execute(() -> {
@@ -64,7 +64,9 @@ public class OffScreenRenders {
         return result.get();
     }
     
-    public static void renderItemStack(ItemStack itemStack, int width, int height, float scaleMul) {
+    public static void renderItemStack(ItemStack itemStack, RenderTarget fbo, float scaleMul) {
+        var width = fbo.width;
+        var height = fbo.height;
         RenderSystem.backupProjectionMatrix();
         RenderSystem.setProjectionMatrix(projBuffer.getBuffer(width,height), ProjectionType.ORTHOGRAPHIC);
         var bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
@@ -92,9 +94,9 @@ public class OffScreenRenders {
             bufferSource.endBatch();
             Minecraft.getInstance().gameRenderer.getLighting().setupFor(Lighting.Entry.ITEMS_FLAT);
         }
-        ClientUtils.clear(renderTarget,true);
-        RenderSystem.outputColorTextureOverride = renderTarget.getColorTextureView();
-        RenderSystem.outputDepthTextureOverride = renderTarget.getDepthTextureView();
+        ClientUtils.clear(fbo,true);
+        RenderSystem.outputColorTextureOverride = fbo.getColorTextureView();
+        RenderSystem.outputDepthTextureOverride = fbo.getDepthTextureView();
         itemStackRenderState.render(poseStack, bufferSource, 15728880, OverlayTexture.NO_OVERLAY);
 //        VanillaUtils.ClientHandler.renderAxis(bufferSource,poseStack);
         bufferSource.endBatch();
