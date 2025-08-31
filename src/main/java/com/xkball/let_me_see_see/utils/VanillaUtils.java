@@ -193,22 +193,4 @@ public class VanillaUtils {
         return startWithList;
     }
     
-    public static class ClientHandler {
-        
-        public static byte[] asByteArray(NativeImage image) throws IOException {
-            byte[] abyte;
-            try (
-                    ByteArrayOutputStream bytearrayoutputstream = new ByteArrayOutputStream();
-                    WritableByteChannel writablebytechannel = Channels.newChannel(bytearrayoutputstream)
-            ) {
-                if (!image.writeToChannel(writablebytechannel)) {
-                    throw new IOException("Could not write image to byte array: " + STBImage.stbi_failure_reason());
-                }
-                
-                abyte = bytearrayoutputstream.toByteArray();
-            }
-            
-            return abyte;
-        }
-    }
 }

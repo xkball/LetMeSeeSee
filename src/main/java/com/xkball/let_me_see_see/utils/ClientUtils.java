@@ -2,6 +2,7 @@ package com.xkball.let_me_see_see.utils;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.CommandEncoder;
 import com.mojang.blaze3d.systems.GpuDevice;
 import com.mojang.blaze3d.systems.RenderPass;
@@ -15,13 +16,19 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import org.joml.Vector3f;
+import org.lwjgl.stb.STBImage;
 import org.slf4j.Logger;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.channels.Channels;
+import java.nio.channels.WritableByteChannel;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
+import java.util.function.Consumer;
 
 public class ClientUtils {
     
@@ -111,5 +118,25 @@ public class ClientUtils {
             }
         }
         return true;
+    }
+    
+    public static byte[] asByteArray(NativeImage image) throws IOException {
+        byte[] abyte;
+        try (
+                ByteArrayOutputStream bytearrayoutputstream = new ByteArrayOutputStream();
+                WritableByteChannel writablebytechannel = Channels.newChannel(bytearrayoutputstream)
+        ) {
+            if (!image.writeToChannel(writablebytechannel)) {
+                throw new IOException("Could not write image to byte array: " + STBImage.stbi_failure_reason());
+            }
+            
+            abyte = bytearrayoutputstream.toByteArray();
+        }
+        
+        return abyte;
+    }
+    
+    public static void takeScreenshotWithAlpha(RenderTarget renderTarget, Consumer<NativeImage> writer){
+    
     }
 }

@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class OffScreenRenders {
     
     private static final CachedOrthoProjectionMatrixBuffer projBuffer = new CachedOrthoProjectionMatrixBuffer(
-            "LMS Off Screen Proj", -1000.0F, 1000.0F, true
+            "LMS Off Screen Proj", -4000.0F, 4000.0F, true
     );
     
     public static RenderTarget renderTarget = new TextureTarget("off screen fbo",128,128,true,false);
@@ -56,7 +56,7 @@ public class OffScreenRenders {
                         }
                     });
                 }
-                result.set(VanillaUtils.base64(VanillaUtils.ClientHandler.asByteArray(nativeImage)));
+                result.set(VanillaUtils.base64(ClientUtils.asByteArray(nativeImage)));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -68,8 +68,7 @@ public class OffScreenRenders {
         RenderSystem.backupProjectionMatrix();
         RenderSystem.setProjectionMatrix(projBuffer.getBuffer(width,height), ProjectionType.ORTHOGRAPHIC);
         var bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
-        var size = Math.min(width, height);
-        var scale = size / 16f;
+        float scale = Math.min(width, height);
         var shift = Math.abs(width - height) / 2f;
         var shiftX = width > height ? shift : 0;
         var shiftY = height > width ? shift : 0;
@@ -81,9 +80,10 @@ public class OffScreenRenders {
         var poseStack = new PoseStack();
         poseStack.pushPose();
         poseStack.translate(shiftX, shiftY, 0);
-        poseStack.translate(scale / (scaleMul * 2), scale / (scaleMul * 2), 0);
+//        poseStack.translate(scale / (scaleMul * 2), scale / (scaleMul * 2), 0);
+        poseStack.translate((float) width / 2, (float) height / 2, 0);
         poseStack.scale(scale, -scale, scale);
-        
+//        poseStack.scale(2,2,2);
         Minecraft.getInstance()
                 .getItemModelResolver()
                 .updateForTopItem(itemStackRenderState, itemStack, ItemDisplayContext.GUI, null, null, 42);
