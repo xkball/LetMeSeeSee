@@ -37,7 +37,7 @@ Click the second button after search bar to re-scan loaded classes.
 
 ### ![](data_base.png)Exported Classes Data Base
 
-![Gui Of Exported Classes Data Base](2025-03-25_00.12.48.png)
+![Gui Of Exported Classes Data Base](2025-08-31_16.46.02.png)
 
 Left panel have a search bar for all exported classes, and listed below are those classes. White class name means it was exported in current game session. Yellow name represent it was exported in past game session. Red name means mod list has changed since export. Relaunch game and change mod list may cause changing of class content.
 
@@ -53,3 +53,8 @@ Exported image files under .minecraft/let_me_see_see/_data/(namespace)/(item nam
 
 Exported item data files under minecraft/let_me_see_see/(namespace).json
 
+### Class Explorer
+
+![Class Exporter](2025-08-31_16.50.00.png)
+
+Enhanced Retriever and Exported Classes Data Base. You can find all loaded top level classes. Double-click to decompile it.  
