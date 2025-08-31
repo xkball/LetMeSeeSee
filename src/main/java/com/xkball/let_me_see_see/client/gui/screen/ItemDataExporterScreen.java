@@ -25,6 +25,7 @@ import com.xkball.let_me_see_see.client.offscreen.OffScreenRenders;
 import com.xkball.let_me_see_see.config.LMSConfig;
 import com.xkball.let_me_see_see.utils.VanillaUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.language.ClientLanguage;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -138,7 +139,7 @@ public class ItemDataExporterScreen extends FrameScreen {
                         .addWidget(PanelConfig.of(1, 1).apply(new SquareWidgetWrapper(
                                 PanelConfig.of()
                                         .decoRenderer(GuiDecorations.bottomCenterString(Component.translatable("let_me_see_see.gui.item_data_exporter.export_hint")))
-                                        .apply(new RawTexturePanel(OffScreenRenders.renderTarget))))));
+                                        .apply(new RawTexturePanel(Minecraft.getInstance().getMainRenderTarget()))))));
         var content = PanelConfig.of(1, 1)
                 .align(HorizontalAlign.CENTER, VerticalAlign.TOP)
                 .apply(new HorizontalPanel()
@@ -148,6 +149,15 @@ public class ItemDataExporterScreen extends FrameScreen {
         screen.resize();
         this.addRenderableWidget(screen);
         this.updateScreen();
+    }
+    
+    @Override
+    public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
+        if (imageSize != null && imageScale != null) {
+            OffScreenRenders.renderTarget.resize(imageSize, imageSize);
+            OffScreenRenders.renderItemStack(Items.CRAFTING_TABLE.getDefaultInstance(), imageSize, imageSize, imageScale);
+        }
     }
     
     @Override

@@ -7,6 +7,7 @@ import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.xkball.let_me_see_see.LetMeSeeSee;
+import com.xkball.let_me_see_see.utils.ClientUtils;
 import com.xkball.let_me_see_see.utils.VanillaUtils;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -91,6 +92,7 @@ public class OffScreenRenders {
             bufferSource.endBatch();
             Minecraft.getInstance().gameRenderer.getLighting().setupFor(Lighting.Entry.ITEMS_FLAT);
         }
+        ClientUtils.clear(renderTarget,true);
         RenderSystem.outputColorTextureOverride = renderTarget.getColorTextureView();
         RenderSystem.outputDepthTextureOverride = renderTarget.getDepthTextureView();
         itemStackRenderState.render(poseStack, bufferSource, 15728880, OverlayTexture.NO_OVERLAY);

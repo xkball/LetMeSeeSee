@@ -40,7 +40,7 @@ public class RawTexturePanel extends AutoResizeWidget {
         guiGraphics.submitBlit(RenderPipelines.GUI_TEXTURED, this.gpuTextureView,
                 getBoundary().inner().x(),getBoundary().inner().y(),
                 getBoundary().inner().maxX(), getBoundary().inner().maxY(),
-                0,1,0,1,-1
+                0,1,1,0,-1
                 );
 
     }
@@ -55,7 +55,7 @@ public class RawTexturePanel extends AutoResizeWidget {
             if(gpuTextureView != null) {
                 gpuTextureView.close();
             }
-            gpuTexture = ClientUtils.getGpuDevice().createTexture(() -> "lms texture panel",GpuTexture.USAGE_TEXTURE_BINDING | GpuTexture.USAGE_COPY_DST, TextureFormat.RGBA8, w, h, 1, 1);
+            gpuTexture = ClientUtils.getGpuDevice().createTexture(() -> "lms texture panel",GpuTexture.USAGE_TEXTURE_BINDING | GpuTexture.USAGE_RENDER_ATTACHMENT | GpuTexture.USAGE_COPY_DST, TextureFormat.RGBA8, w, h, 1, 1);
             gpuTexture.setTextureFilter(FilterMode.NEAREST, false);
             gpuTextureView = ClientUtils.getGpuDevice().createTextureView(gpuTexture);
         }

@@ -132,6 +132,14 @@ public abstract class NumInputFrame<T extends Number> extends ClampHorizontalPan
             this.setValue(default_);
         }
         
+        @Override
+        public void resize() {
+            super.resize();
+            if (this.input != null) {
+                this.input.updateTextPosition();
+            }
+        }
+        
         public void setValue(@Nullable Float value) {
             if (Objects.equals(this.value, value)) return;
             value = value == null ? null : Mth.clamp(value, min, max);
