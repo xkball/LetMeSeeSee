@@ -16,7 +16,6 @@ import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.util.ARGB;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL43;
 import org.lwjgl.stb.STBImage;

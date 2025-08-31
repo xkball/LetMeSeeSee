@@ -92,7 +92,7 @@ configurations {
 dependencies {
     //this is a in making compile time lib.
     //compileOnly(annotationProcessor("com.xkball:XorLib:1.0-SNAPSHOT:all"))
-    mcLib 'org.antlr:antlr4-runtime:4.13.2'
+    jarJar(mcLib('org.antlr:antlr4-runtime:4.13.2'))
     antlr "org.antlr:antlr4:4.13.2"
 }
 
