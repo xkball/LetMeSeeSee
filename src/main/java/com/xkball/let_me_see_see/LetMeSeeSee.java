@@ -33,7 +33,6 @@ import java.lang.instrument.UnmodifiableClassException;
 import java.lang.invoke.MethodHandle;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.security.ProtectionDomain;
 import java.util.List;
 import java.util.Objects;
