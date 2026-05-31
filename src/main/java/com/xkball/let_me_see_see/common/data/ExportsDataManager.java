@@ -5,7 +5,7 @@ import com.google.gson.reflect.TypeToken;
 import com.mojang.logging.LogUtils;
 import com.xkball.let_me_see_see.LetMeSeeSee;
 import com.xkball.let_me_see_see.utils.ClassSearcher;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import org.slf4j.Logger;
@@ -80,7 +80,7 @@ public class ExportsDataManager {
         if (player == null) return;
         Component message;
         while ((message = resultQueue.poll()) != null) {
-            player.displayClientMessage(message,false);
+            player.sendSystemMessage(message);
         }
     }
     

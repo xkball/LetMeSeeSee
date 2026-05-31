@@ -1,6 +1,6 @@
 package com.xkball.let_me_see_see.client;
 
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 
 public class LMSRenderTypes {
     

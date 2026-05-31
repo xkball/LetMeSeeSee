@@ -15,7 +15,7 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL43;
 import org.lwjgl.stb.STBImage;
@@ -65,7 +65,7 @@ public class ClientUtils {
     }
     
     public static void renderAxis(MultiBufferSource bufferSource, PoseStack poseStack) {
-        var buffer = bufferSource.getBuffer(RenderType.debugLineStrip(8));
+        var buffer = bufferSource.getBuffer(RenderTypes.LINES);
         var matrix = poseStack.last();
         buffer.addVertex(matrix, 0, 0, 0).setNormal(matrix, -1, 0, 0).setColor(0xFFFF0000);
         buffer.addVertex(matrix, 100, 0, 0).setNormal(matrix, 1, 0, 0).setColor(0xFFFF0000);

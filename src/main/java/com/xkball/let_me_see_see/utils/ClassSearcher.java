@@ -3,10 +3,10 @@ package com.xkball.let_me_see_see.utils;
 import com.xkball.let_me_see_see.LetMeSeeSee;
 import com.xkball.let_me_see_see.common.event.RebuildClassMapEvent;
 import net.neoforged.fml.ModList;
-import net.neoforged.fml.loading.moddiscovery.ModFile;
 import net.neoforged.neoforge.common.NeoForge;
 
 import java.io.IOException;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -63,14 +63,30 @@ public class ClassSearcher {
     }
 
     
-    @SuppressWarnings("UnstableApiUsage")
     public static List<String> ofModid(String modid) {
         var mod = ModList.get().getSortedMods().stream().filter(c -> c.getModId().equals(modid)).findFirst();
         if(mod.isEmpty()) return List.of();
         var iModFile = mod.get().getModInfo().getOwningFile().getFile();
-        if(!(iModFile instanceof ModFile modFile)) return List.of();
         var classNameList = new ArrayList<String>();
-        modFile.scanFile(p -> classNameList.add(p.toString()));
+        var path = iModFile.getFilePath();
+        try {
+            if (Files.isDirectory(path)) {
+                try (var stream = Files.walk(path)) {
+                    stream.filter(p -> p.toString().endsWith(".class"))
+                          .forEach(p -> classNameList.add(path.relativize(p).toString()));
+                }
+            } else {
+                try (var fs = FileSystems.newFileSystem(path)) {
+                    var root = fs.getPath("/");
+                    try (var stream = Files.walk(root)) {
+                        stream.filter(p -> p.toString().endsWith(".class"))
+                              .forEach(p -> classNameList.add(p.toString().substring(1)));
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         return classNameList;
 //        在专用服务器不可行 仍然会触发OnlyInClient类的加载
 //        var clazz = Class.forName(className,false,ClassSearcher.class.getClassLoader());

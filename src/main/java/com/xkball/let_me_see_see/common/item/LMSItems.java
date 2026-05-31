@@ -3,8 +3,8 @@ package com.xkball.let_me_see_see.common.item;
 import com.xkball.let_me_see_see.LetMeSeeSee;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
@@ -39,7 +39,7 @@ public class LMSItems {
         CREATIVE_MODE_TABS.register(eventBus);
     }
     
-    public static ResourceKey<Item> itemKey(ResourceLocation id){
+    public static ResourceKey<Item> itemKey(Identifier id){
         return ResourceKey.create(Registries.ITEM,id);
     }
     

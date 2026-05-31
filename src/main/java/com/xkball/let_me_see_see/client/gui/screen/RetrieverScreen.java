@@ -1,86 +1,163 @@
 package com.xkball.let_me_see_see.client.gui.screen;
 
+import com.mojang.logging.LogUtils;
 import com.xkball.let_me_see_see.LetMeSeeSee;
-import com.xkball.let_me_see_see.client.gui.frame.core.HorizontalAlign;
-import com.xkball.let_me_see_see.client.gui.frame.core.IUpdateMarker;
-import com.xkball.let_me_see_see.client.gui.frame.core.PanelConfig;
-import com.xkball.let_me_see_see.client.gui.frame.core.VerticalAlign;
-import com.xkball.let_me_see_see.client.gui.frame.screen.FrameScreen;
-import com.xkball.let_me_see_see.client.gui.frame.widget.Label;
-import com.xkball.let_me_see_see.client.gui.frame.widget.basic.AutoResizeWidgetWrapper;
-import com.xkball.let_me_see_see.client.gui.frame.widget.basic.HorizontalPanel;
-import com.xkball.let_me_see_see.client.gui.frame.widget.basic.VerticalPanel;
-import com.xkball.let_me_see_see.client.gui.widget.ClassSearchResultPanel;
 import com.xkball.let_me_see_see.utils.ClassSearcher;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.ComponentPath;
-import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.client.gui.navigation.FocusNavigationEvent;
-import net.minecraft.client.gui.navigation.ScreenDirection;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.Nullable;
+import com.xkball.xklib.ui.render.IComponent;
+import com.xkball.xklib.ui.widget.Button;
+import com.xkball.xklib.ui.widget.Label;
+import com.xkball.xklib.ui.widget.container.ContainerWidget;
+import com.xkball.xklibmc.ui.widget.ObjectInputWidget;
+import net.minecraft.client.Minecraft;
+import org.slf4j.Logger;
 
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
-public class RetrieverScreen extends FrameScreen {
-    
-    @Nullable
-    public EditBox searchBar;
-    @Nullable
-    public ClassSearchResultPanel classSearchResultPanel;
-    public String searchBarValue = "";
-    
+public class RetrieverScreen extends XKLibScreen {
+
+    private static final Logger LOGGER = LogUtils.getLogger();
+    private String searchBarValue = "";
+    private CompletableFuture<List<String>> searchTask;
+    private String lastSearches = "";
+
+    private ObjectInputWidget<String> searchInput;
+    private ContainerWidget resultList;
+    private ContainerWidget statusRow;
+
     public RetrieverScreen() {
-        super(Component.translatable("let_me_see_see.gui.retriever"));
+        super();
         ClassSearcher.buildClassMap();
-        //ClassSearcherTest.test();
     }
-    
+
     @Override
-    protected void init() {
-        super.init();
-        searchBar = new EditBox(font, 0, 0, 0, 0, Component.empty()) {
-            {
-                setupSimpleEditBox(this);
-                setValue(searchBarValue);
-                setResponder(str -> {
-                    searchBarValue = str;
-                    setNeedUpdate();
+    protected String getTitleKey() {
+        return "let_me_see_see.gui.retriever";
+    }
+
+    @Override
+    protected void buildUI() {
+        searchInput = ObjectInputWidget.ofString();
+        searchInput.setAsString(searchBarValue);
+        searchInput.setCallback(w -> {
+            searchBarValue = w.getAsString();
+            refreshResults();
+        });
+        searchInput.inlineStyle("size: 60% 14rpx; margin-top: 2rpx; flex-shrink: 0;");
+
+        statusRow = new ContainerWidget();
+        statusRow.inlineStyle("size: 100% 10rpx; flex-shrink: 0;");
+
+        resultList = new ContainerWidget();
+        resultList.inlineStyle("size: 60% auto; flex-direction: column; overflow-y: scroll; flex-shrink: 1; flex-grow: 1;");
+        resultList.asRootStyle("""
+                .result_btn {
+                    size: 100% 10rpx;
+                    flex-shrink: 0;
+                    text-align: left;
+                    text-scale: fit_to_max;
+                    text-height: 8rpx;
+                    button-shape: rect;
+                    button-bg-color: 0x00FFFFFF;
+                    text-color: -1;
+                    text-drop-shadow: false;
+                }
+                """);
+
+        var exportBtn = new Button(IComponent.translatable("let_me_see_see.gui.retriever.export"), () -> {
+            if (searchBarValue.isEmpty()) return;
+            var value = ClassSearcher.classMap.get(searchBarValue);
+            if (value == null) return;
+            LetMeSeeSee.scanClasses(value);
+        });
+        exportBtn.inlineStyle("""
+                size: content 14rpx;
+                margin-top: 2rpx;
+                margin-left: 2rpx;
+                text-align: center;
+                text-scale: expand-width;
+                button-shape: rect;
+                button-bg-color: rgb(229,233,239);
+                text-drop-shadow: false;
+                text-extra-width: 2rpx;
+                text-height: 8rpx;
+                """);
+
+        var rebuildBtn = new Button(IComponent.translatable("let_me_see_see.gui.retriever.rebuild_cache"), () -> {
+            ClassSearcher.buildClassMap();
+            refreshResults();
+        });
+        rebuildBtn.inlineStyle("""
+                size: content 14rpx;
+                margin-top: 2rpx;
+                margin-left: 2rpx;
+                text-align: center;
+                text-scale: expand-width;
+                button-shape: rect;
+                button-bg-color: rgb(229,233,239);
+                text-drop-shadow: false;
+                text-extra-width: 2rpx;
+                text-height: 8rpx;
+                """);
+
+        // Center row: search on left, buttons on right
+        var centerRow = new ContainerWidget();
+        centerRow.inlineStyle("flex-direction: row; size: 100% auto; align-items: flex-start; flex-shrink: 1; flex-grow: 1;");
+
+        var searchColumn = new ContainerWidget();
+        searchColumn.inlineStyle("flex-direction: column; size: 100% auto; align-items: center; flex-shrink: 1; flex-grow: 1;");
+        searchColumn.addChild(searchInput);
+        searchColumn.addChild(statusRow);
+        searchColumn.addChild(resultList);
+
+        var btnColumn = new ContainerWidget();
+        btnColumn.inlineStyle("flex-direction: column; size: auto auto; flex-shrink: 0; margin-left: 4rpx;");
+        btnColumn.addChild(exportBtn);
+        btnColumn.addChild(rebuildBtn);
+
+        centerRow.addChild(searchColumn);
+        centerRow.addChild(btnColumn);
+
+        this.root.addChild(new Label(IComponent.translatable("let_me_see_see.gui.retriever.search"))
+                .inlineStyle("text-color: -1; size: 100% auto; margin-top: 5rpx; margin-left: 4rpx; flex-shrink: 0;"));
+        this.root.addChild(centerRow);
+
+        refreshResults();
+    }
+
+    private void refreshResults() {
+        statusRow.clearChildren();
+        resultList.clearChildren();
+
+        if (!searchBarValue.isEmpty()) {
+            if (!lastSearches.equals(searchBarValue)) {
+                if (searchTask != null) searchTask.cancel(true);
+                lastSearches = searchBarValue;
+                searchTask = CompletableFuture.supplyAsync(() -> ClassSearcher.search(searchBarValue));
+                searchTask.thenAcceptAsync(results -> {
+                    com.xkball.xklib.ui.system.GuiSystem.INSTANCE.get().submitTreeUpdate(this::refreshResults);
                 });
             }
-            
-            @Nullable
-            @Override
-            public ComponentPath nextFocusPath(FocusNavigationEvent event) {
-                if (classSearchResultPanel == null || event.getVerticalDirectionForInitialFocus() != ScreenDirection.DOWN)
-                    return null;
-                return ComponentPath.leaf(classSearchResultPanel);
+
+            if (searchTask != null && searchTask.isDone()) {
+                var results = searchTask.getNow(List.of());
+                for (var str : results) {
+                    resultList.addChild(new Button(IComponent.literal(str), () -> {
+                        searchBarValue = str;
+                        searchInput.setAsString(str);
+                        refreshResults();
+                    }).setCSSClassName("result_btn"));
+                }
+                if (results.isEmpty() && !ClassSearcher.containsClass(searchBarValue)) {
+                    statusRow.addChild(new Label(IComponent.translatable("let_me_see_see.gui.retriever.class_not_found"))
+                            .inlineStyle("text-color: 0xFFFF5555; size: 100% 10rpx; flex-shrink: 0;"));
+                }
+            } else {
+                statusRow.addChild(new Label(IComponent.translatable("let_me_see_see.gui.retriever.searching"))
+                        .inlineStyle("text-color: -1; size: 100% 10rpx; flex-shrink: 0;"));
             }
-        };
-        var content = PanelConfig.of(1, 0.9f).paddingTop(0.1f).align(HorizontalAlign.CENTER, VerticalAlign.TOP).apply(new HorizontalPanel().addWidget(PanelConfig.of().paddingTop(16).apply(Label.of(Component.translatable("let_me_see_see.gui.retriever.search"), 1.2f))).addWidget(PanelConfig.of(0.6f, 1).align(HorizontalAlign.LEFT, VerticalAlign.TOP).apply(new VerticalPanel().addWidget(PanelConfig.of().trim().apply(new Label(Component.empty(), 1, -1, true) {
-                    @Override
-                    public boolean update(IUpdateMarker marker) {
-                        var old = getMessage();
-                        if (ClassSearcher.containsClass(searchBarValue)) setMessage(Component.empty());
-                        else
-                            setMessage(Component.translatable("let_me_see_see.gui.retriever.class_not_found").withStyle(ChatFormatting.RED));
-                        return old.equals(getMessage());
-                    }
-                })).addWidget(PanelConfig.of(1, 0).fixHeight(20).apply(AutoResizeWidgetWrapper.of(searchBar))).addWidget(PanelConfig.of(1, 1).align(HorizontalAlign.LEFT, VerticalAlign.TOP).apply(classSearchResultPanel = new ClassSearchResultPanel(() -> searchBarValue, str -> {
-                    if (searchBar != null) searchBar.setValue(str);
-                }))))).addWidget(PanelConfig.of().fixSize(20, 20).paddingTop(9).paddingLeft(4).tooltip("let_me_see_see.gui.retriever.export").apply(iconButton((btn) -> {
-                    if (searchBar == null) return;
-                    var value = ClassSearcher.classMap.get(searchBarValue);
-                    if (value == null) return;
-                    LetMeSeeSee.scanClasses(value);
-                }, ResourceLocation.withDefaultNamespace("icon/search")))).addWidget(PanelConfig.of().fixSize(20, 20).paddingTop(9).paddingLeft(4).tooltip(Tooltip.create(Component.translatable("let_me_see_see.gui.retriever.rebuild_cache"))).apply(iconButton((btn) -> ClassSearcher.buildClassMap(), ResourceLocation.withDefaultNamespace("icon/search"))))
-        
-        );
-        var screen = this.screenFrame("let_me_see_see.gui.retriever", content);
-        screen.resize();
-        this.addRenderableWidget(screen);
-        this.updateScreen();
+        }
+        statusRow.markDirty();
+        resultList.markDirty();
     }
-    
 }

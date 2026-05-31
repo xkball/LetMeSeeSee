@@ -1,8 +1,6 @@
 import com.google.gson.JsonParser
 import com.google.gson.JsonObject
-import net.neoforged.moddevgradle.internal.RunGameTask
 
-import java.nio.file.Files
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
@@ -10,7 +8,7 @@ import java.time.format.DateTimeFormatter
 plugins {
     id 'java-library'
     id 'maven-publish'
-    id 'net.neoforged.moddev' version '2.0.103'
+    id 'net.neoforged.moddev' version '2.0.141'
     id 'idea'
     id 'antlr'
 }
@@ -35,15 +33,10 @@ base {
     }
 }
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 
 neoForge {
     version = project.neo_version
-    parchment {
-        mappingsVersion = project.parchment_mappings_version
-        minecraftVersion = project.parchment_minecraft_version
-    }
-    accessTransformers = project.files('src/main/resources/META-INF/accesstransformer.cfg')
     runs {
         client {
             client()
@@ -91,12 +84,46 @@ configurations {
     }
 }
 
-
 dependencies {
-    //this is a in making compile time lib.
-    //compileOnly(annotationProcessor("com.xkball:XorLib:1.0-SNAPSHOT:all"))
     jarJar(mcLib('org.antlr:antlr4-runtime:4.13.2'))
     antlr "org.antlr:antlr4:4.13.2"
+
+    jarJar(implementation "com.xkball:xklib-3d:$xklib_version"){
+        version {
+            strictly '[0.0.6, 1.0.0)'
+            prefer xklib_version
+        }
+    }
+    jarJar(implementation "com.xkball:xklib-ap:$xklib_version"){
+        version {
+            strictly '[0.0.6, 1.0.0)'
+            prefer xklib_version
+        }
+    }
+    jarJar(implementation "com.xkball:xklib-ui:$xklib_version"){
+        version {
+            strictly '[0.0.6, 1.0.0)'
+            prefer xklib_version
+        }
+    }
+    jarJar(implementation "com.xkball:xklib-mc:$xklib_version"){
+        version {
+            strictly '[0.0.6, 1.0.0)'
+            prefer xklib_version
+        }
+    }
+    jarJar(implementation "dev.vfyjxf:taffy:1.1.4") {
+        version {
+            strictly '[1.1.4, 2.0.0)'
+            prefer '1.1.4'
+        }
+    }
+    jarJar(implementation "net.lenni0451:LambdaEvents:2.4.2") {
+        version {
+            strictly '[2.4.2, 3.0.0)'
+            prefer '2.4.2'
+        }
+    }
 }
 
 // https://github.com/antlr/antlr4/blob/master/doc/tool-options.md
@@ -106,12 +133,6 @@ generateGrammarSource {
     outputDirectory = outputDirectory.toPath().resolve("com/xkball/let_me_see_see/antlr/java").toFile()
 }
 
-//tasks.register('copyGrammarSource', Copy) {
-//    dependsOn generateGrammarSource
-//    from "${buildDir}/generated-src/antlr/main/com/xkball/let_me_see_see/antlr/java"
-//    into "${buildDir}/generated-src/antlr/main"
-//    duplicatesStrategy = DuplicatesStrategy.INCLUDE
-//}
 compileJava.dependsOn generateGrammarSource
 sourceSets.main.java.srcDir("${buildDir}/generated-src/antlr/main/com/xkball/let_me_see_see/antlr/java")
 
@@ -143,10 +164,10 @@ jar{
     }
 }
 
-tasks.withType(RunGameTask).configureEach{
+tasks.withType(net.neoforged.moddevgradle.internal.RunGameTask).configureEach{
     dependsOn jar
     systemProperty("LET_ME_SEE_AGENT_JAR_PATH",tasks.jar.archiveFile.get().getAsFile())
-    
+
 }
 
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {

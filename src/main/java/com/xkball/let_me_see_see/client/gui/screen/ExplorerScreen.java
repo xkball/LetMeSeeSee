@@ -1,17 +1,10 @@
 package com.xkball.let_me_see_see.client.gui.screen;
 
-import com.xkball.let_me_see_see.client.gui.frame.core.HorizontalAlign;
-import com.xkball.let_me_see_see.client.gui.frame.core.IUpdateMarker;
-import com.xkball.let_me_see_see.client.gui.frame.core.PanelConfig;
-import com.xkball.let_me_see_see.client.gui.frame.core.VerticalAlign;
-import com.xkball.let_me_see_see.client.gui.frame.core.render.GuiDecorations;
-import com.xkball.let_me_see_see.client.gui.frame.screen.FrameScreen;
-import com.xkball.let_me_see_see.client.gui.frame.widget.ClassTree;
-import com.xkball.let_me_see_see.client.gui.frame.widget.basic.BaseContainerWidget;
-import com.xkball.let_me_see_see.client.gui.frame.widget.basic.ScrollableVHPanel;
-import com.xkball.let_me_see_see.client.gui.frame.widget.basic.VerticalPanel;
+import com.xkball.let_me_see_see.client.gui.xkwidget.ClassTreeModel;
 import com.xkball.let_me_see_see.common.event.RebuildClassMapEvent;
 import com.xkball.let_me_see_see.utils.ClassSearcher;
+import com.xkball.xklib.ui.widget.container.ContainerWidget;
+import com.xkball.xklibmc.ui.widget.ObjectInputWidget;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -19,45 +12,64 @@ import net.neoforged.fml.common.EventBusSubscriber;
 
 @EventBusSubscriber(Dist.CLIENT)
 public class ExplorerScreen extends DataBaseScreen {
-    
-    private static ClassTree classTree = new ClassTree(ClassSearcher.classMap.values());
+
+    private static ClassTreeModel classTree = new ClassTreeModel(ClassSearcher.classMap.values());
+    private ContainerWidget treeContainer;
+
     public ExplorerScreen() {
         super();
     }
-    
+
     @SubscribeEvent
     public static void onRebuildClassMap(RebuildClassMapEvent event) {
-        classTree = new ClassTree(ClassSearcher.classMap.values());
-        if(Minecraft.getInstance().screen instanceof ExplorerScreen explorerScreen) {
-            explorerScreen.searchBarUpdateChecker.forceUpdate();
+        classTree = new ClassTreeModel(ClassSearcher.classMap.values());
+        if (Minecraft.getInstance().screen instanceof ExplorerScreen explorerScreen) {
+            explorerScreen.refreshTree();
         }
     }
-    
+
     @Override
     public String getTitleKey() {
         return "let_me_see_see.gui.explorer";
     }
-    
+
     @Override
-    protected BaseContainerWidget createClassListView() {
-        return PanelConfig.of(FrameScreen.THE_SCALE-0.08F, 1)
-                .align(HorizontalAlign.LEFT, VerticalAlign.TOP)
-                .decoRenderer(GuiDecorations.RIGHT_DARK_BORDER_LINE)
-                .apply(new VerticalPanel()
-                        .addWidget(PanelConfig.of(1, 1)
-                                .fixHeight(24)
-                                .apply(createEditBox(this::getSearchBarValue, this::setSearchBarValue)))
-                        .addWidget(PanelConfig.of(1, 1)
-                                .align(HorizontalAlign.LEFT, VerticalAlign.TOP)
-                                .apply(new ScrollableVHPanel() {
-                                    @Override
-                                    public boolean update(IUpdateMarker marker) {
-                                        if (!searchBarUpdateChecker.checkUpdate(searchBarValue)) return false;
-                                        clearWidget();
-                                        classTree.addToPanel(this,ExplorerScreen.this);
-                                        super.update(marker);
-                                        return true;
-                                    }
-                                })));
+    protected ContainerWidget createClassListPanel() {
+        var panel = new ContainerWidget();
+        panel.inlineStyle("size: 37.31% 100%; flex-direction: column; border-right: 1rpx; border-color: 0x55666666;");
+
+        var searchInput = ObjectInputWidget.ofString();
+        searchInput.setAsString(searchBarValue);
+        searchInput.setCallback(w -> {
+            searchBarValue = w.getAsString();
+            refreshTree();
+        });
+        searchInput.inlineStyle("size: 100% 14rpx; flex-shrink: 0;");
+
+        treeContainer = new ContainerWidget();
+        treeContainer.inlineStyle("size: 100% 100%-16rpx; flex-direction: column; overflow-y: scroll; flex-shrink: 1;");
+
+        panel.addChild(searchInput);
+        panel.addChild(treeContainer);
+        return panel;
+    }
+
+    @Override
+    public void refreshClassList() {
+        // ExplorerScreen uses tree, not flat list
+        refreshTree();
+    }
+
+    @Override
+    protected void buildUI() {
+        super.buildUI();
+        refreshTree();
+    }
+
+    public void refreshTree() {
+        if (treeContainer == null) return;
+        treeContainer.clearChildren();
+        classTree.addToContainer(treeContainer, this, this::refreshTree);
+        treeContainer.markDirty();
     }
 }

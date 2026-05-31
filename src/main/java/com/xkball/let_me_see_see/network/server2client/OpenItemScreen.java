@@ -2,7 +2,6 @@ package com.xkball.let_me_see_see.network.server2client;
 
 import com.xkball.let_me_see_see.common.item.IScreenProviderItem;
 import com.xkball.let_me_see_see.utils.VanillaUtils;
-import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -12,7 +11,6 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-@MethodsReturnNonnullByDefault
 //@NetworkPacket(type = NetworkPacket.Type.PLAY_SERVER_TO_CLIENT)
 public record OpenItemScreen(ItemStack stack, EquipmentSlot slot) implements CustomPacketPayload {
     

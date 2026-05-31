@@ -4,37 +4,23 @@ import com.mojang.logging.LogUtils;
 import com.xkball.let_me_see_see.antlr.java.ColoringListener;
 import com.xkball.let_me_see_see.antlr.java.JavaLexer;
 import com.xkball.let_me_see_see.antlr.java.JavaParser;
-import com.xkball.let_me_see_see.client.gui.frame.core.HorizontalAlign;
-import com.xkball.let_me_see_see.client.gui.frame.core.IPanel;
-import com.xkball.let_me_see_see.client.gui.frame.core.IUpdateMarker;
-import com.xkball.let_me_see_see.client.gui.frame.core.PanelConfig;
-import com.xkball.let_me_see_see.client.gui.frame.core.UpdateChecker;
-import com.xkball.let_me_see_see.client.gui.frame.core.VerticalAlign;
-import com.xkball.let_me_see_see.client.gui.frame.core.render.GuiDecorations;
-import com.xkball.let_me_see_see.client.gui.frame.core.render.SimpleBackgroundRenderer;
-import com.xkball.let_me_see_see.client.gui.frame.screen.FrameScreen;
-import com.xkball.let_me_see_see.client.gui.frame.widget.Label;
-import com.xkball.let_me_see_see.client.gui.frame.widget.basic.AutoResizeWidgetWrapper;
-import com.xkball.let_me_see_see.client.gui.frame.widget.basic.BaseContainerWidget;
-import com.xkball.let_me_see_see.client.gui.frame.widget.basic.HorizontalPanel;
-import com.xkball.let_me_see_see.client.gui.frame.widget.basic.ScrollableVHPanel;
-import com.xkball.let_me_see_see.client.gui.frame.widget.basic.ScrollableVerticalPanel;
-import com.xkball.let_me_see_see.client.gui.frame.widget.basic.VerticalPanel;
-import com.xkball.let_me_see_see.client.gui.widget.ClassLabel;
+import com.xkball.let_me_see_see.client.gui.xkwidget.ClassLabelWidget;
+import net.minecraft.network.chat.TextColor;
 import com.xkball.let_me_see_see.common.data.ExportsDataManager;
-import com.xkball.let_me_see_see.config.ColorMapping;
 import com.xkball.let_me_see_see.config.LMSConfig;
 import com.xkball.let_me_see_see.utils.ClassDecompiler;
 import com.xkball.let_me_see_see.utils.ClassSearcher;
 import com.xkball.let_me_see_see.utils.VanillaUtils;
+import com.xkball.xklib.resource.ResourceLocation;
+import com.xkball.xklib.ui.render.IComponent;
+import com.xkball.xklib.ui.widget.IconButton;
+import com.xkball.xklib.ui.widget.Label;
+import com.xkball.xklib.ui.widget.container.ContainerWidget;
+import com.xkball.xklibmc.ui.widget.ObjectInputWidget;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
@@ -43,219 +29,246 @@ import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DataBaseScreen extends FrameScreen {
-    
+public class DataBaseScreen extends XKLibScreen {
+
     private static final Logger LOGGER = LogUtils.getLogger();
-    private static final Style CODE_BASE_STYLE = Style.EMPTY;
-    public final UpdateChecker searchBarUpdateChecker = new UpdateChecker();
-    protected String searchBarValue = "";
-    
+protected String searchBarValue = "";
     @Nullable
-    public ClassLabel lastFocused = null;
-    
+    public ClassLabelWidget lastFocused;
+
+    private ContainerWidget classListContainer;
+    private ContainerWidget previewBody;
+
     public DataBaseScreen() {
-        super(Component.empty());
+        super();
         ClassSearcher.buildClassMap();
     }
-    
-    protected BaseContainerWidget createClassListView(){
-        return PanelConfig.of(FrameScreen.THE_SCALE, 1)
-                .align(HorizontalAlign.LEFT, VerticalAlign.TOP)
-                .decoRenderer(GuiDecorations.RIGHT_DARK_BORDER_LINE)
-                .apply(new VerticalPanel()
-                        .addWidget(PanelConfig.of(1, 1)
-                                .fixHeight(24)
-                                .apply(createEditBox(this::getSearchBarValue, this::setSearchBarValue)))
-                        .addWidget(PanelConfig.of(1, 1)
-                                .align(HorizontalAlign.LEFT, VerticalAlign.TOP)
-                                .apply(new ScrollableVerticalPanel() {
-                                    @Override
-                                    public boolean update(IUpdateMarker marker) {
-                                        if (!searchBarUpdateChecker.checkUpdate(searchBarValue)) return false;
-                                        clearWidget();
-                                        var labelConfig = PanelConfig.of().fixHeight(16).fixWidth(getBoundary().inner().width() - 6);
-                                        for (var str : VanillaUtils.searchInLowerCase(searchBarValue, ExportsDataManager.recordedClasses.keySet())) {
-                                            var clazz = ClassSearcher.classMap.get(str);
-                                            if (clazz == null) continue;
-                                            addWidget(labelConfig.apply(
-                                                    new ClassLabel.ClassLabelInDBS(clazz,DataBaseScreen.this)));
-                                        }
-                                        return true;
-                                    }
-                                })));
-    }
-    
+
     @Override
-    protected void init() {
-        super.init();
-        this.searchBarUpdateChecker.forceUpdate();
-        var classListPanel = this.createClassListView();
-        var openIDEATooltip = Component.translatable("let_me_see_see.gui.data_base.open_in_idea");
-        if (LMSConfig.IDEA_PATH.isEmpty())
-            openIDEATooltip.append(Component.translatable("let_me_see_see.gui.data_base.no_idea").withStyle(ChatFormatting.RED));
-        var classPreviewHeader = PanelConfig.of(1, 1)
-                .fixHeight(24)
-                .align(HorizontalAlign.RIGHT, VerticalAlign.CENTER)
-                .decoRenderer(GuiDecorations.BOTTOM_DARK_BORDER_LINE)
-                .apply(new HorizontalPanel()
-                        .addWidget(PanelConfig.of()
-                                .fixSize(20, 20)
-                                .paddingRight(4)
-                                .tooltip(Tooltip.create(Component.translatable("let_me_see_see.gui.retriever.rebuild_cache")))
-                                .apply(iconButton((btn) -> ClassSearcher.buildClassMap(), ResourceLocation.withDefaultNamespace("icon/search"))))
-                        .addWidget(PanelConfig.of()
-                                .fixSize(20, 20)
-                                .paddingRight(4)
-                                .tooltip(Tooltip.create(openIDEATooltip))
-                                .apply(iconButton(btn -> {
-                                    if (lastFocused != null) lastFocused.openInIDEA();
-                                }, ResourceLocation.withDefaultNamespace("statistics/item_used"))))
-                        .addWidget(PanelConfig.of()
-                                .fixSize(20, 20)
-                                .paddingRight(4)
-                                .tooltip("let_me_see_see.gui.data_base.re_export")
-                                .apply(iconButton(btn -> {
-                                    if (lastFocused != null) {
-                                        lastFocused.reExport();
-                                        searchBarUpdateChecker.forceUpdate();
-                                        setNeedUpdate();
-                                    }
-                                }, ResourceLocation.withDefaultNamespace("icon/search")))));
-        var classPreviewPanel = PanelConfig.of(1, 1)
-                .align(HorizontalAlign.LEFT, VerticalAlign.TOP)
-                .apply(new VerticalPanel() {
-                    @Override
-                    public boolean update(IUpdateMarker marker) {
-                        clearWidget();
-                        if (lastFocused != null) {
-                            addWidget(classPreviewHeader);
-                            addWidget(buildClassPreviewPanelBody());
-                        }
-                        return true;
-                    }
-                });
-        
-        var content = PanelConfig.of()
-                .align(HorizontalAlign.LEFT, VerticalAlign.TOP)
-                .apply(new HorizontalPanel()
-                        .addWidget(classListPanel)
-                        .addWidget(classPreviewPanel));
-        var screen = this.screenFrame(this.getTitleKey(), content);
-        screen.setDecoRenderer(new SimpleBackgroundRenderer(0x60000000));
-        screen.resize();
-        this.addRenderableWidget(screen);
-        this.updateScreen();
-    }
-    
-    public String getTitleKey(){
+    protected String getTitleKey() {
         return "let_me_see_see.gui.data_base";
     }
-    
-    @SuppressWarnings("unchecked")
-    public <T extends AbstractWidget & IPanel> T buildClassPreviewPanelBody(){
-        var config = PanelConfig.of(1, 1)
-                .paddingTop(0.4f)
-                .trim();
-        if(LMSConfig.FERN_FLOWER_PATH.isEmpty()){
-            return (T) config.apply(Label.ofKey("let_me_see_see.gui.data_base.preview.no_fernflower"));
+
+    @Override
+    protected void buildUI() {
+        var classListPanel = createClassListPanel();
+        var classPreviewPanel = createClassPreviewPanel();
+
+        var content = new ContainerWidget();
+        content.inlineStyle("flex-direction: row; size: 100% 100%;");
+        content.addChild(classListPanel);
+        content.addChild(classPreviewPanel);
+
+        root.addChild(content);
+
+        refreshClassList();
+    }
+
+    protected ContainerWidget createClassListPanel() {
+        var panel = new ContainerWidget();
+        panel.inlineStyle("size: 37.31% 100%; flex-direction: column; border-right: 1rpx; border-color: 0x55666666;");
+
+        var searchInput = ObjectInputWidget.ofString();
+        searchInput.setAsString(searchBarValue);
+        searchInput.setCallback(w -> {
+            searchBarValue = w.getAsString();
+            com.xkball.xklib.ui.system.GuiSystem.INSTANCE.get().submitTreeUpdate(this::refreshClassList);
+        });
+        searchInput.inlineStyle("size: 100% 14rpx; flex-shrink: 0;");
+
+        classListContainer = new ContainerWidget();
+        classListContainer.inlineStyle("size: 100% 100%-16rpx; flex-direction: column; overflow-y: scroll; flex-shrink: 1;");
+
+        panel.addChild(searchInput);
+        panel.addChild(classListContainer);
+        return panel;
+    }
+
+    public void refreshClassList() {
+        classListContainer.clearChildren();
+        var searchResults = VanillaUtils.searchInLowerCase(searchBarValue, ExportsDataManager.recordedClasses.keySet());
+        for (var str : searchResults) {
+            var clazz = ClassSearcher.classMap.get(str);
+            if (clazz == null) continue;
+            classListContainer.addChild(createClassLabel(clazz)
+                    .inlineStyle("size: 100% 8rpx; flex-shrink: 0; margin-top: 1rpx; text-height: 8rpx;"));
         }
-        else if(this.lastFocused == null){
-            return (T) config.apply(Label.ofKey("let_me_see_see.gui.data_base.preview.no_focused"));
+        classListContainer.markDirty();
+    }
+
+    protected ClassLabelWidget createClassLabel(Class<?> clazz) {
+        return new ClassLabelWidget(clazz, this);
+    }
+
+    protected ContainerWidget createClassPreviewPanel() {
+        var panel = new ContainerWidget();
+        panel.inlineStyle("size: 62.69% 100%; flex-direction: column;");
+
+        var header = new ContainerWidget();
+        header.inlineStyle("flex-direction: row; size: 100% 18rpx; flex-shrink: 0; border-bottom: 1rpx; border-color: 0x55666666; align-items: center;");
+
+        var searchIconBtn = new IconButton(new ResourceLocation("minecraft", "icon/search"), () -> {
+            ClassSearcher.buildClassMap();
+            refreshClassList();
+        });
+        searchIconBtn.inlineStyle("size: 14rpx 14rpx; margin-left: 2rpx; flex-shrink: 0;")
+                .withTooltip(IComponent.translatable("let_me_see_see.gui.retriever.rebuild_cache"));
+
+        var openInIdeBtn = new IconButton(new ResourceLocation("minecraft", "statistics/item_used"), () -> {
+            if (lastFocused != null) openInIDEA(lastFocused);
+        });
+        openInIdeBtn.inlineStyle("size: 14rpx 14rpx; margin-left: 2rpx; flex-shrink: 0;");
+        if (LMSConfig.IDEA_PATH.isEmpty()) {
+            openInIdeBtn.withTooltip(IComponent.translatable("let_me_see_see.gui.data_base.no_idea"));
+        } else {
+            openInIdeBtn.withTooltip(IComponent.translatable("let_me_see_see.gui.data_base.open_in_idea"));
         }
-        else {
-            var classPath = this.lastFocused.getClassPath();
-            if(!classPath.toFile().exists()){
-                lastFocused.reExport();
-                return (T) config.apply(Label.ofKey("let_me_see_see.gui.data_base.preview.no_file"));
+
+        var reExportBtn = new IconButton(new ResourceLocation("minecraft", "icon/search"), () -> {
+            if (lastFocused != null) {
+                reExport(lastFocused);
+                refreshPreview();
             }
-            var state = ClassDecompiler.getState(classPath);
-            lastFocused.updateState();
-            if(state == null || state == ClassDecompiler.DecompilerState.DECOMPILING){
-                if(state == null){
-                    ClassDecompiler.decompile(classPath).whenCompleteAsync((v,t) -> {
-                        if(t != null){
-                            LOGGER.error("can not decompile file: {}",classPath,t);
-                        }
-                        this.setNeedUpdate();
-                    });
-                }
-                return (T) config.apply(Label.ofKey("let_me_see_see.gui.data_base.preview.decompiling"));
-            }
-            else if(state == ClassDecompiler.DecompilerState.SUCCESS){
-                List<String> lines = new ArrayList<>();
-                var dstPath = ClassDecompiler.toResultPath(classPath);
-                if(dstPath.toFile().exists()){
-                    try {
-                        lines = Files.readAllLines(dstPath);
-                    } catch (IOException e) {
-                        LOGGER.error("can not read file: {}",dstPath,e);
+        });
+        reExportBtn.inlineStyle("size: 14rpx 14rpx; margin-left: 2rpx; flex-shrink: 0;")
+                .withTooltip(IComponent.translatable("let_me_see_see.gui.data_base.re_export"));
+
+        header.addChild(searchIconBtn);
+        header.addChild(openInIdeBtn);
+        header.addChild(reExportBtn);
+
+        panel.addChild(header);
+
+        previewBody = new ContainerWidget();
+        previewBody.inlineStyle("size: 100% 100%-18rpx; flex-direction: column; overflow-y: scroll; flex-shrink: 1;");
+        panel.addChild(previewBody);
+
+        refreshPreview();
+        return panel;
+    }
+
+    public void refreshPreview() {
+        previewBody.clearChildren();
+
+        if (LMSConfig.FERN_FLOWER_PATH.isEmpty()) {
+            previewBody.addChild(new Label(IComponent.translatable("let_me_see_see.gui.data_base.preview.no_fernflower"))
+                    .inlineStyle("text-color: -1; margin: 4rpx; size: 100% auto; flex-shrink: 0;"));
+        } else if (lastFocused == null) {
+            previewBody.addChild(new Label(IComponent.translatable("let_me_see_see.gui.data_base.preview.no_focused"))
+                    .inlineStyle("text-color: -1; margin: 4rpx; size: 100% auto; flex-shrink: 0;"));
+        } else {
+            var classPath = getClassPath(lastFocused);
+            if (!classPath.toFile().exists()) {
+                reExport(lastFocused);
+                previewBody.addChild(new Label(IComponent.translatable("let_me_see_see.gui.data_base.preview.no_file"))
+                        .inlineStyle("text-color: -1; margin: 4rpx; size: 100% auto; flex-shrink: 0;"));
+            } else {
+                var state = ClassDecompiler.getState(classPath);
+                lastFocused.updateState();
+                if (state == null || state == ClassDecompiler.DecompilerState.DECOMPILING) {
+                    if (state == null) {
+                        ClassDecompiler.decompile(classPath).whenCompleteAsync((v, t) -> {
+                            if (t != null) {
+                                LOGGER.error("can not decompile file: {}", classPath, t);
+                            }
+                            com.xkball.xklib.ui.system.GuiSystem.INSTANCE.get().submitTreeUpdate(this::refreshPreview);
+                        });
                     }
+                    previewBody.addChild(new Label(IComponent.translatable("let_me_see_see.gui.data_base.preview.decompiling"))
+                            .inlineStyle("text-color: -1; margin: 4rpx; size: 100% auto; flex-shrink: 0;"));
+                } else if (state == ClassDecompiler.DecompilerState.SUCCESS) {
+                    List<String> lines = new ArrayList<>();
+                    var dstPath = ClassDecompiler.toResultPath(classPath);
+                    if (dstPath.toFile().exists()) {
+                        try {
+                            lines = Files.readAllLines(dstPath);
+                        } catch (IOException e) {
+                            LOGGER.error("can not read file: {}", dstPath, e);
+                        }
+                    }
+                    var all = String.join(" \n", lines);
+                    var parsedLines = parseJavaSrc(all);
+                    for (var lineComp : parsedLines) {
+                        previewBody.addChild(new Label(lineComp)
+                                .inlineStyle("""
+                                        size: auto 10rpx;
+                                        flex-shrink: 0;
+                                        text-height: 9rpx;
+                                        text-drop-shadow: false;
+                                        """));
+                    }
+                } else {
+                    previewBody.addChild(new Label(IComponent.translatable("let_me_see_see.gui.data_base.preview.decompile_error"))
+                            .inlineStyle("text-color: 0xFFFF5555; margin: 4rpx; size: 100% auto; flex-shrink: 0;"));
                 }
-                var all = String.join(" \n", lines);
-                LOGGER.debug("parsing class: {}",classPath);
-                var formatedLines = parseJavaSrc(all);
-                var config_ = PanelConfig.of().trim().paddingLeft(2);
-                return (T) PanelConfig.of(1,1)
-                        .apply(AutoResizeWidgetWrapper.of(
-                                PanelConfig.of(1,1)
-                                        .align(HorizontalAlign.LEFT, VerticalAlign.TOP)
-                                        .apply(new ScrollableVHPanel()
-                                                .addWidgets(formatedLines.stream().map(c -> config_.apply(Label.of(c))).toList(),false))));
             }
-            else {
-                assert state == ClassDecompiler.DecompilerState.ERROR;
-                return (T) config.apply(Label.ofKey("let_me_see_see.gui.data_base.preview.decompile_error"));
-            }
+        }
+        previewBody.markDirty();
+    }
+
+    protected Path getClassPath(ClassLabelWidget label) {
+        return Path.of(com.xkball.let_me_see_see.LetMeSeeSee.EXPORT_DIR_PATH,
+                label.className.substring(0, label.className.lastIndexOf('['))
+                        .replace('.', java.io.File.separatorChar) + ".class");
+    }
+
+    protected void openInIDEA(ClassLabelWidget label) {
+        var ideaPath = LMSConfig.IDEA_PATH;
+        if (ideaPath.isEmpty()) return;
+        var classPath = getClassPath(label).toString();
+        var pb = new ProcessBuilder('"' + ideaPath + '"', classPath);
+        pb.redirectErrorStream(true);
+        pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+        try {
+            pb.start();
+        } catch (IOException e) {
+            LOGGER.error("Failed to open file {}", classPath, e);
         }
     }
-    
-    public static List<Component> parseJavaSrc(String src){
+
+    protected void reExport(ClassLabelWidget label) {
+        ClassDecompiler.clear(getClassPath(label));
+        com.xkball.let_me_see_see.LetMeSeeSee.scanClasses(label.clazz);
+    }
+
+    public static List<IComponent> parseJavaSrc(String src) {
         var lexer = new JavaLexer(CharStreams.fromString(src));
         var tokens = new CommonTokenStream(lexer);
         var parser = new JavaParser(tokens);
         var tree = parser.compilationUnit();
         var walker = new ParseTreeWalker();
-        Int2ObjectMap<ColorMapping> map = new Int2ObjectOpenHashMap<>();
+        Int2ObjectMap<com.xkball.let_me_see_see.config.ColorMapping> map = new Int2ObjectOpenHashMap<>();
         var listener = new ColoringListener(map);
-        walker.walk(listener,tree);
-        var result = new ArrayList<Component>();
-        var ctx = Component.empty();
-        for(var token : tokens.getTokens()){
-            if(token.getType() == JavaLexer.EOF) continue;
+        walker.walk(listener, tree);
+        var result = new ArrayList<IComponent>();
+        IComponent line = IComponent.literal("");
+        for (var token : tokens.getTokens()) {
+            if (token.getType() == JavaLexer.EOF) continue;
             var index = token.getTokenIndex();
             var text = token.getText();
-            if(text.contains("\n")){
+            int color = map.containsKey(index) ? map.get(index).color : -1;
+            if (text.contains("\n")) {
                 var lt = text.lines().toList();
-                for(var i = 0; i < lt.size(); i++){
-                    ctx.append(Component.literal(lt.get(i)).withStyle(CODE_BASE_STYLE));
-                    if(i != lt.size() - 1 || text.endsWith("\n")){
-                        result.add(ctx);
-                        ctx = Component.empty();
+                for (var i = 0; i < lt.size(); i++) {
+                    if (!lt.get(i).isEmpty()) {
+                        line = line.append(IComponent.literal(lt.get(i)));
+                    }
+                    if (i != lt.size() - 1 || text.endsWith("\n")) {
+                        result.add(line);
+                        line = IComponent.literal("");
                     }
                 }
+            } else {
+                line = line.append(IComponent.literal(text).withColor(color));
             }
-            else{
-                if(map.containsKey(index)){
-                    ctx.append(Component.literal(text).withStyle(CODE_BASE_STYLE.withColor(map.get(index).color)));
-                }
-                else {
-                    ctx.append(Component.literal(text).withStyle(CODE_BASE_STYLE));
-                }
-            }
-            
         }
-        result.add(ctx);
+        if (!line.visit().isEmpty()) {
+            result.add(line);
+        }
         return result;
-    }
-    
-    public String getSearchBarValue() {
-        return searchBarValue;
-    }
-    
-    public void setSearchBarValue(String searchBarValue) {
-        this.searchBarValue = searchBarValue;
     }
 }
