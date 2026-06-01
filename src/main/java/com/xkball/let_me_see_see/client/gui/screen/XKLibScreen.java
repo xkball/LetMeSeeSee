@@ -11,28 +11,31 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public abstract class XKLibScreen extends XKLibBaseScreen {
 
     protected final Queue<Runnable> renderTasks = new ConcurrentLinkedQueue<>();
-    protected final ContainerWidget root;
     private boolean uiBuilt = false;
 
     public XKLibScreen() {
         super(Component.empty());
-        this.root = new ContainerWidget();
-        this.root.inlineStyle("size: 100% 100%; flex-direction: column;");
     }
 
     protected abstract String getTitleKey();
-
-    protected abstract void buildUI();
 
     @Override
     protected void init() {
         super.init();
         if (!uiBuilt) {
             uiBuilt = true;
-            this.addScreenLayer(XKLibBaseScreen.frame(IComponent.translatable(getTitleKey()), this.root));
-            buildUI();
+            setupFrame();
         }
     }
+
+    protected void setupFrame() {
+        var root = new ContainerWidget();
+        root.inlineStyle("size: 100% 100%; flex-direction: column;");
+        this.addScreenLayer(XKLibBaseScreen.frame(IComponent.translatable(getTitleKey()), root));
+        buildUI(root);
+    }
+
+    protected abstract void buildUI(ContainerWidget root);
 
     public void submitRenderTask(Runnable runnable) {
         renderTasks.add(runnable);

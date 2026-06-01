@@ -36,7 +36,7 @@ public class ExplorerScreen extends DataBaseScreen {
     @Override
     protected ContainerWidget createClassListPanel() {
         var panel = new ContainerWidget();
-        panel.inlineStyle("size: 37.31% 100%; flex-direction: column; border-right: 1rpx; border-color: 0x55666666;");
+        panel.inlineStyle("size: 100% 100%; flex-direction: column;");
 
         var searchInput = ObjectInputWidget.ofString();
         searchInput.setAsString(searchBarValue);
@@ -56,13 +56,6 @@ public class ExplorerScreen extends DataBaseScreen {
 
     @Override
     public void refreshClassList() {
-        // ExplorerScreen uses tree, not flat list
-        refreshTree();
-    }
-
-    @Override
-    protected void buildUI() {
-        super.buildUI();
         refreshTree();
     }
 

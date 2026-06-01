@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import com.xkball.let_me_see_see.LetMeSeeSee;
 import com.xkball.let_me_see_see.utils.ClassSearcher;
 import com.xkball.xklib.ui.render.IComponent;
+import com.xkball.xklib.ui.system.GuiSystem;
 import com.xkball.xklib.ui.widget.Button;
 import com.xkball.xklib.ui.widget.Label;
 import com.xkball.xklib.ui.widget.container.ContainerWidget;
@@ -36,7 +37,7 @@ public class RetrieverScreen extends XKLibScreen {
     }
 
     @Override
-    protected void buildUI() {
+    protected void buildUI(ContainerWidget root) {
         searchInput = ObjectInputWidget.ofString();
         searchInput.setAsString(searchBarValue);
         searchInput.setCallback(w -> {
@@ -118,9 +119,9 @@ public class RetrieverScreen extends XKLibScreen {
         centerRow.addChild(searchColumn);
         centerRow.addChild(btnColumn);
 
-        this.root.addChild(new Label(IComponent.translatable("let_me_see_see.gui.retriever.search"))
+        root.addChild(new Label(IComponent.translatable("let_me_see_see.gui.retriever.search"))
                 .inlineStyle("text-color: -1; size: 100% auto; margin-top: 5rpx; margin-left: 4rpx; flex-shrink: 0;"));
-        this.root.addChild(centerRow);
+        root.addChild(centerRow);
 
         refreshResults();
     }
@@ -133,9 +134,10 @@ public class RetrieverScreen extends XKLibScreen {
             if (!lastSearches.equals(searchBarValue)) {
                 if (searchTask != null) searchTask.cancel(true);
                 lastSearches = searchBarValue;
+                var guiSystem = GuiSystem.INSTANCE.get();
                 searchTask = CompletableFuture.supplyAsync(() -> ClassSearcher.search(searchBarValue));
                 searchTask.thenAcceptAsync(results -> {
-                    com.xkball.xklib.ui.system.GuiSystem.INSTANCE.get().submitTreeUpdate(this::refreshResults);
+                    guiSystem.submitTreeUpdate(this::refreshResults);
                 });
             }
 

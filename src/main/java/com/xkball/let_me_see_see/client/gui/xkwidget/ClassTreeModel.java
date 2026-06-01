@@ -111,7 +111,7 @@ public class ClassTreeModel {
 
     public record ClassLabelPlaceholder(Class<?> clazz, int depth) {
         public ClassLabelWidget toWidget(DataBaseScreen screen) {
-            return new ClassLabelWidget(clazz, screen, depth);
+            return new ClassLabelWidget(clazz, screen, depth + 2);
         }
     }
 }

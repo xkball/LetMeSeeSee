@@ -54,23 +54,22 @@ protected String searchBarValue = "";
     }
 
     @Override
-    protected void buildUI() {
-        var classListPanel = createClassListPanel();
-        var classPreviewPanel = createClassPreviewPanel();
-
-        var content = new ContainerWidget();
-        content.inlineStyle("flex-direction: row; size: 100% 100%;");
-        content.addChild(classListPanel);
-        content.addChild(classPreviewPanel);
-
-        root.addChild(content);
-
+    protected void setupFrame() {
+        var leftPanel = createClassListPanel();
+        var rightPanel = createClassPreviewPanel();
+        this.addScreenLayer(com.xkball.xklibmc.ui.XKLibBaseScreen.biPanelFrame(
+                IComponent.translatable(getTitleKey()), leftPanel, rightPanel));
         refreshClassList();
+    }
+
+    @Override
+    protected void buildUI(ContainerWidget root) {
+        // not used - setupFrame handles the frame
     }
 
     protected ContainerWidget createClassListPanel() {
         var panel = new ContainerWidget();
-        panel.inlineStyle("size: 37.31% 100%; flex-direction: column; border-right: 1rpx; border-color: 0x55666666;");
+        panel.inlineStyle("size: 100% 100%; flex-direction: column;");
 
         var searchInput = ObjectInputWidget.ofString();
         searchInput.setAsString(searchBarValue);
@@ -106,7 +105,7 @@ protected String searchBarValue = "";
 
     protected ContainerWidget createClassPreviewPanel() {
         var panel = new ContainerWidget();
-        panel.inlineStyle("size: 62.69% 100%; flex-direction: column;");
+        panel.inlineStyle("size: 100% 100%; flex-direction: column;");
 
         var header = new ContainerWidget();
         header.inlineStyle("flex-direction: row; size: 100% 18rpx; flex-shrink: 0; border-bottom: 1rpx; border-color: 0x55666666; align-items: center;");
@@ -171,11 +170,12 @@ protected String searchBarValue = "";
                 lastFocused.updateState();
                 if (state == null || state == ClassDecompiler.DecompilerState.DECOMPILING) {
                     if (state == null) {
+                        var guiSystem = com.xkball.xklib.ui.system.GuiSystem.INSTANCE.get();
                         ClassDecompiler.decompile(classPath).whenCompleteAsync((v, t) -> {
                             if (t != null) {
                                 LOGGER.error("can not decompile file: {}", classPath, t);
                             }
-                            com.xkball.xklib.ui.system.GuiSystem.INSTANCE.get().submitTreeUpdate(this::refreshPreview);
+                            guiSystem.submitTreeUpdate(this::refreshPreview);
                         });
                     }
                     previewBody.addChild(new Label(IComponent.translatable("let_me_see_see.gui.data_base.preview.decompiling"))

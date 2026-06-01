@@ -86,7 +86,7 @@ public class ItemDataExporterScreen extends XKLibScreen {
     }
 
     @Override
-    protected void buildUI() {
+    protected void buildUI(ContainerWidget root) {
         var imageSize = 1 << imageSizeN;
 
         var leftPanel = new ContainerWidget();
