@@ -19,8 +19,8 @@ public class ModItemModelProvider extends ModelProvider {
     
     @Override
     protected void registerModels(BlockModelGenerators blockModels, ItemModelGenerators itemModels) {
-        itemModels.declareCustomModelItem(LMSItems.DATA_BASE.get());
-        itemModels.declareCustomModelItem(LMSItems.RETRIEVER.get());
+        itemModels.declareCustomModelItem(LMSItems.EXPLORER.get());
+        itemModels.declareCustomModelItem(LMSItems.ITEM_ITEM_DATA_EXPORTER.get());
         itemModels.declareCustomModelItem(LMSItems.SCANNER.get());
     }
 }

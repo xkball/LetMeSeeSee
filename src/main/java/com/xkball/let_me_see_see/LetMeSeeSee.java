@@ -197,7 +197,7 @@ public class LetMeSeeSee {
     public static class ClientModEvents {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
-        
+            com.xkball.let_me_see_see.client.ScreenProviders.init();
         }
         
         @SubscribeEvent

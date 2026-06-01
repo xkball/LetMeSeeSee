@@ -23,8 +23,6 @@ public class LMSItems {
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, LetMeSeeSee.MODID);
     
     public static final DeferredHolder<Item, ScannerItem> SCANNER = ITEMS.register("scanner", (id) -> new ScannerItem(new Item.Properties().setId(itemKey(id)).stacksTo(1)));
-    public static final DeferredHolder<Item, RetrieverItem> RETRIEVER = ITEMS.register("retriever", (id) -> new RetrieverItem(new Item.Properties().setId(itemKey(id)).stacksTo(1)));
-    public static final DeferredHolder<Item, DataBaseItem> DATA_BASE = ITEMS.register("data_base", (id) -> new DataBaseItem(new Item.Properties().setId(itemKey(id)).stacksTo(1)));
     public static final DeferredHolder<Item, ItemDataExporterItem> ITEM_ITEM_DATA_EXPORTER = ITEMS.register("item_data_exporter", (id) -> new ItemDataExporterItem(new Item.Properties().setId(itemKey(id)).stacksTo(1)));
     public static final DeferredHolder<Item, ExplorerItem> EXPLORER = ITEMS.register("explorer", (id) -> new ExplorerItem(new Item.Properties().setId(itemKey(id)).stacksTo(1)));
     
@@ -47,10 +45,8 @@ public class LMSItems {
     public static void creativeTab(BuildCreativeModeTabContentsEvent event) {
         if (event.getTab() == THE_TAB.get()) {
             event.accept(SCANNER.get());
-            event.accept(RETRIEVER.get());
-            event.accept(DATA_BASE.get());
-            event.accept(ITEM_ITEM_DATA_EXPORTER.get());
             event.accept(EXPLORER.get());
+            event.accept(ITEM_ITEM_DATA_EXPORTER.get());
         }
     }
 }

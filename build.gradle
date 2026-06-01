@@ -118,6 +118,7 @@ dependencies {
             prefer '1.1.4'
         }
     }
+    jarJar(implementation "org.vineflower:vineflower:1.10.1")
     jarJar(implementation "net.lenni0451:LambdaEvents:2.4.2") {
         version {
             strictly '[2.4.2, 3.0.0)'

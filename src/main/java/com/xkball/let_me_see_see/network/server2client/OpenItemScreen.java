@@ -1,8 +1,10 @@
 package com.xkball.let_me_see_see.network.server2client;
 
+import com.xkball.let_me_see_see.client.ScreenProviders;
 import com.xkball.let_me_see_see.common.item.IScreenProviderItem;
 import com.xkball.let_me_see_see.utils.VanillaUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -11,12 +13,10 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-//@NetworkPacket(type = NetworkPacket.Type.PLAY_SERVER_TO_CLIENT)
 public record OpenItemScreen(ItemStack stack, EquipmentSlot slot) implements CustomPacketPayload {
-    
+
     public static final Type<OpenItemScreen> TYPE = new Type<>(VanillaUtils.modRL("open_item_screen"));
-    
-    //@NetworkPacket.Codec
+
     public static final StreamCodec<RegistryFriendlyByteBuf, OpenItemScreen> STREAM_CODEC = StreamCodec.composite(
             ItemStack.STREAM_CODEC,
             OpenItemScreen::stack,
@@ -24,20 +24,23 @@ public record OpenItemScreen(ItemStack stack, EquipmentSlot slot) implements Cus
             OpenItemScreen::slot,
             OpenItemScreen::new
     );
-    
-    //@NetworkPacket.Handler
+
     public void handle(IPayloadContext context) {
         context.enqueueWork(() -> {
             var mc = Minecraft.getInstance();
-            if (stack.getItem() instanceof IScreenProviderItem screenProvider) {
-                mc.setScreen(screenProvider.getScreenSupplier(stack, slot).get());
+            if (stack.getItem() instanceof IScreenProviderItem) {
+                var id = BuiltInRegistries.ITEM.getKey(stack.getItem());
+                var provider = ScreenProviders.PROVIDERS.get(id);
+                if (provider != null) {
+                    mc.setScreen(provider.createScreen(stack, slot));
+                }
             }
         });
     }
-    
+
     @Override
     public Type<? extends CustomPacketPayload> type() {
         return TYPE;
     }
-    
+
 }

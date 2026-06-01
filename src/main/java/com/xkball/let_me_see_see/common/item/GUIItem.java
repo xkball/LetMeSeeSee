@@ -10,7 +10,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.network.PacketDistributor;
 
-public abstract class GUIItem extends Item implements IScreenProviderItem {
+public class GUIItem extends Item implements IScreenProviderItem {
     
     public GUIItem(Properties properties) {
         super(properties);

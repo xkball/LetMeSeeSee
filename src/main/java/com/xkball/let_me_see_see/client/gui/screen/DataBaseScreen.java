@@ -161,10 +161,7 @@ protected String searchBarValue = "";
     public void refreshPreview() {
         previewBody.clearChildren();
 
-        if (LMSConfig.FERN_FLOWER_PATH.isEmpty()) {
-            previewBody.addChild(new Label(IComponent.translatable("let_me_see_see.gui.data_base.preview.no_fernflower"))
-                    .inlineStyle("text-color: -1; margin: 4rpx; size: 100% auto; flex-shrink: 0;"));
-        } else if (lastFocused == null) {
+        if (lastFocused == null) {
             previewBody.addChild(new Label(IComponent.translatable("let_me_see_see.gui.data_base.preview.no_focused"))
                     .inlineStyle("text-color: -1; margin: 4rpx; size: 100% auto; flex-shrink: 0;"));
         } else {
