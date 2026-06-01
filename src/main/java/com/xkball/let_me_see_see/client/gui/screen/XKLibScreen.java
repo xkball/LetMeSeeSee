@@ -3,6 +3,7 @@ package com.xkball.let_me_see_see.client.gui.screen;
 import com.xkball.xklib.ui.render.IComponent;
 import com.xkball.xklib.ui.widget.container.ContainerWidget;
 import com.xkball.xklibmc.ui.XKLibBaseScreen;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 
 import java.util.Queue;
@@ -39,5 +40,18 @@ public abstract class XKLibScreen extends XKLibBaseScreen {
 
     public void submitRenderTask(Runnable runnable) {
         renderTasks.add(runnable);
+    }
+
+    @Override
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+        processRenderTasks();
+        super.extractRenderState(graphics, mouseX, mouseY, a);
+    }
+
+    private void processRenderTasks() {
+        Runnable task;
+        while ((task = renderTasks.poll()) != null) {
+            task.run();
+        }
     }
 }

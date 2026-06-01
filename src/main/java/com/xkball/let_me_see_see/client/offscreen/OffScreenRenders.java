@@ -6,6 +6,7 @@ import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import com.xkball.let_me_see_see.LetMeSeeSee;
 import com.xkball.let_me_see_see.utils.ClientUtils;
 import com.xkball.let_me_see_see.utils.VanillaUtils;
@@ -32,8 +33,34 @@ public class OffScreenRenders {
     private static final ItemStackRenderState itemStackRenderState = new ItemStackRenderState();
 
     public static String exportItemStackAsPng(ItemStack itemStack, int width, int height, float scale, boolean writeToFile) {
+        var itemID = BuiltInRegistries.ITEM.getKey(itemStack.getItem());
+        var exportPath = Path.of(LetMeSeeSee.EXPORT_DIR_PATH, "_data", itemID.getNamespace(), itemID.getPath() + ".png");
+        return exportItemStackAsPng(itemStack, width, height, scale, writeToFile, exportPath);
+    }
+
+    public static String exportItemStackAsPng(ItemStack itemStack, int width, int height, float scale, boolean writeToFile, Path exportPath) {
         renderTarget.resize(width, height);
-        return exportItemStackAsPng(renderTarget, itemStack, scale, writeToFile);
+        renderItemStack(itemStack, renderTarget, scale);
+        AtomicReference<String> result = new AtomicReference<>("");
+        ClientUtils.takeScreenshotWithAlpha(renderTarget, (nativeImage -> {
+            try {
+                if (writeToFile) {
+                    Util.ioPool().execute(() -> {
+                        try {
+                            //noinspection ResultOfMethodCallIgnored
+                            exportPath.getParent().toFile().mkdirs();
+                            nativeImage.writeToFile(exportPath);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+                }
+                result.set(VanillaUtils.base64(ClientUtils.asByteArray(nativeImage)));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }));
+        return result.get();
     }
 
     public static String exportItemStackAsPng(RenderTarget fbo, ItemStack itemStack, float scale, boolean writeToFile) {
@@ -68,7 +95,7 @@ public class OffScreenRenders {
         var mc = Minecraft.getInstance();
 
         RenderSystem.backupProjectionMatrix();
-        RenderSystem.setProjectionMatrix(projBuffer.getBuffer(new Matrix4f().setOrtho(0, width, 0, height, -4000.0F, 4000.0F)), ProjectionType.ORTHOGRAPHIC);
+        RenderSystem.setProjectionMatrix(projBuffer.getBuffer(new Matrix4f().setOrtho(0, width, height, 0, -4000.0F, 4000.0F)), ProjectionType.ORTHOGRAPHIC);
         var bufferSource = mc.renderBuffers().bufferSource();
         var submitNodeCollector = mc.gameRenderer.getSubmitNodeStorage();
         var featureDispatcher = mc.gameRenderer.getFeatureRenderDispatcher();

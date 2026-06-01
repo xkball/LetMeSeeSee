@@ -5,6 +5,7 @@ import com.mojang.blaze3d.textures.FilterMode;
 import com.xkball.let_me_see_see.client.offscreen.OffScreenRenders;
 import com.xkball.xklib.ui.render.IGUIGraphics;
 import com.xkball.xklib.ui.widget.Widget;
+import com.xkball.xklibmc.api.client.b3d.SamplerCacheCache;
 import com.xkball.xklibmc.x3d.backend.b3d.B3dGuiGraphics;
 
 public class OffScreenPreviewWidget extends Widget {
@@ -18,23 +19,8 @@ public class OffScreenPreviewWidget extends Widget {
 
         var fbo = OffScreenRenders.renderTarget;
         if (fbo == null || !(graphics instanceof B3dGuiGraphics b3d)) return;
-
-        int texWidth = fbo.width;
-        int texHeight = fbo.height;
-        float drawWidth = this.width;
-        float drawHeight = this.height;
-
-        float scale = Math.min(drawWidth / texWidth, drawHeight / texHeight);
-        float scaledW = texWidth * scale;
-        float scaledH = texHeight * scale;
-        float offsetX = (drawWidth - scaledW) / 2;
-        float offsetY = (drawHeight - scaledH) / 2;
-
-        var sampler = RenderSystem.getSamplerCache().getClampToEdge(FilterMode.NEAREST);
-        b3d.getInner().blit(
-                fbo.getColorTextureView(), sampler,
-                (int) (x + offsetX), (int) (y + offsetY),
-                (int) scaledW, (int) scaledH,
-                0, 0, texWidth, texHeight);
+        
+//        b3d.fill((int) this.x, (int) this.y, (int) this.getMaxX(), (int) this.getMaxY(), 0xff000000);
+        b3d.getInner().blit(fbo.getColorTextureView(), SamplerCacheCache.NEAREST_CLAMP, (int) this.x, (int) this.y, (int) this.getMaxX(), (int) this.getMaxY(), 0, 1, 1, 0);
     }
 }

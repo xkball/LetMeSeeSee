@@ -4,6 +4,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
@@ -14,16 +15,13 @@ import com.xkball.let_me_see_see.client.gui.xkwidget.OffScreenPreviewWidget;
 import com.xkball.let_me_see_see.client.offscreen.OffScreenRenders;
 import com.xkball.let_me_see_see.config.LMSConfig;
 import com.xkball.let_me_see_see.utils.VanillaUtils;
-import com.xkball.xklib.ui.layout.BooleanLayoutVariable;
 import com.xkball.xklib.ui.render.IComponent;
 import com.xkball.xklib.ui.widget.Button;
 import com.xkball.xklib.ui.widget.Label;
 import com.xkball.xklib.ui.widget.container.ContainerWidget;
-import com.xkball.xklibmc.ui.widget.NumberInputWidget;
 import com.xkball.xklibmc.ui.widget.ObjectInputWidget;
 import com.xkball.xklibmc.ui.widget.WidgetWrapper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.resources.language.ClientLanguage;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -37,6 +35,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -74,8 +73,6 @@ public class ItemDataExporterScreen extends XKLibScreen {
     private int imageSizeN = 7;
     private float imageScale = 1f;
 
-    private final BooleanLayoutVariable dumpPNG = new BooleanLayoutVariable(false);
-
     public ItemDataExporterScreen() {
         super();
     }
@@ -96,17 +93,34 @@ public class ItemDataExporterScreen extends XKLibScreen {
         var controlsWrapper = new ContainerWidget();
         controlsWrapper.inlineStyle("flex-direction: column; width: 60%; flex-shrink: 0;");
 
-        // Image size input
+        // Right panel's size label - declared early so button callbacks can reference it
+        var previewSizeLabel = new Label(IComponent.literal(imageSize + " x " + imageSize));
+
+        // Image size: label + [-] [ 128 x 128 ] [+]
         controlsWrapper.addChild(new Label(IComponent.translatable("let_me_see_see.gui.item_data_exporter.image_size"))
                 .inlineStyle("text-color: -1; size: 100% 8rpx; margin-top: 4rpx; flex-shrink: 0;"));
-        var sizeInput = NumberInputWidget.ofInt(0, 12, 1);
-        sizeInput.setValue(imageSizeN);
-        sizeInput.inlineStyle("size: 100% 14rpx; flex-shrink: 0;");
-        sizeInput.setCallback(w -> {
-            imageSizeN = w.getValue();
-            submitRenderTask(this::previewRender);
+        var sizeRow = new ContainerWidget();
+        sizeRow.inlineStyle("flex-direction: row; size: 100% 14rpx; flex-shrink: 0; align-items: center; justify-content: space-between;");
+        var sizeLabel = new Label(IComponent.literal(imageSize + " x " + imageSize));
+        sizeLabel.inlineStyle("text-color: -1; size: auto 100%; flex-grow: 1; text-align: center; flex-shrink: 0;");
+        var halfBtn = WidgetWrapper.button("-", btn -> {
+            if (imageSizeN > 1) {
+                imageSizeN--;
+                onImageSizeChanged(sizeLabel, previewSizeLabel);
+            }
         });
-        controlsWrapper.addChild(sizeInput);
+        halfBtn.inlineStyle("size: 20rpx 12rpx; flex-shrink: 0;");
+        var doubleBtn = WidgetWrapper.button("+", btn -> {
+            if (imageSizeN < 12) {
+                imageSizeN++;
+                onImageSizeChanged(sizeLabel, previewSizeLabel);
+            }
+        });
+        doubleBtn.inlineStyle("size: 20rpx 12rpx; flex-shrink: 0;");
+        sizeRow.addChild(halfBtn);
+        sizeRow.addChild(sizeLabel);
+        sizeRow.addChild(doubleBtn);
+        controlsWrapper.addChild(sizeRow);
 
         // Scale input
         controlsWrapper.addChild(new Label(IComponent.translatable("let_me_see_see.gui.item_data_exporter.item_scale"))
@@ -132,40 +146,24 @@ public class ItemDataExporterScreen extends XKLibScreen {
         nsInput.inlineStyle("size: 100% 14rpx; flex-shrink: 0;");
         controlsWrapper.addChild(nsInput);
 
-        // Save PNG checkbox
-        var dumpRow = new ContainerWidget();
-        dumpRow.inlineStyle("flex-direction: row; size: 100% 14rpx; margin-top: 4rpx; flex-shrink: 0; align-items: center;");
-        var mcCheckbox = Checkbox.builder(Component.empty(), Minecraft.getInstance().font)
-                .pos(0, 0)
-                .selected(dumpPNG.get())
-                .onValueChange((cb, val) -> dumpPNG.set(val))
-                .build();
-        var checkWrapper = new WidgetWrapper(mcCheckbox);
-        checkWrapper.setUserInput(true);
-        checkWrapper.inlineStyle("size: 14rpx 14rpx; flex-shrink: 0;")
-                .withTooltip(IComponent.translatable("let_me_see_see.gui.item_data_exporter.save_png"));
-        dumpRow.addChild(checkWrapper);
-        dumpRow.addChild(new Label(IComponent.translatable("let_me_see_see.gui.item_data_exporter.save_png"))
-                .inlineStyle("text-color: -1; size: auto 100%; margin-left: 4rpx; flex-shrink: 0;"));
-        controlsWrapper.addChild(dumpRow);
+        // Export image button
+        var exportBtn = new Button(IComponent.translatable("let_me_see_see.gui.item_data_exporter.export"),
+                () -> submitRenderTask(this::runExport));
+        exportBtn.inlineStyle("""
+                size: 100% 14rpx;
+                margin-top: 8rpx;
+                text-align: center;
+                text-scale: expand-width;
+                button-shape: rect;
+                button-bg-color: rgb(229,233,239);
+                text-drop-shadow: false;
+                text-extra-width: 2rpx;
+                text-height: 8rpx;
+                flex-shrink: 0;
+                """);
+        controlsWrapper.addChild(exportBtn);
 
-//        // Export buttons
-//        var exportBtn = new Button(IComponent.translatable("let_me_see_see.gui.item_data_exporter.export"),
-//                () -> submitRenderTask(this::runExport));
-//        exportBtn.inlineStyle("""
-//                size: 100% 14rpx;
-//                margin-top: 8rpx;
-//                text-align: center;
-//                text-scale: expand-width;
-//                button-shape: rect;
-//                button-bg-color: rgb(229,233,239);
-//                text-drop-shadow: false;
-//                text-extra-width: 2rpx;
-//                text-height: 8rpx;
-//                flex-shrink: 0;
-//                """);
-//        controlsWrapper.addChild(exportBtn);
-
+        // Export mcmod button
         var mcmodBtn = new Button(IComponent.translatable("let_me_see_see.gui.item_data_exporter.export_mcmod"),
                 () -> submitRenderTask(this::runExportMcMod));
         mcmodBtn.inlineStyle("""
@@ -188,8 +186,8 @@ public class ItemDataExporterScreen extends XKLibScreen {
         var rightPanel = new ContainerWidget();
         rightPanel.inlineStyle("size: 50% 100%; flex-direction: column; align-items: center; justify-content: center;");
 
-        rightPanel.addChild(new Label(IComponent.literal(imageSize + "x" + imageSize))
-                .inlineStyle("text-color: -1; size: 100% 8rpx; flex-shrink: 0; text-align: center;"));
+        previewSizeLabel.inlineStyle("text-color: -1; size: 100% 8rpx; flex-shrink: 0; text-align: center;");
+        rightPanel.addChild(previewSizeLabel);
 
         var previewWidget = new OffScreenPreviewWidget();
         previewWidget.inlineStyle("size: 128rpx 128rpx; flex-shrink: 0;");
@@ -205,6 +203,15 @@ public class ItemDataExporterScreen extends XKLibScreen {
 
         root.addChild(content);
 
+        submitRenderTask(this::previewRender);
+    }
+
+    private void onImageSizeChanged(Label... sizeLabels) {
+        var imageSize = 1 << imageSizeN;
+        var text = imageSize + " x " + imageSize;
+        for (var label : sizeLabels) {
+            label.setText(text);
+        }
         submitRenderTask(this::previewRender);
     }
 
@@ -226,30 +233,13 @@ public class ItemDataExporterScreen extends XKLibScreen {
 
     public void runExport() {
         var imageSize = 1 << imageSizeN;
-        var ops = RegistryOps.create(JsonOps.INSTANCE,
-                Objects.requireNonNull(Minecraft.getInstance().level).registryAccess());
-        var map = ArrayListMultimap.<String, JsonObject>create();
         for (var entry : BuiltInRegistries.ITEM.entrySet()) {
             var item = entry.getValue();
             var rl = BuiltInRegistries.ITEM.getKey(item);
-            var namespace = rl.getNamespace();
-            if (namespaceFilterValue.isEmpty() || matchesFilter(namespaceFilterValue, rl)) {
-                map.put(namespace, itemData(rl, item, ops, imageSize));
-            }
-        }
-        for (var entry : map.asMap().entrySet()) {
-            var list = entry.getValue().stream()
-                    .sorted(Comparator.comparing(j -> j.get("item_name").getAsString()))
-                    .toList();
-            var array = new JsonArray();
-            list.forEach(array::add);
-            var path = Path.of(LetMeSeeSee.EXPORT_DIR_PATH, entry.getKey() + ".json");
-            try {
-                Files.createDirectories(path.getParent());
-                Files.writeString(path, GsonHelper.toStableString(array));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            if (!namespaceFilterValue.isEmpty() && !matchesFilter(namespaceFilterValue, rl)) continue;
+            var exportPath = Path.of(LetMeSeeSee.EXPORT_DIR_PATH, "_images",
+                    rl.getNamespace(), rl.getPath() + ".png");
+            OffScreenRenders.exportItemStackAsPng(item.getDefaultInstance(), imageSize, imageSize, imageScale, true, exportPath);
         }
     }
 
@@ -264,12 +254,16 @@ public class ItemDataExporterScreen extends XKLibScreen {
         var ops = RegistryOps.create(JsonOps.INSTANCE,
                 Objects.requireNonNull(Minecraft.getInstance().level).registryAccess());
         var map = ArrayListMultimap.<String, JsonObject>create();
+        var bigFBO = new TextureTarget(null, 128, 128, true);
+        var smallFBO = new TextureTarget(null, 32, 32, true);
         for (var entry : BuiltInRegistries.ITEM.entrySet()) {
             var item = entry.getValue();
             var rl = BuiltInRegistries.ITEM.getKey(item);
             var namespace = rl.getNamespace();
             if (namespaceFilterValue.isEmpty() || matchesFilter(namespaceFilterValue, rl)) {
                 var json = itemDataMcMod(rl, item, ops);
+                json.addProperty("smallIcon", OffScreenRenders.exportItemStackAsPng(smallFBO, item.getDefaultInstance(), 1, false));
+                json.addProperty("largeIcon", OffScreenRenders.exportItemStackAsPng(bigFBO, item.getDefaultInstance(), 1, false));
                 map.put(namespace, json);
             }
         }
@@ -278,7 +272,7 @@ public class ItemDataExporterScreen extends XKLibScreen {
                     .sorted(Comparator.comparing(j -> j.get("registerName").getAsString()))
                     .toList();
             var path = Path.of(LetMeSeeSee.EXPORT_DIR_PATH, entry.getKey() + ".json");
-            StringBuilder str = new StringBuilder();
+            var str = new StringBuilder();
             for (var json : list) {
                 str.append(json.toString());
                 str.append('\n');
@@ -292,47 +286,28 @@ public class ItemDataExporterScreen extends XKLibScreen {
         }
     }
 
-    public JsonObject itemData(Identifier id, Item item, DynamicOps<JsonElement> ops, int imageSize) {
-        LOGGER.debug("Exporting {} ", id);
-        var defaultMaxStackSize = item.getDefaultMaxStackSize();
-        var canRepair = item.canCombineRepair;
-        @SuppressWarnings("deprecation")
-        var craftRemainItem = item.getCraftingRemainder();
-        var defaultComponent = item.getDefaultInstance().getComponents();
-        var result = new JsonObject();
-        result.addProperty("item_name", id.toString());
-        result.addProperty("default_max_stack_size", defaultMaxStackSize);
-        result.addProperty("can_repair", canRepair);
-        result.addProperty("craftRemainItem", "unknown");
-        result.addProperty("item_image",
-                OffScreenRenders.exportItemStackAsPng(item.getDefaultInstance(), imageSize, imageSize, imageScale, dumpPNG.get()));
-        addDataResult(result, "default_component",
-                () -> DataComponentMap.CODEC.encodeStart(ops, defaultComponent), "ERROR WHEN ENCODING");
-        addDataResult(result, "tags",
-                () -> DataResult.success(new JsonArray()), "ERROR WHEN ENCODING");
-        synchronized (LANGUAGES) {
-            for (var key : LMSConfig.EXPORT_LANG) {
-                result.addProperty(key + "_name", LANGUAGES.get(key).getOrDefault(item.getDescriptionId()));
-            }
-        }
-        return result;
-    }
-
     public JsonObject itemDataMcMod(Identifier id, Item item, DynamicOps<JsonElement> ops) {
         var result = new JsonObject();
-        synchronized (LANGUAGES) {
-            result.addProperty("name", LANGUAGES.get("zh_cn").getOrDefault(item.getDescriptionId()));
-            result.addProperty("englishName", LANGUAGES.get("en_us").getOrDefault(item.getDescriptionId()));
-        }
+        result.addProperty("name", LANGUAGES.get("zh_cn").getOrDefault(item.getDescriptionId()));
+        result.addProperty("englishName", LANGUAGES.get("en_us").getOrDefault(item.getDescriptionId()));
         result.addProperty("registerName", id.toString());
-        result.addProperty("type", item instanceof net.minecraft.world.item.BlockItem ? "Block" : "Item");
+        result.addProperty("type", item instanceof BlockItem ? "Block" : "Item");
         result.addProperty("maxStacksSize", item.getDefaultMaxStackSize());
         result.addProperty("maxDurability", item.getDefaultInstance().getMaxDamage());
         result.addProperty("CreativeTabName", getCreativeModeTab(item)
                 .map(CreativeModeTab::getDisplayName)
                 .map(Component::getString)
                 .orElse("未知"));
-        result.addProperty("OredictList", "[]");
+        var tags = item.builtInRegistryHolder().tags().toList();
+        var oreDic = new StringBuilder("[");
+        boolean flag = false;
+        for (var tag : tags) {
+            flag = true;
+            oreDic.append(tag.location()).append(",");
+        }
+        if (flag) oreDic.deleteCharAt(oreDic.length() - 1);
+        oreDic.append("]");
+        result.addProperty("OredictList", oreDic.toString());
         return result;
     }
 
