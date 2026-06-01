@@ -89,23 +89,27 @@ public class ItemDataExporterScreen extends XKLibScreen {
     protected void buildUI(ContainerWidget root) {
         var imageSize = 1 << imageSizeN;
 
+        // Left panel - centers the controls wrapper
         var leftPanel = new ContainerWidget();
-        leftPanel.inlineStyle("size: 50% 100%; flex-direction: column;");
+        leftPanel.inlineStyle("size: 50% 100%; flex-direction: column; align-items: center; justify-content: center;");
+
+        var controlsWrapper = new ContainerWidget();
+        controlsWrapper.inlineStyle("flex-direction: column; width: 60%; flex-shrink: 0;");
 
         // Image size input
-        leftPanel.addChild(new Label(IComponent.translatable("let_me_see_see.gui.item_data_exporter.image_size"))
+        controlsWrapper.addChild(new Label(IComponent.translatable("let_me_see_see.gui.item_data_exporter.image_size"))
                 .inlineStyle("text-color: -1; size: 100% 8rpx; margin-top: 4rpx; flex-shrink: 0;"));
         var sizeInput = NumberInputWidget.ofInt(0, 12, 1);
         sizeInput.setValue(imageSizeN);
-        sizeInput.inlineStyle("size: 200rpx 14rpx; flex-shrink: 0;");
+        sizeInput.inlineStyle("size: 100% 14rpx; flex-shrink: 0;");
         sizeInput.setCallback(w -> {
             imageSizeN = w.getValue();
             submitRenderTask(this::previewRender);
         });
-        leftPanel.addChild(sizeInput);
+        controlsWrapper.addChild(sizeInput);
 
         // Scale input
-        leftPanel.addChild(new Label(IComponent.translatable("let_me_see_see.gui.item_data_exporter.item_scale"))
+        controlsWrapper.addChild(new Label(IComponent.translatable("let_me_see_see.gui.item_data_exporter.item_scale"))
                 .inlineStyle("text-color: -1; size: 100% 8rpx; margin-top: 4rpx; flex-shrink: 0;"));
         var scaleInput = ObjectInputWidget.ofString();
         scaleInput.setAsString(String.valueOf(imageScale));
@@ -116,17 +120,17 @@ public class ItemDataExporterScreen extends XKLibScreen {
             } catch (NumberFormatException ignored) {
             }
         });
-        scaleInput.inlineStyle("size: 60% 14rpx; flex-shrink: 0;");
-        leftPanel.addChild(scaleInput);
+        scaleInput.inlineStyle("size: 100% 14rpx; flex-shrink: 0;");
+        controlsWrapper.addChild(scaleInput);
 
         // Namespace filter
-        leftPanel.addChild(new Label(IComponent.translatable("let_me_see_see.gui.item_data_exporter.namespace"))
+        controlsWrapper.addChild(new Label(IComponent.translatable("let_me_see_see.gui.item_data_exporter.namespace"))
                 .inlineStyle("text-color: -1; size: 100% 8rpx; margin-top: 4rpx; flex-shrink: 0;"));
         var nsInput = ObjectInputWidget.ofString();
         nsInput.setAsString(namespaceFilterValue);
         nsInput.setCallback(w -> namespaceFilterValue = w.getAsString());
-        nsInput.inlineStyle("size: 60% 14rpx; flex-shrink: 0;");
-        leftPanel.addChild(nsInput);
+        nsInput.inlineStyle("size: 100% 14rpx; flex-shrink: 0;");
+        controlsWrapper.addChild(nsInput);
 
         // Save PNG checkbox
         var dumpRow = new ContainerWidget();
@@ -143,29 +147,29 @@ public class ItemDataExporterScreen extends XKLibScreen {
         dumpRow.addChild(checkWrapper);
         dumpRow.addChild(new Label(IComponent.translatable("let_me_see_see.gui.item_data_exporter.save_png"))
                 .inlineStyle("text-color: -1; size: auto 100%; margin-left: 4rpx; flex-shrink: 0;"));
-        leftPanel.addChild(dumpRow);
+        controlsWrapper.addChild(dumpRow);
 
-        // Export buttons
-        var exportBtn = new Button(IComponent.translatable("let_me_see_see.gui.item_data_exporter.export"),
-                () -> submitRenderTask(this::runExport));
-        exportBtn.inlineStyle("""
-                size: content 14rpx;
-                margin-top: 8rpx;
-                text-align: center;
-                text-scale: expand-width;
-                button-shape: rect;
-                button-bg-color: rgb(229,233,239);
-                text-drop-shadow: false;
-                text-extra-width: 2rpx;
-                text-height: 8rpx;
-                flex-shrink: 0;
-                """);
-        leftPanel.addChild(exportBtn);
+//        // Export buttons
+//        var exportBtn = new Button(IComponent.translatable("let_me_see_see.gui.item_data_exporter.export"),
+//                () -> submitRenderTask(this::runExport));
+//        exportBtn.inlineStyle("""
+//                size: 100% 14rpx;
+//                margin-top: 8rpx;
+//                text-align: center;
+//                text-scale: expand-width;
+//                button-shape: rect;
+//                button-bg-color: rgb(229,233,239);
+//                text-drop-shadow: false;
+//                text-extra-width: 2rpx;
+//                text-height: 8rpx;
+//                flex-shrink: 0;
+//                """);
+//        controlsWrapper.addChild(exportBtn);
 
         var mcmodBtn = new Button(IComponent.translatable("let_me_see_see.gui.item_data_exporter.export_mcmod"),
                 () -> submitRenderTask(this::runExportMcMod));
         mcmodBtn.inlineStyle("""
-                size: content 14rpx;
+                size: 100% 14rpx;
                 margin-top: 4rpx;
                 text-align: center;
                 text-scale: expand-width;
@@ -176,9 +180,11 @@ public class ItemDataExporterScreen extends XKLibScreen {
                 text-height: 8rpx;
                 flex-shrink: 0;
                 """);
-        leftPanel.addChild(mcmodBtn);
+        controlsWrapper.addChild(mcmodBtn);
 
-        // Preview panel
+        leftPanel.addChild(controlsWrapper);
+
+        // Right panel - preview
         var rightPanel = new ContainerWidget();
         rightPanel.inlineStyle("size: 50% 100%; flex-direction: column; align-items: center; justify-content: center;");
 
