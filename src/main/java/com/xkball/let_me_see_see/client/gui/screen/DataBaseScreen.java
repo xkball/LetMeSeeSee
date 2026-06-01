@@ -5,6 +5,8 @@ import com.xkball.let_me_see_see.antlr.java.ColoringListener;
 import com.xkball.let_me_see_see.antlr.java.JavaLexer;
 import com.xkball.let_me_see_see.antlr.java.JavaParser;
 import com.xkball.let_me_see_see.client.gui.xkwidget.ClassLabelWidget;
+import com.xkball.xklib.ui.layout.BooleanLayoutVariable;
+import com.xkball.xklib.ui.system.GuiSystem;
 import net.minecraft.network.chat.TextColor;
 import com.xkball.let_me_see_see.common.data.ExportsDataManager;
 import com.xkball.let_me_see_see.config.LMSConfig;
@@ -75,7 +77,7 @@ protected String searchBarValue = "";
         searchInput.setAsString(searchBarValue);
         searchInput.setCallback(w -> {
             searchBarValue = w.getAsString();
-            com.xkball.xklib.ui.system.GuiSystem.INSTANCE.get().submitTreeUpdate(this::refreshClassList);
+            GuiSystem.INSTANCE.get().submitTreeUpdate(this::refreshClassList);
         });
         searchInput.inlineStyle("size: 100% 14rpx; flex-shrink: 0;");
 
@@ -89,10 +91,16 @@ protected String searchBarValue = "";
 
     public void refreshClassList() {
         classListContainer.clearChildren();
-        var searchResults = VanillaUtils.searchInLowerCase(searchBarValue, ExportsDataManager.recordedClasses.keySet());
-        for (var str : searchResults) {
-            var clazz = ClassSearcher.classMap.get(str);
+        for (var entry : ExportsDataManager.recordedClasses.entrySet()) {
+            var classKey = entry.getKey();
+            var clazz = ClassSearcher.classMap.get(classKey);
             if (clazz == null) continue;
+
+            var cleanName = classKey.substring(0, classKey.lastIndexOf('['));
+            if (!searchBarValue.isEmpty() && !cleanName.startsWith(searchBarValue)) {
+                continue;
+            }
+
             classListContainer.addChild(createClassLabel(clazz)
                     .inlineStyle("size: 100% 8rpx; flex-shrink: 0; margin-top: 1rpx; text-height: 8rpx;"));
         }
@@ -170,7 +178,7 @@ protected String searchBarValue = "";
                 lastFocused.updateState();
                 if (state == null || state == ClassDecompiler.DecompilerState.DECOMPILING) {
                     if (state == null) {
-                        var guiSystem = com.xkball.xklib.ui.system.GuiSystem.INSTANCE.get();
+                        var guiSystem = GuiSystem.INSTANCE.get();
                         ClassDecompiler.decompile(classPath).whenCompleteAsync((v, t) -> {
                             if (t != null) {
                                 LOGGER.error("can not decompile file: {}", classPath, t);
