@@ -3,6 +3,7 @@ package com.xkball.let_me_see_see.utils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.Block;
 
 import java.util.ArrayList;
@@ -11,7 +12,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class RelateClassFinder {
-    
+
     public static List<Class<?>> analysisBlock(Block block) {
         var result = new ArrayList<Class<?>>();
         result.add(block.getClass());
@@ -38,5 +39,16 @@ public class RelateClassFinder {
         }
         return result;
     }
-    
+
+    public static List<Class<?>> analysisEntity(Entity entity) {
+        var result = new ArrayList<Class<?>>();
+        result.add(entity.getClass());
+        var renderDispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
+        var renderer = renderDispatcher.renderers.get(entity.getType());
+        if (renderer != null) {
+            result.add(renderer.getClass());
+        }
+        return result;
+    }
+
 }

@@ -38,7 +38,7 @@ import java.util.List;
 public class DataBaseScreen extends XKLibScreen {
 
     private static final Logger LOGGER = LogUtils.getLogger();
-protected String searchBarValue = "";
+    protected String searchBarValue = "";
     @Nullable
     public ClassLabelWidget lastFocused;
 
@@ -82,7 +82,7 @@ protected String searchBarValue = "";
         searchInput.inlineStyle("size: 100% 14rpx; flex-shrink: 0;");
 
         classListContainer = new ContainerWidget();
-        classListContainer.inlineStyle("size: 100% 100%-16rpx; flex-direction: column; overflow-y: scroll; flex-shrink: 1;");
+        classListContainer.inlineStyle("size: 100% 100%-16rpx; flex-direction: column; overflow-y: scroll; scrollbar-width: 8; flex-shrink: 1;");
 
         panel.addChild(searchInput);
         panel.addChild(classListContainer);
@@ -151,7 +151,7 @@ protected String searchBarValue = "";
         panel.addChild(header);
 
         previewBody = new ContainerWidget();
-        previewBody.inlineStyle("size: 100% 100%-18rpx; flex-direction: column; overflow-y: scroll; flex-shrink: 1;");
+        previewBody.inlineStyle("size: 100% 100%-18rpx; flex-direction: column; overflow: scroll; scrollbar-width: 8;");
         panel.addChild(previewBody);
 
         refreshPreview();
@@ -200,10 +200,13 @@ protected String searchBarValue = "";
                     for (var lineComp : parsedLines) {
                         previewBody.addChild(new Label(lineComp)
                                 .inlineStyle("""
-                                        size: auto 10rpx;
+                                        width: auto;
+                                        height: 10rpx;
                                         flex-shrink: 0;
                                         text-height: 9rpx;
                                         text-drop-shadow: false;
+                                        text-scale: expand-width;
+                                        align-self: flex-start;
                                         """));
                     }
                 } else {

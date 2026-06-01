@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,81 +34,73 @@ public class ClassDecompiler {
         return CompletableFuture.runAsync(() -> {
             var srcPath = file.toAbsolutePath().toString();
             var dstPath = toResultPath(file).toAbsolutePath();
-            var dstDir = file.getParent().toAbsolutePath().toFile();
+            LOGGER.debug("Decompiling: {}", srcPath);
 
-            var resultSaver = new IResultSaver() {
-                @Override
-                public void saveFolder(String path) {}
-
-                @Override
-                public void copyFile(String source, String path, String entryName) {}
-
-                @Override
-                public void saveClassFile(String path, String qualifiedName, String entryName, String content, int[] mapping) {}
-
-                @Override
-                public void createArchive(String path, String archiveName, Manifest manifest) {}
-
-                @Override
-                public void saveDirEntry(String path, String archiveName, String entryName) {}
-
-                @Override
-                public void copyEntry(String source, String path, String archiveName, String entry) {}
-
-                @Override
-                public void saveClassEntry(String path, String archiveName, String qualifiedName, String entryName, String content) {
-                    var outputFile = new File(dstDir, entryName);
-                    try {
-                        Files.createDirectories(outputFile.getParentFile().toPath());
-                        Files.writeString(outputFile.toPath(), content);
-                    } catch (IOException e) {
-                        LOGGER.error("Failed to write decompiled class: {}", entryName, e);
-                    }
-                }
-
-                @Override
-                public void closeArchive(String path, String archiveName) {}
-            };
+            var options = new HashMap<String, Object>();
+            options.put("mpm", "60");
 
             var logger = new IFernflowerLogger() {
                 @Override
                 public void writeMessage(String message, Severity severity) {
-                    if (severity == Severity.ERROR) {
-                        LOGGER.error("Fernflower: {}", message);
+                    if (severity.ordinal() >= Severity.WARN.ordinal()) {
+                        LOGGER.warn("Fernflower: {}", message);
                     }
                 }
-
                 @Override
                 public void writeMessage(String message, Severity severity, Throwable t) {
-                    if (severity == Severity.ERROR) {
-                        LOGGER.error("Fernflower: {}", message, t);
+                    LOGGER.error("Fernflower: {}", message, t);
+                }
+            };
+
+            var saver = new IResultSaver() {
+                @Override public void saveFolder(String path) {}
+                @Override public void copyFile(String source, String path, String entryName) {}
+                @Override
+                public void saveClassFile(String path, String qualifiedName, String entryName, String content, int[] mapping) {
+                    try {
+                        Files.createDirectories(dstPath.getParent());
+                        Files.writeString(dstPath, content);
+                    } catch (IOException e) {
+                        LOGGER.error("Failed to write decompiled file: {}", dstPath, e);
+                    }
+                }
+                @Override public void createArchive(String path, String archiveName, Manifest manifest) {}
+                @Override public void saveDirEntry(String path, String archiveName, String entryName) {}
+                @Override public void copyEntry(String source, String path, String archiveName, String entry) {}
+                @Override public void closeArchive(String path, String archiveName) {}
+                @Override
+                public void saveClassEntry(String path, String archiveName, String qualifiedName, String entryName, String content) {
+                    try {
+                        Files.createDirectories(dstPath.getParent());
+                        Files.writeString(dstPath, content);
+                    } catch (IOException e) {
+                        LOGGER.error("Failed to write decompiled file: {}", dstPath, e);
                     }
                 }
             };
 
-            Map<String, Object> options = Map.of("mpm", "60");
-            var engine = new Fernflower(resultSaver, options, logger);
+            var engine = new Fernflower(saver, options, logger);
             try {
                 engine.addSource(new File(srcPath));
                 engine.decompileContext();
+
                 if (dstPath.toFile().exists()) {
+                    LOGGER.debug("Decompile success: {}", dstPath);
                     decompiledClasses.put(file, DecompilerState.SUCCESS);
                 } else {
+                    LOGGER.warn("Decompile completed but output not found: {}", dstPath);
                     decompiledClasses.put(file, DecompilerState.ERROR);
                 }
             } catch (Exception e) {
                 LOGGER.error("Can not decompile file: {}", srcPath, e);
                 decompiledClasses.put(file, DecompilerState.ERROR);
-            } finally {
-                engine.clearContext();
             }
         });
     }
 
     public static Path toResultPath(Path file) {
         var srcPath = file.toAbsolutePath().toString();
-        var dstPath = srcPath.substring(0, srcPath.length() - 5) + "java";
-        return Path.of(dstPath);
+        return Path.of(srcPath.substring(0, srcPath.length() - 5) + "java");
     }
 
     @Nullable

@@ -14,16 +14,16 @@ import com.xkball.let_me_see_see.client.gui.xkwidget.OffScreenPreviewWidget;
 import com.xkball.let_me_see_see.client.offscreen.OffScreenRenders;
 import com.xkball.let_me_see_see.config.LMSConfig;
 import com.xkball.let_me_see_see.utils.VanillaUtils;
-import com.xkball.xklib.resource.ResourceLocation;
 import com.xkball.xklib.ui.layout.BooleanLayoutVariable;
 import com.xkball.xklib.ui.render.IComponent;
 import com.xkball.xklib.ui.widget.Button;
-import com.xkball.xklib.ui.widget.IconCheckBox;
 import com.xkball.xklib.ui.widget.Label;
 import com.xkball.xklib.ui.widget.container.ContainerWidget;
 import com.xkball.xklibmc.ui.widget.NumberInputWidget;
 import com.xkball.xklibmc.ui.widget.ObjectInputWidget;
+import com.xkball.xklibmc.ui.widget.WidgetWrapper;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.resources.language.ClientLanguage;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -131,9 +131,16 @@ public class ItemDataExporterScreen extends XKLibScreen {
         // Save PNG checkbox
         var dumpRow = new ContainerWidget();
         dumpRow.inlineStyle("flex-direction: row; size: 100% 14rpx; margin-top: 4rpx; flex-shrink: 0; align-items: center;");
-        dumpRow.addChild(new IconCheckBox(new ResourceLocation("minecraft", "icon/arrow_down")).bind(dumpPNG)
-                .inlineStyle("size: 14rpx 14rpx; flex-shrink: 0;")
-                .withTooltip(IComponent.translatable("let_me_see_see.gui.item_data_exporter.save_png")));
+        var mcCheckbox = Checkbox.builder(Component.empty(), Minecraft.getInstance().font)
+                .pos(0, 0)
+                .selected(dumpPNG.get())
+                .onValueChange((cb, val) -> dumpPNG.set(val))
+                .build();
+        var checkWrapper = new WidgetWrapper(mcCheckbox);
+        checkWrapper.setUserInput(true);
+        checkWrapper.inlineStyle("size: 14rpx 14rpx; flex-shrink: 0;")
+                .withTooltip(IComponent.translatable("let_me_see_see.gui.item_data_exporter.save_png"));
+        dumpRow.addChild(checkWrapper);
         dumpRow.addChild(new Label(IComponent.translatable("let_me_see_see.gui.item_data_exporter.save_png"))
                 .inlineStyle("text-color: -1; size: auto 100%; margin-left: 4rpx; flex-shrink: 0;"));
         leftPanel.addChild(dumpRow);

@@ -16,7 +16,7 @@
   "let_me_see_see.gui.data_base.old": "此前导出的数据",
   "let_me_see_see.gui.data_base.out_of_date": "导出后检测到mod列表发生变化,类内容可能变化,建议重新导出.",
   "let_me_see_see.gui.data_base.preview.no_fernflower": "你需要设置 FernFlower 路径才能使用类预览功能.",
-  "let_me_see_see.gui.data_base.preview.no_focused": "你没有查看任何类.不应该发生这种情况并显示这行字.",
+  "let_me_see_see.gui.data_base.preview.no_focused": "你没有查看任何类.",
   "let_me_see_see.gui.data_base.preview.no_file": "无法找到类文件.不应该发生这种情况并显示这行字.",
   "let_me_see_see.gui.data_base.preview.decompiling": "反编译中...",
   "let_me_see_see.gui.data_base.preview.decompile_error": "反编译发生错误.查看日志获取具体信息.",
@@ -35,6 +35,9 @@
   "let_me_see_see.gui.item_data_exporter.export_mcmod_hint": "无法使用自定义图片设置导出",
   "item.let_me_see_see.scanner": "盒码先生",
   "item.let_me_see_see.retriever": "检索器",
+  "item.let_me_see_see.explorer": "类浏览器",
   "item.let_me_see_see.data_base": "已导出类检索器",
-  "item.let_me_see_see.item_data_exporter": "物品数据导出器"
+  "item.let_me_see_see.item_data_exporter": "物品数据导出器",
+  "let_me_see_see.gui.explorer": "类浏览器",
+  "let_me_see_see.gui.data_base.show_exported_only": "仅显示已导出"
 }

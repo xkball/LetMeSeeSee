@@ -16,7 +16,7 @@
   "let_me_see_see.gui.data_base.old": "Class exported before.",
   "let_me_see_see.gui.data_base.out_of_date": "Some mod changed since the export and may influence class contents.Suggest to re-export.",
   "let_me_see_see.gui.data_base.preview.no_fernflower": "You need set the path of Fernflower to use class preview.",
-  "let_me_see_see.gui.data_base.preview.no_focused": "You are not focusing any class.This should not happen.",
+  "let_me_see_see.gui.data_base.preview.no_focused": "You are not focusing any class.",
   "let_me_see_see.gui.data_base.preview.no_file": "Cannot find class file.This should not happen.",
   "let_me_see_see.gui.data_base.preview.decompiling": "Decompiling.",
   "let_me_see_see.gui.data_base.preview.decompile_error": "An error occurred in decompilation, please check the log for more information.",
@@ -35,6 +35,9 @@
   "let_me_see_see.gui.item_data_exporter.export_mcmod_hint": "Cannot export using custom image settings.",
   "item.let_me_see_see.scanner": "Scanner",
   "item.let_me_see_see.retriever": "Retriever",
+  "item.let_me_see_see.explorer": "Class Explorer",
   "item.let_me_see_see.data_base": "Exported Classes Data Base",
-  "item.let_me_see_see.item_data_exporter": "Item Data Exporter"
+  "item.let_me_see_see.item_data_exporter": "Item Data Exporter",
+  "let_me_see_see.gui.explorer": "Class Explorer",
+  "let_me_see_see.gui.data_base.show_exported_only": "Show exported only"
 }

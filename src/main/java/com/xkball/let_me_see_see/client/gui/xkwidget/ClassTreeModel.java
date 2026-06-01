@@ -7,6 +7,7 @@ import com.xkball.xklib.ui.render.IComponent;
 import com.xkball.xklib.ui.widget.Button;
 import com.xkball.xklib.ui.widget.container.ContainerWidget;
 
+import javax.annotation.Nullable;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 import java.util.Collection;
@@ -35,6 +36,21 @@ public class ClassTreeModel {
             }
             node.classes.put(path[path.length - 1],
                     new ClassLabelPlaceholder(clazz, node.depth + 1));
+        }
+    }
+
+    public void copyOpenStates(@Nullable ClassTreeModel source) {
+        if (source == null) return;
+        copyOpenStates(source.root, this.root);
+    }
+
+    private static void copyOpenStates(PackageLabel source, PackageLabel target) {
+        target.open = source.open;
+        for (var entry : target.pkg.entrySet()) {
+            var sourceChild = source.pkg.get(entry.getKey());
+            if (sourceChild != null) {
+                copyOpenStates(sourceChild, entry.getValue());
+            }
         }
     }
 
