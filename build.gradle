@@ -247,22 +247,22 @@ tasks.register("githubActionOutput",DefaultTask){
 }
 
 
-tasks.named("processResources") {
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
-    def src1 = project.layout.projectDirectory.file("src/main/resources/assets/let_me_see_see/lang/en_us.json")
-    def src2 = project.layout.projectDirectory.file("src/generated/resources/assets/let_me_see_see/lang/en_us.json")
-    def output = project.layout.buildDirectory.file("resources/main/assets/let_me_see_see/lang/en_us.json")
-    inputs.files(src1, src2)
-    outputs.file(output)
-    doLast {
-        def obj1 = JsonParser.parseString(src1.asFile.text).getAsJsonObject()
-        def obj2 = JsonParser.parseString(src2.asFile.text).getAsJsonObject()
-
-        def merged = new JsonObject()
-        obj1.entrySet().each { e -> merged.add(e.getKey(), e.getValue()) }
-        obj2.entrySet().each { e -> merged.add(e.getKey(), e.getValue()) }
-        def outputFile = output.get().asFile
-        outputFile.parentFile.mkdirs()
-        outputFile.text = merged.toString()
-    }
-}
+//tasks.named("processResources") {
+//    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+//    def src1 = project.layout.projectDirectory.file("src/main/resources/assets/let_me_see_see/lang/en_us.json")
+//    def src2 = project.layout.projectDirectory.file("src/generated/resources/assets/let_me_see_see/lang/en_us.json")
+//    def output = project.layout.buildDirectory.file("resources/main/assets/let_me_see_see/lang/en_us.json")
+//    inputs.files(src1, src2)
+//    outputs.file(output)
+//    doLast {
+//        def obj1 = JsonParser.parseString(src1.asFile.text).getAsJsonObject()
+//        def obj2 = JsonParser.parseString(src2.asFile.text).getAsJsonObject()
+//
+//        def merged = new JsonObject()
+//        obj1.entrySet().each { e -> merged.add(e.getKey(), e.getValue()) }
+//        obj2.entrySet().each { e -> merged.add(e.getKey(), e.getValue()) }
+//        def outputFile = output.get().asFile
+//        outputFile.parentFile.mkdirs()
+//        outputFile.text = merged.toString()
+//    }
+//}
