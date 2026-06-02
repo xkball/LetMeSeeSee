@@ -33,7 +33,13 @@ public class ClassSearcher {
     }
     
     public static void buildClassMap() {
-        var classes = LetMeSeeSee.getInst().getAllLoadedClasses();
+        var inst = LetMeSeeSee.getInst();
+        if (inst == null) {
+            classMap.clear();
+            NeoForge.EVENT_BUS.post(new RebuildClassMapEvent());
+            return;
+        }
+        var classes = inst.getAllLoadedClasses();
         classMap.clear();
         for (var clazz : classes) {
             var className = className(clazz);

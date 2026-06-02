@@ -1,5 +1,7 @@
 package com.xkball.let_me_see_see.client;
 
+import com.xkball.let_me_see_see.LetMeSeeSee;
+import com.xkball.let_me_see_see.client.gui.screen.AgentNotAvailableScreen;
 import com.xkball.let_me_see_see.client.gui.screen.ExplorerScreen;
 import com.xkball.let_me_see_see.client.gui.screen.ItemDataExporterScreen;
 import com.xkball.let_me_see_see.common.item.LMSItems;
@@ -16,7 +18,12 @@ public class ScreenProviders {
     public static final Map<Identifier, IScreenProviderItemClient> PROVIDERS = new HashMap<>();
 
     public static void init() {
-        PROVIDERS.put(LMSItems.EXPLORER.getId(), (stack, slot) -> new ExplorerScreen());
+        PROVIDERS.put(LMSItems.EXPLORER.getId(), (stack, slot) -> {
+            if (LetMeSeeSee.isAgentAvailable()) {
+                return new ExplorerScreen();
+            }
+            return new AgentNotAvailableScreen();
+        });
         PROVIDERS.put(LMSItems.ITEM_ITEM_DATA_EXPORTER.getId(), (stack, slot) -> new ItemDataExporterScreen());
     }
 

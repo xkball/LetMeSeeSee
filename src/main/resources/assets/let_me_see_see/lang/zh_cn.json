@@ -39,5 +39,7 @@
   "item.let_me_see_see.data_base": "已导出类检索器",
   "item.let_me_see_see.item_data_exporter": "物品数据导出器",
   "let_me_see_see.gui.explorer": "类浏览器",
-  "let_me_see_see.gui.data_base.show_exported_only": "仅显示已导出"
+  "let_me_see_see.gui.data_base.show_exported_only": "仅显示已导出",
+  "let_me_see_see.gui.agent_not_available": "类浏览器不可用",
+  "let_me_see_see.gui.agent_not_available.desc": "Java Agent 未能成功加载。\n类浏览器功能需要 Instrumentation 支持，在当前运行环境中无法正常工作。\n请检查启动参数和 JVM 设置。"
 }

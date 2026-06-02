@@ -60,7 +60,8 @@ public class LetMeSeeSee {
     public static String EXPORT_DIR_PATH;
     public static String[] CLASS_PATH;
     public static Instrumentation INST;
-    
+    private static boolean agentLoadFailed = false;
+
     public LetMeSeeSee(IEventBus modEventBus, ModContainer modContainer) {
         LMSItems.init(modEventBus);
         CLASS_PATH = System.getProperty("java.class.path").split(File.pathSeparator);
@@ -110,6 +111,7 @@ public class LetMeSeeSee {
     
     public static Instrumentation getInst() {
         if (INST != null) return INST;
+        if (agentLoadFailed) return null;
         var jar = createTempJar().toFile().getAbsolutePath();
         LOGGER.info("Start get instrumentation via MethodHandle.");
         if(LOAD_AGENT != null) {
@@ -136,8 +138,9 @@ public class LetMeSeeSee {
             tryGetInst();
         }
         if (INST == null) {
-            LOGGER.error("Failed to get instrumentation after all.");
-            throw new RuntimeException("Failed to get Instrumentation after all.");
+            agentLoadFailed = true;
+            LOGGER.warn("Failed to get instrumentation after all. Class browser features will be unavailable.");
+            return null;
         }
         INST.addTransformer(new ClassFileTransformer() {
             @Override
@@ -148,13 +151,21 @@ public class LetMeSeeSee {
         
         return INST;
     }
-    
+
+    public static boolean isAgentAvailable() {
+        return getInst() != null;
+    }
+
     public static void runExportClass(Class<?> clazz) {
+        var inst = getInst();
+        if (inst == null) {
+            LOGGER.warn("Cannot export class, instrumentation not available");
+            return;
+        }
         var className = getClassName(clazz);
         try {
             LOGGER.info(className);
-            //不使用clazz.getClassLoader().getResourceAsStream(classname) 因为只能获取未transform类
-            getInst().retransformClasses(clazz);
+            inst.retransformClasses(clazz);
         } catch (UnmodifiableClassException e) {
             LOGGER.warn("class not support retransform {}", className);
         } catch (ClassFormatError e) {
