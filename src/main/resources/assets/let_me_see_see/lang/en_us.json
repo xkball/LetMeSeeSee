@@ -39,6 +39,7 @@
   "item.let_me_see_see.data_base": "Exported Classes Data Base",
   "item.let_me_see_see.item_data_exporter": "Item Data Exporter",
   "let_me_see_see.gui.explorer": "Class Explorer",
+  "let_me_see_see.gui.explorer.export_all_decompile": "Export and decompile all loaded classes",
   "let_me_see_see.gui.data_base.show_exported_only": "Show exported only",
   "let_me_see_see.gui.agent_not_available": "Class Explorer Unavailable",
   "let_me_see_see.gui.agent_not_available.desc": "The Java Agent failed to load.\nClass explorer features require Instrumentation support and cannot function in the current runtime environment.\nPlease check your launch arguments and JVM settings."

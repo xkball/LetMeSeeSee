@@ -1,21 +1,32 @@
 package com.xkball.let_me_see_see.client.gui.screen;
 
+import com.mojang.logging.LogUtils;
+import com.xkball.let_me_see_see.LetMeSeeSee;
 import com.xkball.let_me_see_see.client.gui.xkwidget.ClassTreeModel;
 import com.xkball.let_me_see_see.common.event.RebuildClassMapEvent;
+import com.xkball.let_me_see_see.utils.ClassDecompiler;
 import com.xkball.let_me_see_see.utils.ClassSearcher;
+import com.xkball.xklib.resource.ResourceLocation;
+import com.xkball.xklib.ui.render.IComponent;
+import com.xkball.xklib.ui.system.GuiSystem;
+import com.xkball.xklib.ui.widget.IconButton;
 import com.xkball.xklib.ui.widget.container.ContainerWidget;
 import com.xkball.xklibmc.ui.widget.ObjectInputWidget;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import org.slf4j.Logger;
 
 import java.util.Collection;
+import java.util.concurrent.CompletableFuture;
 
 @EventBusSubscriber(Dist.CLIENT)
 public class ExplorerScreen extends DataBaseScreen {
 
+    private static final Logger LOGGER = LogUtils.getLogger();
     private static ClassTreeModel classTree = new ClassTreeModel(ClassSearcher.classMap.values());
+    private static boolean exportingAll = false;
     private ContainerWidget treeContainer;
     // 只看已导出类的功能不实用，暂时注释
     // private final BooleanLayoutVariable showExportedOnly = new BooleanLayoutVariable(false);
@@ -80,6 +91,14 @@ public class ExplorerScreen extends DataBaseScreen {
     }
 
     @Override
+    protected void addClassPreviewHeaderButtons(ContainerWidget header) {
+        var exportAllBtn = new IconButton(new ResourceLocation("let_me_see_see", "missing/export_all_decompile"), this::exportAndDecompileAllLoadedClasses);
+        exportAllBtn.inlineStyle("size: 14rpx 14rpx; margin-left: 2rpx; flex-shrink: 0;")
+                .withTooltip(IComponent.translatable("let_me_see_see.gui.explorer.export_all_decompile"));
+        header.addChild(exportAllBtn);
+    }
+
+    @Override
     public void refreshClassList() {
         refreshTree();
     }
@@ -109,5 +128,39 @@ public class ExplorerScreen extends DataBaseScreen {
                     var cleanName = classKey.substring(0, classKey.lastIndexOf('['));
                     return cleanName.contains(searchBarValue);
                 }).toList();
+    }
+
+    private void exportAndDecompileAllLoadedClasses() {
+        if (exportingAll) {
+            return;
+        }
+        exportingAll = true;
+        var guiSystem = GuiSystem.INSTANCE.get();
+        var classes = ClassSearcher.classMap.values().stream()
+                .filter(ClassTreeModel::isNormalClass)
+                .toList();
+        CompletableFuture.runAsync(() -> exportAndDecompileAllLoadedClasses(classes))
+                .whenCompleteAsync((v, t) -> {
+                    exportingAll = false;
+                    if (t != null) {
+                        LOGGER.error("Failed to export and decompile all loaded classes", t);
+                    }
+                    guiSystem.submitTreeUpdate(() -> {
+                        refreshTree();
+                        refreshPreview();
+                    });
+                });
+    }
+
+    private void exportAndDecompileAllLoadedClasses(Collection<Class<?>> classes) {
+        LetMeSeeSee.scanClasses(classes.stream().toList());
+        var futures = classes.stream()
+                .map(ClassSearcher::className)
+                .map(this::getClassPath)
+                .filter(path -> path.toFile().exists())
+                .peek(ClassDecompiler::clear)
+                .map(ClassDecompiler::decompile)
+                .toArray(CompletableFuture<?>[]::new);
+        CompletableFuture.allOf(futures).join();
     }
 }

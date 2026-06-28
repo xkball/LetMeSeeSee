@@ -1,18 +1,18 @@
 package com.xkball.let_me_see_see.client.gui.screen;
 
 import com.mojang.logging.LogUtils;
+import com.xkball.let_me_see_see.LetMeSeeSee;
 import com.xkball.let_me_see_see.antlr.java.ColoringListener;
 import com.xkball.let_me_see_see.antlr.java.JavaLexer;
 import com.xkball.let_me_see_see.antlr.java.JavaParser;
 import com.xkball.let_me_see_see.client.gui.xkwidget.ClassLabelWidget;
-import com.xkball.xklib.ui.layout.BooleanLayoutVariable;
+import com.xkball.let_me_see_see.config.ColorMapping;
 import com.xkball.xklib.ui.system.GuiSystem;
-import net.minecraft.network.chat.TextColor;
+import com.xkball.xklibmc.ui.XKLibBaseScreen;
 import com.xkball.let_me_see_see.common.data.ExportsDataManager;
 import com.xkball.let_me_see_see.config.LMSConfig;
 import com.xkball.let_me_see_see.utils.ClassDecompiler;
 import com.xkball.let_me_see_see.utils.ClassSearcher;
-import com.xkball.let_me_see_see.utils.VanillaUtils;
 import com.xkball.xklib.resource.ResourceLocation;
 import com.xkball.xklib.ui.render.IComponent;
 import com.xkball.xklib.ui.widget.IconButton;
@@ -21,14 +21,13 @@ import com.xkball.xklib.ui.widget.container.ContainerWidget;
 import com.xkball.xklibmc.ui.widget.ObjectInputWidget;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -59,8 +58,8 @@ public class DataBaseScreen extends XKLibScreen {
     protected void setupFrame() {
         var leftPanel = createClassListPanel();
         var rightPanel = createClassPreviewPanel();
-        this.addScreenLayer(com.xkball.xklibmc.ui.XKLibBaseScreen.biPanelFrame(
-                IComponent.translatable(getTitleKey()), leftPanel, rightPanel));
+        this.addScreenLayer(XKLibBaseScreen.biPanelFrame(
+                IComponent.translatable(getTitleKey()), leftPanel, rightPanel).inlineStyle("background-color: 0xDD030407;"));
         refreshClassList();
     }
 
@@ -147,6 +146,7 @@ public class DataBaseScreen extends XKLibScreen {
         header.addChild(searchIconBtn);
         header.addChild(openInIdeBtn);
         header.addChild(reExportBtn);
+        addClassPreviewHeaderButtons(header);
 
         panel.addChild(header);
 
@@ -156,6 +156,9 @@ public class DataBaseScreen extends XKLibScreen {
 
         refreshPreview();
         return panel;
+    }
+
+    protected void addClassPreviewHeaderButtons(ContainerWidget header) {
     }
 
     public void refreshPreview() {
@@ -219,9 +222,13 @@ public class DataBaseScreen extends XKLibScreen {
     }
 
     protected Path getClassPath(ClassLabelWidget label) {
-        return Path.of(com.xkball.let_me_see_see.LetMeSeeSee.EXPORT_DIR_PATH,
-                label.className.substring(0, label.className.lastIndexOf('['))
-                        .replace('.', java.io.File.separatorChar) + ".class");
+        return getClassPath(label.className);
+    }
+
+    protected Path getClassPath(String className) {
+        return Path.of(LetMeSeeSee.EXPORT_DIR_PATH,
+                className.substring(0, className.lastIndexOf('['))
+                        .replace('.', File.separatorChar) + ".class");
     }
 
     protected void openInIDEA(ClassLabelWidget label) {
@@ -240,7 +247,7 @@ public class DataBaseScreen extends XKLibScreen {
 
     protected void reExport(ClassLabelWidget label) {
         ClassDecompiler.clear(getClassPath(label));
-        com.xkball.let_me_see_see.LetMeSeeSee.scanClasses(label.clazz);
+        LetMeSeeSee.scanClasses(label.clazz);
     }
 
     public static List<IComponent> parseJavaSrc(String src) {
@@ -249,7 +256,7 @@ public class DataBaseScreen extends XKLibScreen {
         var parser = new JavaParser(tokens);
         var tree = parser.compilationUnit();
         var walker = new ParseTreeWalker();
-        Int2ObjectMap<com.xkball.let_me_see_see.config.ColorMapping> map = new Int2ObjectOpenHashMap<>();
+        Int2ObjectMap<ColorMapping> map = new Int2ObjectOpenHashMap<>();
         var listener = new ColoringListener(map);
         walker.walk(listener, tree);
         var result = new ArrayList<IComponent>();
