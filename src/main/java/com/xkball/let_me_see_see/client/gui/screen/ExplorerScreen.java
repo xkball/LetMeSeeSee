@@ -107,8 +107,7 @@ public class ExplorerScreen extends DataBaseScreen {
                 .filter(clazz -> {
                     var classKey = ClassSearcher.className(clazz);
                     var cleanName = classKey.substring(0, classKey.lastIndexOf('['));
-                    return cleanName.startsWith(searchBarValue);
-                })
-                .collect(java.util.stream.Collectors.toList());
+                    return cleanName.contains(searchBarValue);
+                }).toList();
     }
 }
