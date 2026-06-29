@@ -20,6 +20,7 @@
   "let_me_see_see.gui.data_base.preview.no_file": "无法找到类文件.不应该发生这种情况并显示这行字.",
   "let_me_see_see.gui.data_base.preview.decompiling": "反编译中...",
   "let_me_see_see.gui.data_base.preview.decompile_error": "反编译发生错误.查看日志获取具体信息.",
+  "let_me_see_see.gui.data_base.preview.class_tooltip.open": "按下 Ctrl + 左键跳转",
   "let_me_see_see.gui.data_base.open_in_idea": "在IDEA中打开",
   "let_me_see_see.gui.data_base.no_idea": " 尚未配置IDEA路径",
   "let_me_see_see.gui.data_base.re_export": "重新导出类",

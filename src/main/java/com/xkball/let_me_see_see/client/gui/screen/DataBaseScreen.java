@@ -6,7 +6,9 @@ import com.xkball.let_me_see_see.antlr.java.ColoringListener;
 import com.xkball.let_me_see_see.antlr.java.JavaLexer;
 import com.xkball.let_me_see_see.antlr.java.JavaParser;
 import com.xkball.let_me_see_see.client.gui.xkwidget.ClassLabelWidget;
+import com.xkball.let_me_see_see.client.gui.xkwidget.ClassTreeModel;
 import com.xkball.let_me_see_see.config.ColorMapping;
+import com.xkball.xklib.XKLib;
 import com.xkball.xklib.ui.system.GuiSystem;
 import com.xkball.xklib.ui.widget.Widget;
 import com.xkball.xklibmc.ui.XKLibBaseScreen;
@@ -15,6 +17,7 @@ import com.xkball.let_me_see_see.config.LMSConfig;
 import com.xkball.let_me_see_see.utils.ClassDecompiler;
 import com.xkball.let_me_see_see.utils.ClassSearcher;
 import com.xkball.xklib.resource.ResourceLocation;
+import com.xkball.xklib.api.gui.input.IMouseButtonEvent;
 import com.xkball.xklib.ui.render.IComponent;
 import com.xkball.xklib.ui.widget.Button;
 import com.xkball.xklib.ui.widget.IconButton;
@@ -27,6 +30,7 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -35,6 +39,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class DataBaseScreen extends XKLibScreen {
 
@@ -182,14 +187,18 @@ public class DataBaseScreen extends XKLibScreen {
     }
 
     public void openClassTab(ClassLabelWidget label) {
-        var tab = findOpenedTab(label.className);
+        openClassTab(label.clazz, label.className, label.classSimpleName);
+        label.updateState();
+    }
+
+    private void openClassTab(Class<?> clazz, String className, String classSimpleName) {
+        var tab = findOpenedTab(className);
         var newTab = tab == null;
         if (tab == null) {
-            tab = new ClassPreviewTab(label.clazz, label.className, label.classSimpleName);
+            tab = new ClassPreviewTab(clazz, className, classSimpleName);
             openedTabs.add(tab);
         }
         activeTab = tab;
-        label.updateState();
         GuiSystem.INSTANCE.get().submitTreeUpdate(() -> {
             if (newTab) {
                 refreshTabBar();
@@ -200,7 +209,17 @@ public class DataBaseScreen extends XKLibScreen {
         });
     }
 
+    private void openClassTab(String fullClassName) {
+        for (var clazz : ClassSearcher.ofClassName(fullClassName)) {
+            var className = ClassSearcher.className(clazz);
+            var classSimpleName = cleanClassName(className).substring(fullClassName.lastIndexOf('.') + 1);
+            openClassTab(clazz, className, classSimpleName);
+            return;
+        }
+    }
+
     private void activateClassTab(String className) {
+        if (activeTab != null && activeTab.className.equals(className)) return;
         activeTab = findOpenedTab(className);
         updateTabStates();
         refreshPreview();
@@ -254,7 +273,8 @@ public class DataBaseScreen extends XKLibScreen {
                 background-color: %s;
                 """.formatted(active ? "0xAA2D405C" : "0x66333333"));
 
-        var button = new Button(IComponent.literal(tab.classSimpleName), () -> activateClassTab(tab.className));
+        var button = new TabButton(IComponent.literal(tab.classSimpleName), () -> activateClassTab(tab.className),
+                () -> closeClassTab(tab.className));
         button.inlineStyle("""
                 size: auto 100%;
                 padding-left: 4rpx;
@@ -325,8 +345,9 @@ public class DataBaseScreen extends XKLibScreen {
             var classPath = getClassPath(activeTab);
             if (!classPath.toFile().exists()) {
                 reExport(activeTab);
-                previewBody.addChild(new Label(IComponent.translatable("let_me_see_see.gui.data_base.preview.no_file"))
-                        .inlineStyle("text-color: -1; margin: 4rpx; size: 100% auto; flex-shrink: 0;"));
+            }
+            if (!classPath.toFile().exists()) {
+                addPreviewMessage(IComponent.translatable("let_me_see_see.gui.data_base.preview.no_file"), -1);
             } else {
                 var state = ClassDecompiler.getState(classPath);
                 updateTabStates();
@@ -340,8 +361,7 @@ public class DataBaseScreen extends XKLibScreen {
                             guiSystem.submitTreeUpdate(this::refreshPreview);
                         });
                     }
-                    previewBody.addChild(new Label(IComponent.translatable("let_me_see_see.gui.data_base.preview.decompiling"))
-                            .inlineStyle("text-color: -1; margin: 4rpx; size: 100% auto; flex-shrink: 0;"));
+                    addPreviewMessage(IComponent.translatable("let_me_see_see.gui.data_base.preview.decompiling"), -1);
                 } else if (state == ClassDecompiler.DecompilerState.SUCCESS) {
                     List<String> lines = new ArrayList<>();
                     var dstPath = ClassDecompiler.toResultPath(classPath);
@@ -367,12 +387,16 @@ public class DataBaseScreen extends XKLibScreen {
                                         """));
                     }
                 } else {
-                    previewBody.addChild(new Label(IComponent.translatable("let_me_see_see.gui.data_base.preview.decompile_error"))
-                            .inlineStyle("text-color: 0xFFFF5555; margin: 4rpx; size: 100% auto; flex-shrink: 0;"));
+                    addPreviewMessage(IComponent.translatable("let_me_see_see.gui.data_base.preview.decompile_error"), 0xFFFF5555);
                 }
             }
         }
         previewBody.markDirty();
+    }
+
+    private void addPreviewMessage(IComponent message, int color) {
+        previewBody.addChild(new Label(message)
+                .inlineStyle("text-color: %s; margin: 4rpx; size: 100%% auto; flex-shrink: 0;".formatted(color)));
     }
 
     protected Path getClassPath(ClassLabelWidget label) {
@@ -431,7 +455,7 @@ public class DataBaseScreen extends XKLibScreen {
         return className.substring(0, className.lastIndexOf('['));
     }
 
-    public static List<IComponent> parseJavaSrc(String src) {
+    public List<IComponent> parseJavaSrc(String src) {
         var lexer = new JavaLexer(CharStreams.fromString(src));
         var tokens = new CommonTokenStream(lexer);
         var parser = new JavaParser(tokens);
@@ -440,6 +464,8 @@ public class DataBaseScreen extends XKLibScreen {
         Int2ObjectMap<ColorMapping> map = new Int2ObjectOpenHashMap<>();
         var listener = new ColoringListener(map);
         walker.walk(listener, tree);
+        var imports = new java.util.HashMap<>(getClassTree().collectImplicitImports(listener.getPackageName()));
+        imports.putAll(listener.getImports());
         var result = new ArrayList<IComponent>();
         IComponent line = IComponent.literal("");
         for (var token : tokens.getTokens()) {
@@ -459,7 +485,16 @@ public class DataBaseScreen extends XKLibScreen {
                     }
                 }
             } else {
-                line = line.append(IComponent.literal(text).withColor(color).withTooltip(() -> Widget.createTooltipFactory(IComponent.literal(text)).get()));
+                var component = IComponent.literal(text).withColor(color);
+                var fullName = imports.get(text);
+                if (fullName != null) {
+                    component = component.withTooltip(() -> createTooltipFactory(IComponent.literal(fullName), IComponent.translatable("let_me_see_see.gui.data_base.preview.class_tooltip.open")).get())
+                            .withClickEvent(() -> {
+                                if(!GuiSystem.INSTANCE.get().isCtrlDown()) return;
+                                openClassTab(fullName);
+                            });
+                }
+                line = line.append(component);
             }
         }
         if (!line.visit().isEmpty()) {
@@ -467,7 +502,68 @@ public class DataBaseScreen extends XKLibScreen {
         }
         return result;
     }
+    
+    public static Supplier<Widget> createTooltipFactory(IComponent... text) {
+        return () -> {
+            var font = XKLib.RENDER_CONTEXT.get().getGUIGraphics().defaultFont();
+            var wMax = 0f;
+            for(var c : text){
+                wMax = Math.max(wMax,font.width(c, 20f));
+            }
+            var result =  new ContainerWidget()
+                    .inlineStyle(String.format("""
+                            size: %spx %spx;
+                            flex-direction: column;
+                            justify-content: space-around;
+                            margin-left: 6rpx;
+                            margin-top: 6rpx;
+                            background-color: 0xdd263136;
+                            border: 2px;
+                            border-color: -1;
+                            """, wMax+16, text.length * 20 + 10));
+            for(var c : text){
+                result.addChild(
+                        new Label(c).inlineStyle("""
+                            size: 100% 20px;
+                            flex-shrink: 0;
+                            margin-left: 8px;
+                            text-color: -1;
+                            text-height: 20;
+                            text-align: left;
+                            text-drop-shadow: false;
+                        """));
+            }
+            return new ContainerWidget()
+                    .addChild(result);
+        };
+    }
+
+    protected static ClassTreeModel getClassTree() {
+        return new ClassTreeModel(ClassSearcher.classMap.values());
+    }
 
     protected record ClassPreviewTab(Class<?> clazz, String className, String classSimpleName) {
+    }
+
+    private static class TabButton extends Button {
+
+        private final Runnable middleClickCallback;
+
+        public TabButton(IComponent text, Runnable leftClickCallback, Runnable middleClickCallback) {
+            super(text, leftClickCallback);
+            this.middleClickCallback = middleClickCallback;
+        }
+
+        @Override
+        public boolean mouseClicked(IMouseButtonEvent event, boolean doubleClick) {
+            if (event.button() == GLFW.GLFW_MOUSE_BUTTON_MIDDLE) {
+                middleClickCallback.run();
+                return true;
+            }
+            if (event.button() == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+                return super.mouseClicked(event, doubleClick);
+            }
+            return false;
+        }
     }
 }

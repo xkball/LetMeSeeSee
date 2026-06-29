@@ -58,11 +58,9 @@ public class ClassSearcher {
     
     public static List<Class<?>> ofClassName(String className) {
         var classes = search(className);
-        for(var clazz : classes) {
-            if(!clazz.substring(0,clazz.lastIndexOf('[')).equals(className)) return List.of();
-        }
         var result = new ArrayList<Class<?>>();
         for(var clazz : classes) {
+            if(!clazz.substring(0,clazz.lastIndexOf('[')).equals(className)) continue;
             result.add(classMap.get(clazz));
         }
         return result;

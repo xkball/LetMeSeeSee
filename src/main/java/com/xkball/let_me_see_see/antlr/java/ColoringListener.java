@@ -5,7 +5,9 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class ColoringListener extends com.xkball.let_me_see_see.antlr.java.JavaParserBaseListener {
@@ -28,9 +30,19 @@ public class ColoringListener extends com.xkball.let_me_see_see.antlr.java.JavaP
     ));
     
     private final Int2ObjectMap<ColorMapping> map;
+    private final Map<String, String> imports = new HashMap<>();
+    private String packageName = "";
     
     public ColoringListener(Int2ObjectMap<ColorMapping> map) {
         this.map = map;
+    }
+
+    public Map<String, String> getImports() {
+        return imports;
+    }
+
+    public String getPackageName() {
+        return packageName;
     }
     
     private void checkError(int index, ParserRuleContext ctx){
@@ -46,6 +58,28 @@ public class ColoringListener extends com.xkball.let_me_see_see.antlr.java.JavaP
         var index = token.getTokenIndex();
         if (KEYWORDS.contains(token.getText())) {
             map.putIfAbsent(index,ColorMapping.KEY_WORDS);
+        }
+    }
+
+    @Override
+    public void enterImportDeclaration(com.xkball.let_me_see_see.antlr.java.JavaParser.ImportDeclarationContext ctx) {
+        super.enterImportDeclaration(ctx);
+        if (ctx.STATIC() != null) return;
+        if (ctx.getText().endsWith(".*;")) return;
+        var qualifiedName = ctx.qualifiedName();
+        if (qualifiedName == null) return;
+        var fullName = qualifiedName.getText();
+        var index = fullName.lastIndexOf('.');
+        if (index < 0 || index == fullName.length() - 1) return;
+        imports.putIfAbsent(fullName.substring(index + 1), fullName);
+    }
+
+    @Override
+    public void enterPackageDeclaration(com.xkball.let_me_see_see.antlr.java.JavaParser.PackageDeclarationContext ctx) {
+        super.enterPackageDeclaration(ctx);
+        var qualifiedName = ctx.qualifiedName();
+        if (qualifiedName != null) {
+            packageName = qualifiedName.getText();
         }
     }
     

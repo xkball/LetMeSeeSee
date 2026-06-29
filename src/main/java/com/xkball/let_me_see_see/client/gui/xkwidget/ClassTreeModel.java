@@ -61,6 +61,34 @@ public class ClassTreeModel {
                 && !clazz.isArray();
     }
 
+    public Map<String, String> collectImplicitImports(String packageName) {
+        var result = new TreeMap<String, String>();
+        collectPackageClasses(result, "java.lang");
+        if (!packageName.isEmpty() && !"java.lang".equals(packageName)) {
+            collectPackageClasses(result, packageName);
+        }
+        return result;
+    }
+
+    private void collectPackageClasses(Map<String, String> result, String packageName) {
+        var node = findPackage(packageName);
+        if (node == null) return;
+        for (var entry : node.classes.entrySet()) {
+            result.putIfAbsent(entry.getKey(), packageName + "." + entry.getKey());
+        }
+    }
+
+    @Nullable
+    private PackageLabel findPackage(String packageName) {
+        var node = root;
+        if (packageName.isEmpty()) return node;
+        for (var part : packageName.split("\\.")) {
+            node = node.pkg.get(part);
+            if (node == null) return null;
+        }
+        return node;
+    }
+
     public void addToContainer(ContainerWidget container, DataBaseScreen screen, Runnable onUpdate) {
         addToContainer(container, root, screen, onUpdate);
     }
