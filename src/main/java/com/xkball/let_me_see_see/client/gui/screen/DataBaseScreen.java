@@ -8,6 +8,7 @@ import com.xkball.let_me_see_see.antlr.java.JavaParser;
 import com.xkball.let_me_see_see.client.gui.xkwidget.ClassLabelWidget;
 import com.xkball.let_me_see_see.config.ColorMapping;
 import com.xkball.xklib.ui.system.GuiSystem;
+import com.xkball.xklib.ui.widget.Widget;
 import com.xkball.xklibmc.ui.XKLibBaseScreen;
 import com.xkball.let_me_see_see.common.data.ExportsDataManager;
 import com.xkball.let_me_see_see.config.LMSConfig;
@@ -15,6 +16,7 @@ import com.xkball.let_me_see_see.utils.ClassDecompiler;
 import com.xkball.let_me_see_see.utils.ClassSearcher;
 import com.xkball.xklib.resource.ResourceLocation;
 import com.xkball.xklib.ui.render.IComponent;
+import com.xkball.xklib.ui.widget.Button;
 import com.xkball.xklib.ui.widget.IconButton;
 import com.xkball.xklib.ui.widget.Label;
 import com.xkball.xklib.ui.widget.container.ContainerWidget;
@@ -39,9 +41,12 @@ public class DataBaseScreen extends XKLibScreen {
     private static final Logger LOGGER = LogUtils.getLogger();
     protected String searchBarValue = "";
     @Nullable
-    public ClassLabelWidget lastFocused;
+    protected ClassPreviewTab activeTab;
 
+    private final List<ClassPreviewTab> openedTabs = new ArrayList<>();
+    private final List<ContainerWidget> tabWidgets = new ArrayList<>();
     private ContainerWidget classListContainer;
+    private ContainerWidget tabBar;
     private ContainerWidget previewBody;
 
     public DataBaseScreen() {
@@ -125,7 +130,7 @@ public class DataBaseScreen extends XKLibScreen {
                 .withTooltip(IComponent.translatable("let_me_see_see.gui.retriever.rebuild_cache"));
 
         var openInIdeBtn = new IconButton(new ResourceLocation("minecraft", "statistics/item_used"), () -> {
-            if (lastFocused != null) openInIDEA(lastFocused);
+            if (activeTab != null) openInIDEA(activeTab);
         });
         openInIdeBtn.inlineStyle("size: 14rpx 14rpx; margin-left: 2rpx; flex-shrink: 0;");
         if (LMSConfig.IDEA_PATH.isEmpty()) {
@@ -135,8 +140,8 @@ public class DataBaseScreen extends XKLibScreen {
         }
 
         var reExportBtn = new IconButton(new ResourceLocation("minecraft", "icon/search"), () -> {
-            if (lastFocused != null) {
-                reExport(lastFocused);
+            if (activeTab != null) {
+                reExport(activeTab);
                 refreshPreview();
             }
         });
@@ -150,10 +155,25 @@ public class DataBaseScreen extends XKLibScreen {
 
         panel.addChild(header);
 
+        tabBar = new ContainerWidget();
+        tabBar.inlineStyle("""
+                flex-direction: row;
+                size: 100% 16rpx;
+                flex-shrink: 0;
+                overflow-x: scroll;
+                overflow-y: visible;
+                scrollbar-width: 4;
+                align-items: center;
+                border-bottom: 1rpx;
+                border-color: 0x55666666;
+                """);
+        panel.addChild(tabBar);
+
         previewBody = new ContainerWidget();
-        previewBody.inlineStyle("size: 100% 100%-18rpx; flex-direction: column; overflow: scroll; scrollbar-width: 8;");
+        previewBody.inlineStyle("size: 100% 100%-34rpx; flex-direction: column; overflow: scroll; scrollbar-width: 8;");
         panel.addChild(previewBody);
 
+        refreshTabBar();
         refreshPreview();
         return panel;
     }
@@ -161,21 +181,155 @@ public class DataBaseScreen extends XKLibScreen {
     protected void addClassPreviewHeaderButtons(ContainerWidget header) {
     }
 
+    public void openClassTab(ClassLabelWidget label) {
+        var tab = findOpenedTab(label.className);
+        var newTab = tab == null;
+        if (tab == null) {
+            tab = new ClassPreviewTab(label.clazz, label.className, label.classSimpleName);
+            openedTabs.add(tab);
+        }
+        activeTab = tab;
+        label.updateState();
+        GuiSystem.INSTANCE.get().submitTreeUpdate(() -> {
+            if (newTab) {
+                refreshTabBar();
+            } else {
+                updateTabStates();
+            }
+            refreshPreview();
+        });
+    }
+
+    private void activateClassTab(String className) {
+        activeTab = findOpenedTab(className);
+        updateTabStates();
+        refreshPreview();
+    }
+
+    @Nullable
+    private ClassPreviewTab findOpenedTab(String className) {
+        for (var tab : openedTabs) {
+            if (tab.className.equals(className)) {
+                return tab;
+            }
+        }
+        return null;
+    }
+
+    private void refreshTabBar() {
+        if (tabBar == null) return;
+        tabBar.clearChildren();
+        tabWidgets.clear();
+        for (var tab : openedTabs) {
+            var tabWidget = createTabButton(tab);
+            tabWidgets.add(tabWidget);
+            tabBar.addChild(tabWidget);
+        }
+        tabBar.markDirty();
+    }
+
+    private void updateTabStates() {
+        for (var i = 0; i < openedTabs.size() && i < tabWidgets.size(); i++) {
+            updateTabState(openedTabs.get(i), tabWidgets.get(i));
+        }
+    }
+
+    private void updateTabState(ClassPreviewTab tab, ContainerWidget tabWidget) {
+        var active = tab.equals(activeTab);
+        tabWidget.inlineStyle("background-color: %s;".formatted(active ? "0xAA2D405C" : "0x66333333"));
+        tabWidget.markDirty();
+    }
+
+    private ContainerWidget createTabButton(ClassPreviewTab tab) {
+        var active = tab.equals(activeTab);
+        var state = ClassLabelWidget.State.of(tab.className);
+        var tabWidget = new ContainerWidget();
+        tabWidget.inlineStyle("""
+                flex-direction: row;
+                size: auto 12rpx;
+                min-width: 24rpx;
+                margin-left: 2rpx;
+                flex-shrink: 0;
+                align-items: center;
+                background-color: %s;
+                """.formatted(active ? "0xAA2D405C" : "0x66333333"));
+
+        var button = new Button(IComponent.literal(tab.classSimpleName), () -> activateClassTab(tab.className));
+        button.inlineStyle("""
+                size: auto 100%;
+                padding-left: 4rpx;
+                padding-right: 2rpx;
+                flex-shrink: 0;
+                text-height: 8rpx;
+                text-color: -1;
+                text-scale: expand-width;
+                text-drop-shadow: false;
+                button-shape: rect;
+                button-bg-color: 0x00000000;
+                """);
+        button.withTooltip(IComponent.literal(cleanClassName(tab.className)));
+
+        var closeButton = new Button(IComponent.literal("x"), () -> closeClassTab(tab.className));
+        closeButton.inlineStyle("""
+                size: 8rpx 100%;
+                margin-right: 2rpx;
+                flex-shrink: 0;
+                text-height: 7rpx;
+                text-scale: expand-width;
+                text-color: 0xFFAAAAAA;
+                text-drop-shadow: false;
+                button-shape: rect;
+                button-bg-color: 0x00000000;
+                """);
+
+        tabWidget.addChild(button);
+        tabWidget.addChild(closeButton);
+        return tabWidget;
+    }
+
+    private void closeClassTab(String className) {
+        var closingIndex = -1;
+        for (var i = 0; i < openedTabs.size(); i++) {
+            if (openedTabs.get(i).className.equals(className)) {
+                closingIndex = i;
+                break;
+            }
+        }
+        if (closingIndex < 0) return;
+        var closingActive = openedTabs.get(closingIndex).equals(activeTab);
+        openedTabs.remove(closingIndex);
+        if (closingIndex < tabWidgets.size()) {
+            var tabWidget = tabWidgets.remove(closingIndex);
+            if (tabBar != null) {
+                tabBar.removeChild(tabWidget);
+            }
+        }
+        if (closingActive) {
+            if (openedTabs.isEmpty()) {
+                activeTab = null;
+            } else {
+                activeTab = openedTabs.get(Math.min(closingIndex, openedTabs.size() - 1));
+            }
+        }
+        updateTabStates();
+        refreshPreview();
+    }
+
     public void refreshPreview() {
         previewBody.clearChildren();
 
-        if (lastFocused == null) {
+        if (activeTab == null) {
             previewBody.addChild(new Label(IComponent.translatable("let_me_see_see.gui.data_base.preview.no_focused"))
                     .inlineStyle("text-color: -1; margin: 4rpx; size: 100% auto; flex-shrink: 0;"));
         } else {
-            var classPath = getClassPath(lastFocused);
+            var classPath = getClassPath(activeTab);
             if (!classPath.toFile().exists()) {
-                reExport(lastFocused);
+                reExport(activeTab);
                 previewBody.addChild(new Label(IComponent.translatable("let_me_see_see.gui.data_base.preview.no_file"))
                         .inlineStyle("text-color: -1; margin: 4rpx; size: 100% auto; flex-shrink: 0;"));
             } else {
                 var state = ClassDecompiler.getState(classPath);
-                lastFocused.updateState();
+                updateTabStates();
                 if (state == null || state == ClassDecompiler.DecompilerState.DECOMPILING) {
                     if (state == null) {
                         var guiSystem = GuiSystem.INSTANCE.get();
@@ -225,6 +379,10 @@ public class DataBaseScreen extends XKLibScreen {
         return getClassPath(label.className);
     }
 
+    protected Path getClassPath(ClassPreviewTab tab) {
+        return getClassPath(tab.className);
+    }
+
     protected Path getClassPath(String className) {
         return Path.of(LetMeSeeSee.EXPORT_DIR_PATH,
                 className.substring(0, className.lastIndexOf('['))
@@ -245,9 +403,32 @@ public class DataBaseScreen extends XKLibScreen {
         }
     }
 
+    protected void openInIDEA(ClassPreviewTab tab) {
+        var ideaPath = LMSConfig.IDEA_PATH;
+        if (ideaPath.isEmpty()) return;
+        var classPath = getClassPath(tab).toString();
+        var pb = new ProcessBuilder('"' + ideaPath + '"', classPath);
+        pb.redirectErrorStream(true);
+        pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+        try {
+            pb.start();
+        } catch (IOException e) {
+            LOGGER.error("Failed to open file {}", classPath, e);
+        }
+    }
+
     protected void reExport(ClassLabelWidget label) {
         ClassDecompiler.clear(getClassPath(label));
         LetMeSeeSee.scanClasses(label.clazz);
+    }
+
+    protected void reExport(ClassPreviewTab tab) {
+        ClassDecompiler.clear(getClassPath(tab));
+        LetMeSeeSee.scanClasses(tab.clazz);
+    }
+
+    protected String cleanClassName(String className) {
+        return className.substring(0, className.lastIndexOf('['));
     }
 
     public static List<IComponent> parseJavaSrc(String src) {
@@ -278,12 +459,15 @@ public class DataBaseScreen extends XKLibScreen {
                     }
                 }
             } else {
-                line = line.append(IComponent.literal(text).withColor(color));
+                line = line.append(IComponent.literal(text).withColor(color).withTooltip(() -> Widget.createTooltipFactory(IComponent.literal(text)).get()));
             }
         }
         if (!line.visit().isEmpty()) {
             result.add(line);
         }
         return result;
+    }
+
+    protected record ClassPreviewTab(Class<?> clazz, String className, String classSimpleName) {
     }
 }

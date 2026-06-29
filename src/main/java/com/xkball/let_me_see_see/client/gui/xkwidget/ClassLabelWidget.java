@@ -31,8 +31,7 @@ public class ClassLabelWidget extends Button implements Comparable<ClassLabelWid
         this.setText(text);
         this.setTextColor(state.color != -1 ? state.color : -1);
         this.setCallback(() -> {
-            screen.lastFocused = this;
-            com.xkball.xklib.ui.system.GuiSystem.INSTANCE.get().submitTreeUpdate(screen::refreshPreview);
+            screen.openClassTab(this);
         });
     }
 

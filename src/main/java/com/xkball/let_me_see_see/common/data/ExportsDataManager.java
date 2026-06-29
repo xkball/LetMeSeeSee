@@ -69,7 +69,7 @@ public class ExportsDataManager {
             for (var entry : map.entrySet()) {
                 recordedClasses.putIfAbsent(entry.getKey(), entry.getValue());
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOGGER.error("Failed to read recorded classes", e);
         }
         
