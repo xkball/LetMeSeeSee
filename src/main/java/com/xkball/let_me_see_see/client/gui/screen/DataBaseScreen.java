@@ -44,11 +44,12 @@ import java.util.function.Supplier;
 public class DataBaseScreen extends XKLibScreen {
 
     private static final Logger LOGGER = LogUtils.getLogger();
-    protected String searchBarValue = "";
+    private static final List<ClassPreviewTab> OPENED_TABS = new ArrayList<>();
     @Nullable
-    protected ClassPreviewTab activeTab;
+    private static ClassPreviewTab savedActiveTab;
 
-    private final List<ClassPreviewTab> openedTabs = new ArrayList<>();
+    protected String searchBarValue = "";
+
     private final List<ContainerWidget> tabWidgets = new ArrayList<>();
     private ContainerWidget classListContainer;
     private ContainerWidget tabBar;
@@ -135,7 +136,7 @@ public class DataBaseScreen extends XKLibScreen {
                 .withTooltip(IComponent.translatable("let_me_see_see.gui.retriever.rebuild_cache"));
 
         var openInIdeBtn = new IconButton(new ResourceLocation("minecraft", "statistics/item_used"), () -> {
-            if (activeTab != null) openInIDEA(activeTab);
+            if (savedActiveTab != null) openInIDEA(savedActiveTab);
         });
         openInIdeBtn.inlineStyle("size: 14rpx 14rpx; margin-left: 2rpx; flex-shrink: 0;");
         if (LMSConfig.IDEA_PATH.isEmpty()) {
@@ -145,8 +146,8 @@ public class DataBaseScreen extends XKLibScreen {
         }
 
         var reExportBtn = new IconButton(new ResourceLocation("minecraft", "icon/search"), () -> {
-            if (activeTab != null) {
-                reExport(activeTab);
+            if (savedActiveTab != null) {
+                reExport(savedActiveTab);
                 refreshPreview();
             }
         });
@@ -196,9 +197,9 @@ public class DataBaseScreen extends XKLibScreen {
         var newTab = tab == null;
         if (tab == null) {
             tab = new ClassPreviewTab(clazz, className, classSimpleName);
-            openedTabs.add(tab);
+            OPENED_TABS.add(tab);
         }
-        activeTab = tab;
+        savedActiveTab = tab;
         GuiSystem.INSTANCE.get().submitTreeUpdate(() -> {
             if (newTab) {
                 refreshTabBar();
@@ -219,15 +220,15 @@ public class DataBaseScreen extends XKLibScreen {
     }
 
     private void activateClassTab(String className) {
-        if (activeTab != null && activeTab.className.equals(className)) return;
-        activeTab = findOpenedTab(className);
+        if (savedActiveTab != null && savedActiveTab.className.equals(className)) return;
+        savedActiveTab = findOpenedTab(className);
         updateTabStates();
         refreshPreview();
     }
 
     @Nullable
     private ClassPreviewTab findOpenedTab(String className) {
-        for (var tab : openedTabs) {
+        for (var tab : OPENED_TABS) {
             if (tab.className.equals(className)) {
                 return tab;
             }
@@ -239,7 +240,7 @@ public class DataBaseScreen extends XKLibScreen {
         if (tabBar == null) return;
         tabBar.clearChildren();
         tabWidgets.clear();
-        for (var tab : openedTabs) {
+        for (var tab : OPENED_TABS) {
             var tabWidget = createTabButton(tab);
             tabWidgets.add(tabWidget);
             tabBar.addChild(tabWidget);
@@ -248,20 +249,19 @@ public class DataBaseScreen extends XKLibScreen {
     }
 
     private void updateTabStates() {
-        for (var i = 0; i < openedTabs.size() && i < tabWidgets.size(); i++) {
-            updateTabState(openedTabs.get(i), tabWidgets.get(i));
+        for (var i = 0; i < OPENED_TABS.size() && i < tabWidgets.size(); i++) {
+            updateTabState(OPENED_TABS.get(i), tabWidgets.get(i));
         }
     }
 
     private void updateTabState(ClassPreviewTab tab, ContainerWidget tabWidget) {
-        var active = tab.equals(activeTab);
+        var active = tab.equals(savedActiveTab);
         tabWidget.inlineStyle("background-color: %s;".formatted(active ? "0xAA2D405C" : "0x66333333"));
         tabWidget.markDirty();
     }
 
     private ContainerWidget createTabButton(ClassPreviewTab tab) {
-        var active = tab.equals(activeTab);
-        var state = ClassLabelWidget.State.of(tab.className);
+        var active = tab.equals(savedActiveTab);
         var tabWidget = new ContainerWidget();
         tabWidget.inlineStyle("""
                 flex-direction: row;
@@ -274,32 +274,28 @@ public class DataBaseScreen extends XKLibScreen {
                 """.formatted(active ? "0xAA2D405C" : "0x66333333"));
 
         var button = new TabButton(IComponent.literal(tab.classSimpleName), () -> activateClassTab(tab.className),
-                () -> closeClassTab(tab.className));
-        button.inlineStyle("""
-                size: auto 100%;
-                padding-left: 4rpx;
-                padding-right: 2rpx;
-                flex-shrink: 0;
-                text-height: 8rpx;
-                text-color: -1;
-                text-scale: expand-width;
-                text-drop-shadow: false;
-                button-shape: rect;
-                button-bg-color: 0x00000000;
-                """);
-        button.withTooltip(IComponent.literal(cleanClassName(tab.className)));
+                () -> closeClassTab(tab.className))
+                .inlineStyle("""
+                    size: auto 100%;
+                    padding-left: 4rpx;
+                    padding-right: 2rpx;
+                    flex-shrink: 0;
+                    text-height: 8rpx;
+                    text-color: -1;
+                    text-scale: expand-width;
+                    text-drop-shadow: false;
+                """)
+                .withTooltip(IComponent.literal(cleanClassName(tab.className)));
 
-        var closeButton = new Button(IComponent.literal("x"), () -> closeClassTab(tab.className));
-        closeButton.inlineStyle("""
-                size: 8rpx 100%;
-                margin-right: 2rpx;
-                flex-shrink: 0;
-                text-height: 7rpx;
-                text-scale: expand-width;
-                text-color: 0xFFAAAAAA;
-                text-drop-shadow: false;
-                button-shape: rect;
-                button-bg-color: 0x00000000;
+        var closeButton = new Button(IComponent.literal("x"), () -> closeClassTab(tab.className))
+                .inlineStyle("""
+                    size: 8rpx 100%;
+                    margin-right: 2rpx;
+                    flex-shrink: 0;
+                    text-height: 7rpx;
+                    text-scale: expand-width;
+                    text-color: 0xFFAAAAAA;
+                    text-drop-shadow: false;
                 """);
 
         tabWidget.addChild(button);
@@ -309,15 +305,15 @@ public class DataBaseScreen extends XKLibScreen {
 
     private void closeClassTab(String className) {
         var closingIndex = -1;
-        for (var i = 0; i < openedTabs.size(); i++) {
-            if (openedTabs.get(i).className.equals(className)) {
+        for (var i = 0; i < OPENED_TABS.size(); i++) {
+            if (OPENED_TABS.get(i).className.equals(className)) {
                 closingIndex = i;
                 break;
             }
         }
         if (closingIndex < 0) return;
-        var closingActive = openedTabs.get(closingIndex).equals(activeTab);
-        openedTabs.remove(closingIndex);
+        var closingActive = OPENED_TABS.get(closingIndex).equals(savedActiveTab);
+        OPENED_TABS.remove(closingIndex);
         if (closingIndex < tabWidgets.size()) {
             var tabWidget = tabWidgets.remove(closingIndex);
             if (tabBar != null) {
@@ -325,10 +321,10 @@ public class DataBaseScreen extends XKLibScreen {
             }
         }
         if (closingActive) {
-            if (openedTabs.isEmpty()) {
-                activeTab = null;
+            if (OPENED_TABS.isEmpty()) {
+                savedActiveTab = null;
             } else {
-                activeTab = openedTabs.get(Math.min(closingIndex, openedTabs.size() - 1));
+                savedActiveTab = OPENED_TABS.get(Math.min(closingIndex, OPENED_TABS.size() - 1));
             }
         }
         updateTabStates();
@@ -338,13 +334,13 @@ public class DataBaseScreen extends XKLibScreen {
     public void refreshPreview() {
         previewBody.clearChildren();
 
-        if (activeTab == null) {
+        if (savedActiveTab == null) {
             previewBody.addChild(new Label(IComponent.translatable("let_me_see_see.gui.data_base.preview.no_focused"))
                     .inlineStyle("text-color: -1; margin: 4rpx; size: 100% auto; flex-shrink: 0;"));
         } else {
-            var classPath = getClassPath(activeTab);
+            var classPath = getClassPath(savedActiveTab);
             if (!classPath.toFile().exists()) {
-                reExport(activeTab);
+                reExport(savedActiveTab);
             }
             if (!classPath.toFile().exists()) {
                 addPreviewMessage(IComponent.translatable("let_me_see_see.gui.data_base.preview.no_file"), -1);
@@ -567,3 +563,4 @@ public class DataBaseScreen extends XKLibScreen {
         }
     }
 }
+
