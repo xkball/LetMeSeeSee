@@ -1,7 +1,7 @@
 package com.xkball.let_me_see_see.utils;
 
 import com.mojang.logging.LogUtils;
-import com.xkball.let_me_see_see.LetMeSeeSee;
+import com.xkball.let_me_see_see.LetMeSeeSeeClient;
 import com.xkball.xklib.resource.ResourceLocation;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Direction;
@@ -41,11 +41,11 @@ public class VanillaUtils {
     public static final int GUI_GRAY = VanillaUtils.getColor(30, 30, 30, 200);
 
     public static Identifier modRL(String path) {
-        return rLOf(LetMeSeeSee.MODID, path);
+        return rLOf(LetMeSeeSeeClient.MODID, path);
     }
 
     public static ResourceLocation modrl(String path) {
-        return new ResourceLocation(LetMeSeeSee.MODID, path);
+        return new ResourceLocation(LetMeSeeSeeClient.MODID, path);
     }
 
     public static Identifier rLOf(String namespace, String path) {

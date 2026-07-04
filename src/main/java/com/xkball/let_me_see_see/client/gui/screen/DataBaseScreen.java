@@ -1,7 +1,7 @@
 package com.xkball.let_me_see_see.client.gui.screen;
 
 import com.mojang.logging.LogUtils;
-import com.xkball.let_me_see_see.LetMeSeeSee;
+import com.xkball.let_me_see_see.LetMeSeeSeeClient;
 import com.xkball.let_me_see_see.antlr.java.ColoringListener;
 import com.xkball.let_me_see_see.antlr.java.JavaLexer;
 import com.xkball.let_me_see_see.antlr.java.JavaParser;
@@ -404,7 +404,7 @@ public class DataBaseScreen extends XKLibScreen {
     }
 
     protected Path getClassPath(String className) {
-        return Path.of(LetMeSeeSee.EXPORT_DIR_PATH,
+        return Path.of(LetMeSeeSeeClient.EXPORT_DIR_PATH,
                 className.substring(0, className.lastIndexOf('['))
                         .replace('.', File.separatorChar) + ".class");
     }
@@ -439,12 +439,12 @@ public class DataBaseScreen extends XKLibScreen {
 
     protected void reExport(ClassLabelWidget label) {
         ClassDecompiler.clear(getClassPath(label));
-        LetMeSeeSee.scanClasses(label.clazz);
+        LetMeSeeSeeClient.scanClasses(label.clazz);
     }
 
     protected void reExport(ClassPreviewTab tab) {
         ClassDecompiler.clear(getClassPath(tab));
-        LetMeSeeSee.scanClasses(tab.clazz);
+        LetMeSeeSeeClient.scanClasses(tab.clazz);
     }
 
     protected String cleanClassName(String className) {

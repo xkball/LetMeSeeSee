@@ -1,7 +1,8 @@
 package com.xkball.let_me_see_see.common.item;
 
-import com.xkball.let_me_see_see.LetMeSeeSee;
+import com.xkball.let_me_see_see.LetMeSeeSeeClient;
 import com.xkball.let_me_see_see.utils.RelateClassFinder;
+import com.xkball.xklibmc.annotation.NonNullByDefault;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
@@ -10,6 +11,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 
+@NonNullByDefault
 public class ScannerItem extends Item {
 
     public ScannerItem(Properties properties) {
@@ -24,7 +26,7 @@ public class ScannerItem extends Item {
             var pos = context.getClickedPos();
             var bs = level.getBlockState(pos);
             var block = bs.getBlock();
-            LetMeSeeSee.scanClasses(RelateClassFinder.analysisBlock(block));
+            LetMeSeeSeeClient.scanClasses(RelateClassFinder.analysisBlock(block));
         }
         return InteractionResult.SUCCESS;
     }
@@ -33,7 +35,7 @@ public class ScannerItem extends Item {
     public InteractionResult interactLivingEntity(ItemStack stack, Player player, LivingEntity interactionTarget, InteractionHand usedHand) {
         var level = player.level();
         if (level.isClientSide()) {
-            LetMeSeeSee.scanClasses(RelateClassFinder.analysisEntity(interactionTarget));
+            LetMeSeeSeeClient.scanClasses(RelateClassFinder.analysisEntity(interactionTarget));
         }
         return InteractionResult.SUCCESS;
     }

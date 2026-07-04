@@ -1,7 +1,6 @@
 package com.xkball.let_me_see_see.client.gui.screen;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.pipeline.TextureTarget;
@@ -10,7 +9,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
-import com.xkball.let_me_see_see.LetMeSeeSee;
+import com.xkball.let_me_see_see.LetMeSeeSeeClient;
 import com.xkball.let_me_see_see.client.gui.xkwidget.OffScreenPreviewWidget;
 import com.xkball.let_me_see_see.client.offscreen.OffScreenRenders;
 import com.xkball.let_me_see_see.config.LMSConfig;
@@ -23,7 +22,6 @@ import com.xkball.xklibmc.ui.widget.ObjectInputWidget;
 import com.xkball.xklibmc.ui.widget.WidgetWrapper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.ClientLanguage;
-import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -32,7 +30,6 @@ import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.tags.TagKey;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.BlockItem;
@@ -60,7 +57,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-@EventBusSubscriber(modid = LetMeSeeSee.MODID, value = Dist.CLIENT)
+@EventBusSubscriber(modid = LetMeSeeSeeClient.MODID, value = Dist.CLIENT)
 public class ItemDataExporterScreen extends XKLibScreen {
 
     @SuppressWarnings("deprecation")
@@ -237,7 +234,7 @@ public class ItemDataExporterScreen extends XKLibScreen {
             var item = entry.getValue();
             var rl = BuiltInRegistries.ITEM.getKey(item);
             if (!namespaceFilterValue.isEmpty() && !matchesFilter(namespaceFilterValue, rl)) continue;
-            var exportPath = Path.of(LetMeSeeSee.EXPORT_DIR_PATH, "_images",
+            var exportPath = Path.of(LetMeSeeSeeClient.EXPORT_DIR_PATH, "_images",
                     rl.getNamespace(), rl.getPath() + ".png");
             OffScreenRenders.exportItemStackAsPng(item.getDefaultInstance(), imageSize, imageSize, imageScale, true, exportPath);
         }
@@ -271,7 +268,7 @@ public class ItemDataExporterScreen extends XKLibScreen {
             var list = entry.getValue().stream()
                     .sorted(Comparator.comparing(j -> j.get("registerName").getAsString()))
                     .toList();
-            var path = Path.of(LetMeSeeSee.EXPORT_DIR_PATH, entry.getKey() + ".json");
+            var path = Path.of(LetMeSeeSeeClient.EXPORT_DIR_PATH, entry.getKey() + ".json");
             var str = new StringBuilder();
             for (var json : list) {
                 str.append(json.toString());

@@ -1,6 +1,6 @@
 package com.xkball.let_me_see_see.client;
 
-import com.xkball.let_me_see_see.LetMeSeeSee;
+import com.xkball.let_me_see_see.LetMeSeeSeeClient;
 import com.xkball.let_me_see_see.client.gui.screen.AgentNotAvailableScreen;
 import com.xkball.let_me_see_see.client.gui.screen.ExplorerScreen;
 import com.xkball.let_me_see_see.client.gui.screen.ItemDataExporterScreen;
@@ -19,7 +19,7 @@ public class ScreenProviders {
 
     public static void init() {
         PROVIDERS.put(LMSItems.EXPLORER.getId(), (stack, slot) -> {
-            if (LetMeSeeSee.isAgentAvailable()) {
+            if (LetMeSeeSeeClient.isAgentAvailable()) {
                 return new ExplorerScreen();
             }
             return new AgentNotAvailableScreen();

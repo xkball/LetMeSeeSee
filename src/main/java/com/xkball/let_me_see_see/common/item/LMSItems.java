@@ -1,6 +1,6 @@
 package com.xkball.let_me_see_see.common.item;
 
-import com.xkball.let_me_see_see.LetMeSeeSee;
+import com.xkball.let_me_see_see.LetMeSeeSeeClient;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -15,12 +15,12 @@ import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
-@EventBusSubscriber(modid = LetMeSeeSee.MODID)
+@EventBusSubscriber(modid = LetMeSeeSeeClient.MODID)
 public class LMSItems {
     
-    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Registries.ITEM, LetMeSeeSee.MODID);
+    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Registries.ITEM, LetMeSeeSeeClient.MODID);
     
-    public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, LetMeSeeSee.MODID);
+    public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, LetMeSeeSeeClient.MODID);
     
     public static final DeferredHolder<Item, ScannerItem> SCANNER = ITEMS.register("scanner", (id) -> new ScannerItem(new Item.Properties().setId(itemKey(id)).stacksTo(1)));
     public static final DeferredHolder<Item, ItemDataExporterItem> ITEM_ITEM_DATA_EXPORTER = ITEMS.register("item_data_exporter", (id) -> new ItemDataExporterItem(new Item.Properties().setId(itemKey(id)).stacksTo(1)));

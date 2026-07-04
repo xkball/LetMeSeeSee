@@ -6,8 +6,7 @@ import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
-import com.xkball.let_me_see_see.LetMeSeeSee;
+import com.xkball.let_me_see_see.LetMeSeeSeeClient;
 import com.xkball.let_me_see_see.utils.ClientUtils;
 import com.xkball.let_me_see_see.utils.VanillaUtils;
 import net.minecraft.client.Minecraft;
@@ -34,7 +33,7 @@ public class OffScreenRenders {
 
     public static String exportItemStackAsPng(ItemStack itemStack, int width, int height, float scale, boolean writeToFile) {
         var itemID = BuiltInRegistries.ITEM.getKey(itemStack.getItem());
-        var exportPath = Path.of(LetMeSeeSee.EXPORT_DIR_PATH, "_data", itemID.getNamespace(), itemID.getPath() + ".png");
+        var exportPath = Path.of(LetMeSeeSeeClient.EXPORT_DIR_PATH, "_data", itemID.getNamespace(), itemID.getPath() + ".png");
         return exportItemStackAsPng(itemStack, width, height, scale, writeToFile, exportPath);
     }
 
@@ -65,7 +64,7 @@ public class OffScreenRenders {
 
     public static String exportItemStackAsPng(RenderTarget fbo, ItemStack itemStack, float scale, boolean writeToFile) {
         var itemID = BuiltInRegistries.ITEM.getKey(itemStack.getItem());
-        var exportPath = Path.of(LetMeSeeSee.EXPORT_DIR_PATH, "_data", itemID.getNamespace(), itemID.getPath() + ".png");
+        var exportPath = Path.of(LetMeSeeSeeClient.EXPORT_DIR_PATH, "_data", itemID.getNamespace(), itemID.getPath() + ".png");
         renderItemStack(itemStack, fbo, scale);
         AtomicReference<String> result = new AtomicReference<>("");
         ClientUtils.takeScreenshotWithAlpha(fbo,(nativeImage -> {

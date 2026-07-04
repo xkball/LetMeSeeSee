@@ -1,7 +1,7 @@
 package com.xkball.let_me_see_see.client.gui.screen;
 
 import com.mojang.logging.LogUtils;
-import com.xkball.let_me_see_see.LetMeSeeSee;
+import com.xkball.let_me_see_see.LetMeSeeSeeClient;
 import com.xkball.let_me_see_see.client.gui.xkwidget.ClassTreeModel;
 import com.xkball.let_me_see_see.common.event.RebuildClassMapEvent;
 import com.xkball.let_me_see_see.utils.ClassDecompiler;
@@ -153,7 +153,7 @@ public class ExplorerScreen extends DataBaseScreen {
     }
 
     private void exportAndDecompileAllLoadedClasses(Collection<Class<?>> classes) {
-        LetMeSeeSee.scanClasses(classes.stream().toList());
+        LetMeSeeSeeClient.scanClasses(classes.stream().toList());
         var futures = classes.stream()
                 .map(ClassSearcher::className)
                 .map(this::getClassPath)

@@ -1,6 +1,6 @@
 package com.xkball.let_me_see_see.config;
 
-import com.xkball.let_me_see_see.LetMeSeeSee;
+import com.xkball.let_me_see_see.LetMeSeeSeeClient;
 import com.xkball.let_me_see_see.common.data.ExportsDataManager;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -10,7 +10,7 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 import java.util.ArrayList;
 import java.util.List;
 
-@EventBusSubscriber(modid = LetMeSeeSee.MODID)
+@EventBusSubscriber(modid = LetMeSeeSeeClient.MODID)
 public class LMSConfig {
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
     public static final ModConfigSpec.ConfigValue<String> IDEA_PATH_CONFIG = BUILDER

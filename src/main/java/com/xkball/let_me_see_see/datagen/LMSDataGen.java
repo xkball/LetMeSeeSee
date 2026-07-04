@@ -1,11 +1,11 @@
 package com.xkball.let_me_see_see.datagen;
 
-import com.xkball.let_me_see_see.LetMeSeeSee;
+import com.xkball.let_me_see_see.LetMeSeeSeeClient;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 
-@EventBusSubscriber(modid = LetMeSeeSee.MODID)
+@EventBusSubscriber(modid = LetMeSeeSeeClient.MODID)
 public class LMSDataGen {
     
     @SubscribeEvent

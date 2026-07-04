@@ -3,7 +3,7 @@ package com.xkball.let_me_see_see.common.data;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.mojang.logging.LogUtils;
-import com.xkball.let_me_see_see.LetMeSeeSee;
+import com.xkball.let_me_see_see.LetMeSeeSeeClient;
 import com.xkball.let_me_see_see.utils.ClassSearcher;
 import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
@@ -23,9 +23,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ExportsDataManager {
     public static final Logger LOGGER = LogUtils.getLogger();
-    public static final Path DATA_PATH = Path.of(LetMeSeeSee.EXPORT_DIR_PATH).resolve("metadata");
-    public static final Path DATA_PATH_TEMP = Path.of(LetMeSeeSee.EXPORT_DIR_PATH).resolve("metadata-temp");
-    public static final Path DATA_PATH_BACKUP = Path.of(LetMeSeeSee.EXPORT_DIR_PATH).resolve("metadata-backup");
+    public static final Path DATA_PATH = Path.of(LetMeSeeSeeClient.EXPORT_DIR_PATH).resolve("metadata");
+    public static final Path DATA_PATH_TEMP = Path.of(LetMeSeeSeeClient.EXPORT_DIR_PATH).resolve("metadata-temp");
+    public static final Path DATA_PATH_BACKUP = Path.of(LetMeSeeSeeClient.EXPORT_DIR_PATH).resolve("metadata-backup");
     public static final Gson GSON = new Gson();
     public static final TypeToken<Map<String, ExportEnv>> TYPE_TOKEN = new TypeToken<>() {
     };

@@ -1,6 +1,6 @@
 package com.xkball.let_me_see_see.utils;
 
-import com.xkball.let_me_see_see.LetMeSeeSee;
+import com.xkball.let_me_see_see.LetMeSeeSeeClient;
 import com.xkball.let_me_see_see.common.event.RebuildClassMapEvent;
 import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.common.NeoForge;
@@ -33,7 +33,7 @@ public class ClassSearcher {
     }
     
     public static void buildClassMap() {
-        var inst = LetMeSeeSee.getInst();
+        var inst = LetMeSeeSeeClient.getInst();
         if (inst == null) {
             classMap.clear();
             NeoForge.EVENT_BUS.post(new RebuildClassMapEvent());
@@ -98,7 +98,7 @@ public class ClassSearcher {
     
     public static void findAllClassFiles() {
         var result = new ArrayList<Path>();
-        for(var path_ : LetMeSeeSee.CLASS_PATH){
+        for(var path_ : LetMeSeeSeeClient.CLASS_PATH){
             var path = Path.of(path_);
 //            if(path.toFile().isFile() && path_.endsWith(".jar")){
 //                try(var jar = new JarFile(path_)){

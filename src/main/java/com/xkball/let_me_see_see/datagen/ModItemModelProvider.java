@@ -1,6 +1,6 @@
 package com.xkball.let_me_see_see.datagen;
 
-import com.xkball.let_me_see_see.LetMeSeeSee;
+import com.xkball.let_me_see_see.LetMeSeeSeeClient;
 import com.xkball.let_me_see_see.common.item.LMSItems;
 import net.minecraft.client.data.models.BlockModelGenerators;
 import net.minecraft.client.data.models.ItemModelGenerators;
@@ -14,7 +14,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 public class ModItemModelProvider extends ModelProvider {
     
     public ModItemModelProvider(PackOutput output) {
-        super(output, LetMeSeeSee.MODID);
+        super(output, LetMeSeeSeeClient.MODID);
     }
     
     @Override
