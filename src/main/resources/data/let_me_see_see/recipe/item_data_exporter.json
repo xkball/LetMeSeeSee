@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "C": "minecraft:crafting_table",
+    "G": "minecraft:glass_pane",
+    "I": "minecraft:iron_ingot",
+    "P": "minecraft:paper",
+    "R": "minecraft:redstone"
+  },
+  "pattern": [
+    "PGP",
+    "RCR",
+    "IGI"
+  ],
+  "result": {
+    "count": 1,
+    "id": "let_me_see_see:item_data_exporter"
+  }
+}

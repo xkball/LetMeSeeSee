@@ -16,6 +16,7 @@ import com.xkball.let_me_see_see.common.data.ExportsDataManager;
 import com.xkball.let_me_see_see.config.LMSConfig;
 import com.xkball.let_me_see_see.utils.ClassDecompiler;
 import com.xkball.let_me_see_see.utils.ClassSearcher;
+import com.xkball.xklibmc.annotation.NonNullByDefault;
 import com.xkball.xklib.resource.ResourceLocation;
 import com.xkball.xklib.api.gui.input.IMouseButtonEvent;
 import com.xkball.xklib.ui.render.IComponent;
@@ -29,7 +30,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 
@@ -48,7 +49,10 @@ public class DataBaseScreen extends XKLibScreen {
     @Nullable
     private static ClassPreviewTab savedActiveTab;
 
-    protected String searchBarValue = "";
+    protected static String searchBarValue = "";
+
+    @Nullable
+    private final String initialClassName;
 
     private final List<ContainerWidget> tabWidgets = new ArrayList<>();
     private ContainerWidget classListContainer;
@@ -56,7 +60,12 @@ public class DataBaseScreen extends XKLibScreen {
     private ContainerWidget previewBody;
 
     public DataBaseScreen() {
+        this(null);
+    }
+
+    protected DataBaseScreen(@Nullable String initialClassName) {
         super();
+        this.initialClassName = initialClassName;
         ClassSearcher.buildClassMap();
     }
 
@@ -72,6 +81,9 @@ public class DataBaseScreen extends XKLibScreen {
         this.addScreenLayer(XKLibBaseScreen.biPanelFrame(
                 IComponent.translatable(getTitleKey()), leftPanel, rightPanel).inlineStyle("background-color: 0xDD030407;"));
         refreshClassList();
+        if (initialClassName != null) {
+            openClassTab(initialClassName);
+        }
     }
 
     @Override
@@ -210,7 +222,7 @@ public class DataBaseScreen extends XKLibScreen {
         });
     }
 
-    private void openClassTab(String fullClassName) {
+    protected void openClassTab(String fullClassName) {
         for (var clazz : ClassSearcher.ofClassName(fullClassName)) {
             var className = ClassSearcher.className(clazz);
             var classSimpleName = cleanClassName(className).substring(fullClassName.lastIndexOf('.') + 1);
@@ -563,4 +575,3 @@ public class DataBaseScreen extends XKLibScreen {
         }
     }
 }
-

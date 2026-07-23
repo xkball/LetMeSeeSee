@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "B": "minecraft:book",
+    "C": "minecraft:compass",
+    "E": "minecraft:ender_pearl",
+    "R": "minecraft:redstone",
+    "S": "let_me_see_see:scanner"
+  },
+  "pattern": [
+    "EBE",
+    "RSR",
+    "ECE"
+  ],
+  "result": {
+    "count": 1,
+    "id": "let_me_see_see:explorer"
+  }
+}

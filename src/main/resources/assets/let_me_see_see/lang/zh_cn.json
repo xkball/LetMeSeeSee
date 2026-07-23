@@ -43,5 +43,9 @@
   "let_me_see_see.gui.explorer.export_all_decompile": "导出并反编译所有已加载类",
   "let_me_see_see.gui.data_base.show_exported_only": "仅显示已导出",
   "let_me_see_see.gui.agent_not_available": "类浏览器不可用",
-  "let_me_see_see.gui.agent_not_available.desc": "Java Agent 未能成功加载。\n类浏览器功能需要 Instrumentation 支持，在当前运行环境中无法正常工作。\n请检查启动参数和 JVM 设置。"
+  "let_me_see_see.gui.agent_not_available.desc": "Java Agent 未能成功加载。\n类浏览器功能需要 Instrumentation 支持，在当前运行环境中无法正常工作。\n请检查启动参数和 JVM 设置。",
+  "let_me_see_see.message.export.success": "成功导出类：%s",
+  "let_me_see_see.message.export.failure": "导出类失败：%s",
+  "let_me_see_see.message.export.open_class": "点击打开此类",
+  "let_me_see_see.command.class_not_found": "未找到类：%s"
 }

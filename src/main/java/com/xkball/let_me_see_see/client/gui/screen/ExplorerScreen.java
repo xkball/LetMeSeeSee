@@ -11,6 +11,7 @@ import com.xkball.xklib.ui.render.IComponent;
 import com.xkball.xklib.ui.system.GuiSystem;
 import com.xkball.xklib.ui.widget.IconButton;
 import com.xkball.xklib.ui.widget.container.ContainerWidget;
+import com.xkball.xklibmc.annotation.NonNullByDefault;
 import com.xkball.xklibmc.ui.widget.ObjectInputWidget;
 import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
@@ -22,6 +23,7 @@ import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
 @EventBusSubscriber(Dist.CLIENT)
+@NonNullByDefault
 public class ExplorerScreen extends DataBaseScreen {
 
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -33,6 +35,10 @@ public class ExplorerScreen extends DataBaseScreen {
 
     public ExplorerScreen() {
         super();
+    }
+
+    public ExplorerScreen(String initialClassName) {
+        super(initialClassName);
     }
 
     @SubscribeEvent
@@ -100,7 +106,7 @@ public class ExplorerScreen extends DataBaseScreen {
 
     @Override
     public void refreshClassList() {
-        refreshTree();
+        rebuildTree();
     }
 
     private void rebuildTree() {

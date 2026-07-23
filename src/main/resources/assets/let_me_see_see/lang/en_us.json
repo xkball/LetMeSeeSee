@@ -43,5 +43,9 @@
   "let_me_see_see.gui.explorer.export_all_decompile": "Export and decompile all loaded classes",
   "let_me_see_see.gui.data_base.show_exported_only": "Show exported only",
   "let_me_see_see.gui.agent_not_available": "Class Explorer Unavailable",
-  "let_me_see_see.gui.agent_not_available.desc": "The Java Agent failed to load.\nClass explorer features require Instrumentation support and cannot function in the current runtime environment.\nPlease check your launch arguments and JVM settings."
+  "let_me_see_see.gui.agent_not_available.desc": "The Java Agent failed to load.\nClass explorer features require Instrumentation support and cannot function in the current runtime environment.\nPlease check your launch arguments and JVM settings.",
+  "let_me_see_see.message.export.success": "Successfully exported class: %s",
+  "let_me_see_see.message.export.failure": "Failed to export class: %s",
+  "let_me_see_see.message.export.open_class": "Click to open this class",
+  "let_me_see_see.command.class_not_found": "Class not found: %s"
 }

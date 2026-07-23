@@ -1,15 +1,25 @@
 package com.xkball.let_me_see_see;
 
 import com.mojang.logging.LogUtils;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.xkball.let_me_see_see.client.ScreenProviders;
 import com.xkball.let_me_see_see.common.data.ExportsDataManager;
+import com.xkball.let_me_see_see.client.gui.screen.ExplorerScreen;
 import com.xkball.let_me_see_see.config.LMSConfig;
+import com.xkball.let_me_see_see.utils.ClassSearcher;
 import com.xkball.let_me_see_see.utils.ClassStaticAnalysis;
 import com.xkball.let_me_see_see.utils.JavaWorkaround;
 import com.xkball.let_me_see_see.utils.ThrowableSupplier;
 import com.xkball.let_me_see_see.utils.VanillaUtils;
+import com.xkball.xklibmc.annotation.NonNullByDefault;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.HoverEvent;
+import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -21,7 +31,7 @@ import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -41,6 +51,7 @@ import java.util.stream.Stream;
 
 @Mod(value = LetMeSeeSeeClient.MODID, dist = Dist.CLIENT)
 //@ModMeta(useLanguages = {"en_us","zh_cn"})
+@NonNullByDefault
 public class LetMeSeeSeeClient {
     
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -179,11 +190,26 @@ public class LetMeSeeSeeClient {
         }
         if (writeClassCode(getClassName(clazz), src)) {
             ExportsDataManager.finishClassExport(clazz);
-            ExportsDataManager.resultQueue.add(Component.literal("Successfully export class " + getClassName(clazz)));
+            ExportsDataManager.resultQueue.add(createExportResultMessage(clazz, true));
         } else {
-            ExportsDataManager.resultQueue.add(Component.literal("Failed to export class " + getClassName(clazz)).withStyle(ChatFormatting.RED));
+            ExportsDataManager.resultQueue.add(createExportResultMessage(clazz, false));
         }
         return src;
+    }
+
+    private static Component createExportResultMessage(Class<?> clazz, boolean success) {
+        var topLevelClass = clazz;
+        while (topLevelClass.getEnclosingClass() != null) {
+            topLevelClass = topLevelClass.getEnclosingClass();
+        }
+        var className = Component.literal(topLevelClass.getSimpleName())
+                .withStyle(success ? ChatFormatting.AQUA : ChatFormatting.RED)
+                .withStyle(style -> style
+                        .withClickEvent(new ClickEvent.RunCommand("/letmeseesee " + clazz.getName()))
+                        .withHoverEvent(new HoverEvent.ShowText(Component.translatable("let_me_see_see.message.export.open_class"))));
+        return Component.translatable(success
+                ? "let_me_see_see.message.export.success"
+                : "let_me_see_see.message.export.failure", className);
     }
     
     public static String getClassName(Class<?> clazz) {
@@ -205,8 +231,32 @@ public class LetMeSeeSeeClient {
     @EventBusSubscriber(modid = MODID, value = Dist.CLIENT)
     public static class ClientModEvents {
         @SubscribeEvent
+        public static void registerClientCommands(RegisterClientCommandsEvent event) {
+            var command = Commands.literal("letmeseesee")
+                    .then(Commands.argument("className", StringArgumentType.greedyString())
+                            .executes(context -> openClassBrowser(StringArgumentType.getString(context, "className"))));
+            event.getDispatcher().register(command);
+            event.getDispatcher().register(Commands.literal("lms")
+                    .then(Commands.argument("className", StringArgumentType.greedyString())
+                            .executes(context -> openClassBrowser(StringArgumentType.getString(context, "className")))));
+        }
+
+        private static int openClassBrowser(String className) {
+            ClassSearcher.buildClassMap();
+            if (ClassSearcher.ofClassName(className).isEmpty()) {
+                var player = Minecraft.getInstance().player;
+                if (player != null) {
+                    player.sendSystemMessage(Component.translatable("let_me_see_see.command.class_not_found", className));
+                }
+                return 0;
+            }
+            Minecraft.getInstance().setScreen(new ExplorerScreen(className));
+            return 1;
+        }
+
+        @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
-            com.xkball.let_me_see_see.client.ScreenProviders.init();
+            ScreenProviders.init();
         }
         
         @SubscribeEvent
