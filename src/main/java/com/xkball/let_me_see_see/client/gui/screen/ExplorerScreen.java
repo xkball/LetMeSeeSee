@@ -98,10 +98,10 @@ public class ExplorerScreen extends DataBaseScreen {
 
     @Override
     protected void addClassPreviewHeaderButtons(ContainerWidget header) {
-        var exportAllBtn = new IconButton(new ResourceLocation("let_me_see_see", "missing/export_all_decompile"), this::exportAndDecompileAllLoadedClasses);
-        exportAllBtn.inlineStyle("size: 14rpx 14rpx; margin-left: 2rpx; flex-shrink: 0;")
-                .withTooltip(IComponent.translatable("let_me_see_see.gui.explorer.export_all_decompile"));
-        header.addChild(exportAllBtn);
+//        var exportAllBtn = new IconButton(new ResourceLocation("let_me_see_see", "missing/export_all_decompile"), this::exportAndDecompileAllLoadedClasses);
+//        exportAllBtn.inlineStyle("size: 14rpx 14rpx; margin-left: 2rpx; flex-shrink: 0;")
+//                .withTooltip(IComponent.translatable("let_me_see_see.gui.explorer.export_all_decompile"));
+//        header.addChild(exportAllBtn);
     }
 
     @Override
