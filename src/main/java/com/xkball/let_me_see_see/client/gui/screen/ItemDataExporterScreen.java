@@ -91,7 +91,7 @@ public class ItemDataExporterScreen extends FrameScreen {
         if (!LMSConfig.EXPORT_LANG.contains("zh_cn")) list.add("zh_cn");
         for (var key : list) {
             var langInfo = Minecraft.getInstance().getLanguageManager().getLanguage(key);
-            map.put(key, ClientLanguage.loadFrom(resourceManager, List.of(key), langInfo != null && langInfo.bidirectional()));
+            map.put(key, ClientLanguage.loadFrom(resourceManager, key.equals("en_us") ? List.of("en_us") : List.of("en_us", key), langInfo != null && langInfo.bidirectional()));
         }
         
         synchronized (LANGUAGES) {
